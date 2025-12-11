@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "297027357708",
+    "project_id": "instasevak-8e1db",
+    "storage_bucket": "instasevak-8e1db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297027357708:android:3006d2220ed4f762bbb229",
+        "android_client_info": {
+          "package_name": "com.instasevak.sevak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz3T642rMvjOGDNJJaG8tb8ni2RnJ7nak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297027357708:android:04578e30a61b74fbbbb229",
+        "android_client_info": {
+          "package_name": "com.instasevak.sevak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz3T642rMvjOGDNJJaG8tb8ni2RnJ7nak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

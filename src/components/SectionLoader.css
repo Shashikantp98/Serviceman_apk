@@ -1,0 +1,133 @@
+/* Section Loader Styles */
+.section-loader-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.section-loader-container.with-overlay {
+  position: relative;
+}
+
+.section-loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.section-loader-content {
+  position: relative;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+/* Spinner Sizes */
+.section-loader-small .section-loader-spinner {
+  width: 30px;
+  height: 30px;
+  border-width: 2px;
+  border-top-width: 2px;
+}
+
+.section-loader-medium .section-loader-spinner {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+  border-top-width: 3px;
+}
+
+.section-loader-large .section-loader-spinner {
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+  border-top-width: 4px;
+}
+
+/* Spinner Animation */
+.section-loader-spinner {
+  border: 3px solid rgba(40, 56, 145, 0.2);
+  border-radius: 50%;
+  border-top: 3px solid #283891;
+  animation: section-spin 1s linear infinite;
+}
+
+@keyframes section-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.section-loader-text {
+  color: #283891;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+}
+
+.full-page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 99999;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ccc;
+  border-top-color: #283891;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.full-page-loader p {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .section-loader-container {
+    min-height: 80px;
+  }
+
+  .section-loader-content {
+    gap: 8px;
+    padding: 15px;
+  }
+
+  .section-loader-text {
+    font-size: 12px;
+  }
+}
