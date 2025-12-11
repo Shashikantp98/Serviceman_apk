@@ -45,7 +45,7 @@ const Select = () => {
             navigate("/servicemenlogin", { state: { role: "servicemen" } });
           }}
         >
-          Servicemen
+          Serviceman
         </button>
       </div>
     </>
