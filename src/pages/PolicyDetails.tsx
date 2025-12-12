@@ -49,7 +49,7 @@ const PolicyDetails = () => {
       <div className="container pb-5 pt-5 mt-5 mb-5">
         <div className="row pt-5">
           <div className="col-12">
-              <h2 className="head4 text-center mb-3">Privacy Policy</h2>
+              <h2 className="head4 text-center">Privacy Policy</h2>
           </div>
           <div className="col-12 ">
             <div

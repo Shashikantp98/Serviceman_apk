@@ -1816,9 +1816,9 @@ outline: none !important;
 /* Minimized header small top padding */
 .minimized-header {
   padding-top: 14px !important;
-  padding-right: 0 !important;
-  padding-bottom: 6px !important;
-  padding-left: 0 !important;
+  padding-right: 20px !important;
+  padding-bottom: 20px !important;
+  padding-left: 20px !important;
 }
 
 .page-scrollable {

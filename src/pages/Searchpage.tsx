@@ -78,9 +78,9 @@ const Searchpage = () => {
     <>
       <div>
         <div className="fixed_header">
-          <button className="back-btn" onClick={() => navigate(-1)}>
+          <button className="backs_butn" onClick={() => navigate(-1)}>
             <ChevronLeft></ChevronLeft>
-            Back
+           
           </button>
           <div className="container">
           <div className="row pt-3">
@@ -99,7 +99,7 @@ const Searchpage = () => {
         </div>
         
         <div className="main-content">
-          <div className="container">
+          <div className="container pt-3">
           {searchList?.length > 0 && (
             <div className="row px-2">
               <div className="col-12 pt-3">
