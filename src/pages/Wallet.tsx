@@ -86,7 +86,7 @@ const Wallet: React.FC = () => {
       <ServiceManHeader title="My Wallet" />
 
       <div className="container main-content-service">
-        <div className="page-scrollable">
+        
           {/* Wallet Balance */}
           <div className="row px-2">
             <div className="col-12 pt-2">
@@ -105,7 +105,6 @@ const Wallet: React.FC = () => {
               </button>
             </div>
           </div>
-
           {/* Withdraw Modal */}
           {isModalOpen && (
             <div className="modal-overlay">
@@ -141,7 +140,6 @@ const Wallet: React.FC = () => {
               </div>
             </div>
           )}
-
           {/* Withdrawal History */}
           <div className="row px-2 mt-3">
             <div className="col-12">
@@ -193,7 +191,7 @@ const Wallet: React.FC = () => {
               ))
             )}
           </div>
-        </div>
+      
       </div>
     </>
   );
