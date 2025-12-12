@@ -99,7 +99,7 @@ const Searchpage = () => {
         </div>
         
         <div className="main-content">
-          <div className="container pt-3">
+          <div className="container pt-3 ">
           {searchList?.length > 0 && (
             <div className="row px-2">
               <div className="col-12 pt-3">
