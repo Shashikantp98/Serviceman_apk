@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "react-feather";
+import { ChevronLeft, Mail, MapPin, Phone } from "react-feather";
 
 import { useState } from "react";
 import ApiService from "../services/api";
@@ -43,6 +43,21 @@ const MyCustomerProfile = () => {
           <p>Loading Profile details...</p>
         </div>
       )}
+
+ <div className="fixed_header">
+        <div className="container">
+        <div className="row">
+          <div className="col-12 ">
+            <button className="backs_butn" onClick={() => navigate(-1)}>
+              <ChevronLeft />
+            </button>
+          </div>
+        </div>
+        </div>
+</div>
+
+
+
       <div className="container mb-5 pb-5 main-content-service">
         <div className="row px-3">
           <div className="col-12 p text-center pt-4">

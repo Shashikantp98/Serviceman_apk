@@ -85,7 +85,7 @@ const Wallet: React.FC = () => {
     <>
       <ServiceManHeader title="My Wallet" />
 
-      <div className="container main-content-service">
+      <div className="container main-content-service pb-5 mb-5">
         
           {/* Wallet Balance */}
           <div className="row px-2">
