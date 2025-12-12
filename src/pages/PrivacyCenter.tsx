@@ -35,15 +35,15 @@ const PrivacyCenter = () => {
     <div>
       <div className="fixed_header">
         <div className="row">
-          <div className="col-12 px-0">
-            <button className="back-btn" onClick={() => navigate(-1)}>
-              <ChevronLeft /> Back
+          <div className="col-12 px-3">
+            <button className="backs_butn" onClick={() => navigate(-1)}>
+              <ChevronLeft />
             </button>
           </div>
         </div>
       </div>
-      <div className="main-content-service">
-        <div className="row">
+      <div className="container mb-5 pb-5 mt-5 pt-5">
+        <div className="row pt-5">
           <div className="col-12 ">
             <div
               style={{
@@ -52,10 +52,10 @@ const PrivacyCenter = () => {
                 fontWeight: "bold",
               }}
             >
-              <h2>Privacy Center</h2>
+              <h2 className="head4">Privacy Center</h2>
             </div>
             <div style={{ padding: "10px" }}>
-              <h4 className="mb-2">Account Deletion Policy</h4>
+              <h4 className="font-12 px-3 mx-1 mt-1 mb-3">Account Deletion Policy</h4>
               <ul>
                 <li>
                   You'll no longer be able to access your saved professionals

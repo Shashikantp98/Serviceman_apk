@@ -1319,7 +1319,7 @@ background: #ffffff;
 }
 
 .new_header {
-  background: rgba(245, 245, 245, 1) !important;
+  background: linear-gradient(0deg, rgba(245, 245, 245, 1) 0%, rgba(222, 223, 252, 1) 100%) !important;
 
   border-bottom: 1px sold grey !important;
   padding-top: 20px !important;
@@ -1930,4 +1930,7 @@ outline: none !important;
   background-color: #ffffff !important;
   border-radius: 12px !important;
   padding: 0 !important;
+}
+.minsvg svg{
+  min-width: 20px;
 }

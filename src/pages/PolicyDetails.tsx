@@ -39,15 +39,18 @@ const PolicyDetails = () => {
           </div>
         )}
         <div className="row">
-          <div className="col-12 px-0">
-            <button className="back-btn" onClick={() => navigate(-1)}>
-              <ChevronLeft /> Back
+          <div className="col-12 px-3">
+            <button className="backs_butn" onClick={() => navigate(-1)}>
+              <ChevronLeft />
             </button>
           </div>
         </div>
       </div>
-      <div className="main-content-profile">
-        <div className="row">
+      <div className="container pb-5 pt-5 mt-5 mb-5">
+        <div className="row pt-5">
+          <div className="col-12">
+              <h2 className="head4 text-center mb-3">Privacy Policy</h2>
+          </div>
           <div className="col-12 ">
             <div
               style={{ padding: "10px" }}

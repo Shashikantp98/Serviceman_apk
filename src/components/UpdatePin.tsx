@@ -46,11 +46,11 @@ const UpdatePin = () => {
       <div className="container">
         <div className="row px-2 pt-3">
           <div className="px-5 pt-5 pb-3">
-            <h3 className="head2 pt-5">Update PIN</h3>
+            <h3 className="head4 text-center pt-5">Update PIN</h3>
           </div>
 
           <div className="otp">
-            <h5 className="heading2 pt-4">Enter your Old PIN number</h5>
+            <h5 className="font-14 mb-3 pt-4">Enter your Old PIN number</h5>
             <OtpInput
               length={6}
               onChange={handleOtpChange}
@@ -60,7 +60,7 @@ const UpdatePin = () => {
           </div>
 
           <div className="otp ">
-            <h5 className="heading2 pt-4">Enter your New PIN number</h5>
+            <h5 className="font-14 mb-3 mt-3 pt-4">Enter your New PIN number</h5>
             <OtpInput
               length={6}
               onChange={handlePinChange}
@@ -70,7 +70,7 @@ const UpdatePin = () => {
           </div>
           <div className="px-4 mt-5">
             <button
-              className="fill_half"
+              className="fill"
               disabled={otp.length !== 6 || pin.length !== 6 || loading}
               onClick={onSubmit}
             >

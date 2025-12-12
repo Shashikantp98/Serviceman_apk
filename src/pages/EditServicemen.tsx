@@ -473,8 +473,8 @@ const EditServicemen = () => {
           </div>
         )}
         <div className="row pt-4">
-          <div className="col-12">
-            <h6 className="font-18 text-center">Edit Profile</h6>
+          <div className="col-12 text-center pb-3">
+            <h6 className="head4">Edit Profile</h6>
           </div>
         </div>
         {/* Accordion Sections */}
@@ -759,9 +759,8 @@ const EditServicemen = () => {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="accordion-item mb-3 border rounded p-3">
+               <div className="accordion-item mb-3 border rounded p-3">
           <div
             className="d-flex justify-content-between align-items-center"
             onClick={() =>
@@ -805,8 +804,11 @@ const EditServicemen = () => {
             </div>
           )}
         </div>
+        </div>
 
-        <div className="row px-3 pt-3">
+   
+
+        <div className="row  pt-3">
           <div className="col-12">
             <button
               onClick={handleSubmit(onSubmit)}
