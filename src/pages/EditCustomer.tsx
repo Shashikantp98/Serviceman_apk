@@ -207,7 +207,7 @@ const EditCustomer = () => {
         )}
         <div className="row pt-4">
           <div className="col-12">
-            <h6 className="font-18 text-center">Edit Profile</h6>
+            <h6 className="head4 text-center">Edit Profile</h6>
           </div>
         </div>
         <div className="row px-3 pt-3">
