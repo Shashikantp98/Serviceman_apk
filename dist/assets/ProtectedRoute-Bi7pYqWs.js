@@ -1,0 +1,1 @@
+import{a as r,j as e,N as i}from"./index-Dsyms-5d.js";const o=({children:t})=>{const{isAuthenticated:a,loading:s}=r();return s?e.jsxs("div",{className:"full-page-loader",children:[e.jsx("div",{className:"loader-spinner"}),e.jsx("p",{children:"Please wait while we verify your authentication."})]}):a?e.jsx(e.Fragment,{children:t}):e.jsx(i,{to:"/",replace:!0})};export{o as default};

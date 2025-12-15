@@ -21,6 +21,44 @@ export const initPushNotifications = async () => {
     try {
       const { LocalNotifications } = await import('@capacitor/local-notifications');
       await LocalNotifications.requestPermissions();
+      
+      // Listen for local notification taps (when user taps the heads-up notification)
+      LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
+        console.log('Local notification tapped:', notification);
+        
+        const notificationData = notification.notification.extra;
+        if (notificationData) {
+          const { notify_type, booking_id, support_id, notification_id, route } = notificationData;
+
+          // Mark notification as seen if notification_id is provided
+          if (notification_id) {
+            console.log(`Marking local notification ${notification_id} as seen`);
+            ApiService.post("/user/markNotificationsAsSeen", { notification_id })
+              .then(() => console.log(`Local notification ${notification_id} marked as seen`))
+              .catch(err => console.error("Error marking notification as seen:", err));
+          }
+
+          // Dispatch custom event for Dashboard refresh
+          if (notify_type === "booking" || notify_type === "new_booking") {
+            window.dispatchEvent(new CustomEvent('newBookingReceived', { detail: notificationData }));
+          }
+
+          // Navigate based on notification type
+          if (notify_type === "new_booking") {
+            // New booking for serviceman - go to dashboard
+            pushNavigate(`/dashboard`);
+          } else if (notify_type === "booking" && booking_id) {
+            // Customer booking notification - go to booking details
+            pushNavigate(`/CustomerProjectinfo/${booking_id}`);
+          } else if (notify_type === "support" && support_id) {
+            pushNavigate(`/supportlist`);
+          } else if (route) {
+            pushNavigate(route);
+          } else {
+            pushNavigate('/notifications');
+          }
+        }
+      });
     } catch (error) {
       console.error("Error requesting local notification permissions:", error);
     }
@@ -44,36 +82,49 @@ export const initPushNotifications = async () => {
   PushNotifications.addListener(
     "pushNotificationReceived",
     async (notification: PushNotificationSchema) => {
-      console.log("Push received in foreground: ", JSON.stringify(notification));
+      console.log("🔔 Push received in FOREGROUND");
+      console.log("Notification object:", JSON.stringify(notification, null, 2));
       
-      // Show notification even when app is in foreground
+      // Dispatch custom event for app to react (e.g., refresh Dashboard)
+      const notifyType = notification.data?.notify_type;
+      if (notifyType === "booking" || notifyType === "new_booking") {
+        window.dispatchEvent(new CustomEvent('newBookingReceived', { detail: notification.data }));
+      }
+      
+      // Show notification even when app is in foreground as heads-up notification
       if (Capacitor.getPlatform() !== "web") {
         try {
-          await PushNotifications.createChannel({
-            id: 'default',
-            name: 'Default',
-            importance: 5,
-            visibility: 1,
-            sound: 'default'
-          });
-
-          // Create a local notification to display it
           const { LocalNotifications } = await import('@capacitor/local-notifications');
+          
+          // Extract title and body - they might be in different places depending on payload format
+          const title = notification.title || notification.data?.title || 'New Notification';
+          const body = notification.body || notification.data?.body || notification.data?.message || '';
+          
+          console.log("📱 Creating local notification with title:", title, "body:", body);
+
+          // Schedule immediate local notification with all heads-up properties
+          const notificationId = Date.now();
           await LocalNotifications.schedule({
             notifications: [
               {
-                title: notification.title || 'New Notification',
-                body: notification.body || '',
-                id: Math.floor(Math.random() * 100000),
-                schedule: { at: new Date(Date.now() + 100) },
-                sound: 'default',
-                channelId: 'default',
-                extra: notification.data
+                title: title,
+                body: body,
+                id: notificationId,
+                schedule: { at: new Date(Date.now() + 100) }, // Small delay for reliability
+                sound: 'default.wav',
+                channelId: 'fcm_default_channel',
+                extra: notification.data || {},
+                smallIcon: 'ic_stat_icon_config_sample',
+                iconColor: '#488AFF',
+                ongoing: false,
+                autoCancel: true
               }
             ]
           });
+          
+          console.log("✅ Local notification scheduled successfully with ID:", notificationId);
         } catch (error) {
-          console.error("Error showing foreground notification:", error);
+          console.error("❌ Error showing foreground notification:", error);
         }
       }
     }
@@ -108,8 +159,16 @@ export const initPushNotifications = async () => {
           .catch(err => console.error("Error marking push notification as seen:", err));
       }
 
-      if (notify_type === "booking" && booking_id) {
-        // Navigate to booking details page
+      // Dispatch custom event for Dashboard refresh
+      if (notify_type === "booking" || notify_type === "new_booking") {
+        window.dispatchEvent(new CustomEvent('newBookingReceived', { detail: notificationData }));
+      }
+
+      if (notify_type === "new_booking") {
+        // New booking for serviceman - go to dashboard
+        pushNavigate(`/dashboard`);
+      } else if (notify_type === "booking" && booking_id) {
+        // Customer booking notification - go to booking details page
         pushNavigate(`/CustomerProjectinfo/${booking_id}`);
       } else if (notify_type === "support" && support_id) {
         // Navigate to support list page

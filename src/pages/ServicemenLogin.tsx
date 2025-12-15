@@ -1,7 +1,7 @@
 import logo from "../assets/logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ChevronLeft, LogIn } from "react-feather";
+import { ChevronLeft } from "react-feather"; //LogIn
 
 const ServicemenLogin = () => {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const ServicemenLogin = () => {
               navigate("/servicemenregister", { state: { role: role, fcm_token: fcmToken } });
             }}
           >
-            <LogIn size={20}></LogIn>
+            {/* <LogIn size={20}></LogIn> */}
             Login / Signup
           </button>
           {/* <button

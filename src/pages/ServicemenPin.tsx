@@ -65,6 +65,7 @@ const ServicemenPin = () => {
     } catch (err: any) {
       console.log(err);
       setError(err.response?.data?.message || "Login failed"); // set error message
+      setPin(""); // Clear the pin field
       setLoading(false);
       lastSubmittedPinRef.current = null; // allow retry
     }

@@ -1,14 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import CommonHeader from "../components/CommonHeader";
 import { useAuth } from "../contexts/AuthContext";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import { Clock } from "react-feather";
-import { PushNotifications } from '@capacitor/push-notifications';
-import type { PluginListenerHandle } from '@capacitor/core';
 import { useLocation } from "react-router-dom";
 
 
@@ -21,9 +19,6 @@ const NotificationsList = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
 
   const notificationLoader = useSectionLoader("notify-loader");
-
-  // Track if component has mounted at least once
-  const hasMounted = useRef(false);
 
   const fetchNotifications = async () => {
     notificationLoader.setLoading(true);
@@ -47,43 +42,8 @@ const NotificationsList = () => {
   };
 
   useEffect(() => {
-    hasMounted.current = true;
     fetchNotifications();
-
-    let pushListenerHandle: PluginListenerHandle | undefined;
-    PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      fetchNotifications();
-      if (notification) {
-        alert((notification.title || 'Notification') + ': ' + (notification.body || ''));
-      }
-    }).then((handle: any) => {
-      pushListenerHandle = handle;
-    });
-
-    // Mark as seen when page becomes hidden (user navigates away or switches tabs)
-    const handleVisibilityChange = () => {
-      if (document.hidden && hasMounted.current) {
-        console.log("Page hidden - marking notifications as seen");
-        ApiService.post("/user/markNotificationsAsSeen").catch(() => {});
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      // Remove listeners
-      if (pushListenerHandle) pushListenerHandle.remove();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-
-      // Mark all unseen as seen when component unmounts
-      if (hasMounted.current) {
-        console.log("Component unmounting - marking all as seen immediately");
-        ApiService.post("/user/markNotificationsAsSeen").catch(() => {});
-      }
-    };
   }, []);
-
-  // 
 
   const handleNotificationClick = async (notification: any, index: number) => {
     const scrollPos = window.scrollY;

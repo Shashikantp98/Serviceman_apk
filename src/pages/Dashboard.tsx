@@ -90,6 +90,21 @@ const Dashboard = () => {
     getTotalWalletBalance();
     setbookingList([]);
     getAllMyRequest();
+
+    // Listen for new booking push notifications
+    const handleNewBooking = (event: any) => {
+      console.log('📬 New booking notification received on Dashboard:', event.detail);
+      // Refresh the booking list
+      getAllMyRequest();
+      // Optionally show a toast
+      // toast.info('New booking request received!');
+    };
+
+    window.addEventListener('newBookingReceived', handleNewBooking);
+
+    return () => {
+      window.removeEventListener('newBookingReceived', handleNewBooking);
+    };
   }, []);
   const checkServicemanStatus = () => {
     ApiService.get("/servicemen/checkServicemanStatus").then((res: any) => {
