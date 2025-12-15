@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Button, Spinner } from "react-bootstrap";
+import { LogIn } from "react-feather";
 
 export type LoginModalProps = {
   show: boolean;
@@ -15,7 +16,7 @@ export type LoginModalProps = {
 
 export function LoginModal({
   show,
-  title = "Login",
+  title = "👋 Hello There!",
   description,
   itemName,
   onCancel,
@@ -33,6 +34,9 @@ export function LoginModal({
       keyboard={!loading}
     >
       <Modal.Header closeButton={!loading}>
+       <span className="logicnss">
+         <LogIn></LogIn>
+       </span>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
 
