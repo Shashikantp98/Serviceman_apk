@@ -1,1 +1,0 @@
-import{j as e}from"./index-Dsyms-5d.js";const a=({title:s})=>e.jsx(e.Fragment,{children:e.jsx("div",{className:"fixed_header",children:e.jsx("div",{className:"row",children:e.jsx("div",{className:"col-12 d-flex justify-content-center",children:e.jsx("h1",{className:"head4",children:s})})})})});export{a as S};

@@ -1,11 +1,12 @@
 import { Bell, MapPin, Search } from "react-feather";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ApiService from "../services/api";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Header = ({ isMinimized = false }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     token,
     setLatLong,
@@ -53,18 +54,24 @@ const Header = ({ isMinimized = false }) => {
       });
   };
 
-  // 🔄 Poll unseen count every 5 seconds
+  // 🔄 Poll unseen count every 5 seconds (but NOT on notifications page)
   useEffect(() => {
     if (token !== "guest") {
+      // Fetch count immediately when not on notifications page
       getUnseenNotificationCount();
+      
+      // Don't poll if user is on the notifications page
+      const isOnNotificationsPage = location.pathname === "/notifications";
+      
+      if (!isOnNotificationsPage) {
+        const interval = setInterval(() => {
+          getUnseenNotificationCount();
+        }, 5000);
 
-      const interval = setInterval(() => {
-        getUnseenNotificationCount();
-      }, 5000);
-
-      return () => clearInterval(interval);
+        return () => clearInterval(interval);
+      }
     }
-  }, [token]);
+  }, [token, location.pathname]);
 
   useEffect(() => {
     if (token == "guest") {

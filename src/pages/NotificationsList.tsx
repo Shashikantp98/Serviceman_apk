@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import CommonHeader from "../components/CommonHeader";
 import { useAuth } from "../contexts/AuthContext";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import { Clock } from "react-feather";
+import { PushNotifications } from '@capacitor/push-notifications';
+import type { PluginListenerHandle } from '@capacitor/core';
 import { useLocation } from "react-router-dom";
-
 
 const NotificationsList = () => {
   const navigate = useNavigate();
@@ -20,11 +21,51 @@ const NotificationsList = () => {
 
   const notificationLoader = useSectionLoader("notify-loader");
 
-  const fetchNotifications = async () => {
+  // Track if component has mounted at least once
+  const hasMounted = useRef(false);
+  
+  // Store initial is_seen state to prevent backend from removing badges prematurely
+  const initialSeenState = useRef<Map<string, boolean>>(new Map());
+  
+  // Prevent double fetch in StrictMode
+  const hasFetchedOnce = useRef(false);
+
+  const fetchNotifications = async (preserveSeenState = false) => {
+    console.log('🔍 fetchNotifications called, preserveSeenState:', preserveSeenState);
     notificationLoader.setLoading(true);
     try {
       const res: any = await ApiService.post("/user/listNotificationForCustomer", {});
-      setNotifications(res.data || []);
+      const fetchedNotifications = res.data || [];
+      
+      console.log('📦 Fetched notifications:', fetchedNotifications.map((n: any) => ({ 
+        id: n._id, 
+        is_seen: n.is_seen, 
+        is_read: n.is_read 
+      })));
+      
+      if (preserveSeenState) {
+        // Preserve the original is_seen state for notifications that were unseen on first load
+        const preservedNotifications = fetchedNotifications.map((notif: any) => {
+          if (initialSeenState.current.has(notif._id)) {
+            return {
+              ...notif,
+              is_seen: initialSeenState.current.get(notif._id)
+            };
+          }
+          return notif;
+        });
+        console.log('✅ Preserved state applied');
+        setNotifications(preservedNotifications);
+      } else {
+        // First load - store the initial seen state
+        fetchedNotifications.forEach((notif: any) => {
+          if (!initialSeenState.current.has(notif._id)) {
+            initialSeenState.current.set(notif._id, notif.is_seen);
+          }
+        });
+        console.log('💾 Initial state stored');
+        setNotifications(fetchedNotifications);
+      }
     } catch (err) {
       console.error("Error:", err);
     } finally {
@@ -42,25 +83,58 @@ const NotificationsList = () => {
   };
 
   useEffect(() => {
+    // Prevent double fetch in React StrictMode
+    if (hasFetchedOnce.current) {
+      console.log('⚠️ Skipping duplicate fetch (StrictMode double mount)');
+      return;
+    }
+    hasFetchedOnce.current = true;
+    
+    hasMounted.current = true;
     fetchNotifications();
+
+    let pushListenerHandle: PluginListenerHandle | undefined;
+    PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      // DON'T refetch - just show alert
+      // Refetching causes backend to mark as seen
+      console.log('📬 Push notification received, NOT refetching to preserve "New" badges');
+      if (notification) {
+        alert((notification.title || 'Notification') + ': ' + (notification.body || ''));
+      }
+    }).then((handle: any) => {
+      pushListenerHandle = handle;
+    });
+
+    return () => {
+      // Remove listeners
+      if (pushListenerHandle) pushListenerHandle.remove();
+
+      // Mark all unseen as seen when component unmounts (user leaves the page)
+      if (hasMounted.current) {
+        console.log("Component unmounting - marking all as seen");
+        ApiService.post("/user/markNotificationsAsSeen").catch(() => {});
+      }
+    };
   }, []);
+
+  // 
 
   const handleNotificationClick = async (notification: any, index: number) => {
     const scrollPos = window.scrollY;
 
     const { notify_type, booking_id, support_id, _id } = notification;
 
-    // Mark this specific notification as seen
-    if (_id && !notification.is_seen) {
-      ApiService.post("/user/markNotificationsAsSeen", { notification_id: _id })
+    // Mark this specific notification as read (removes bold effect)
+    if (_id && !notification.is_read) {
+      ApiService.post("/user/markNotificationAsRead", { notification_id: _id })
         .then(() => {
-          console.log(`Notification ${_id} marked as seen`);
+          console.log(`Notification ${_id} marked as read`);
           // Update local state to reflect the change
           setNotifications(prev => 
-            prev.map(n => n._id === _id ? { ...n, is_seen: true } : n)
+            prev.map(n => n._id === _id ? { ...n, is_read: true } : n)
           );
         })
-        .catch(err => console.error("Error marking notification as seen:", err));
+        .catch(err => console.error("Error marking notification as read:", err));
     }
 
     // CASE 1: Booking Notification → Navigate with scroll state
@@ -139,7 +213,7 @@ const NotificationsList = () => {
                     )}
                   </p>
 
-                  <p className={`notfication_messages ${!item.is_seen ? "new_message" : ""}`}>
+                  <p className={`notfication_messages ${!item.is_read ? "new_message" : ""}`}>
                     {item.message}
                   </p>
 

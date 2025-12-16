@@ -10,6 +10,7 @@ const ServicemenPin = () => {
   const { login } = useAuth();
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null); // Error state
+  const [inputKey, setInputKey] = useState(0); // Key to force OtpInput reset
   const location = useLocation();
   const phone_number = location.state?.phone_number;
   const user_type = location.state?.user_type;
@@ -66,6 +67,7 @@ const ServicemenPin = () => {
       console.log(err);
       setError(err.response?.data?.message || "Login failed"); // set error message
       setPin(""); // Clear the pin field
+      setInputKey(prev => prev + 1); // Force OtpInput to reset by changing key
       setLoading(false);
       lastSubmittedPinRef.current = null; // allow retry
     }
@@ -107,6 +109,7 @@ const ServicemenPin = () => {
 
       <div className="otp">
         <OtpInput
+          key={inputKey}
           length={6}
           onChange={handlePinChange}
           className="otp-input-container"

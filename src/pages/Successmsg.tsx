@@ -19,8 +19,7 @@ const Successmsg = () => {
           </h3>
           <p className="font-14 text-center">
             Dear <b>{name}</b> you have successfully scheduled booking of{" "}
-           <b>{service_name}</b> 
-            for the upcoming date <b>{booking_date}</b> at <b>{booking_time}</b>. Our service
+           <b>{service_name}</b> for the upcoming date <b>{booking_date}</b> at <b>{booking_time}</b>. Our service
             provider will contact you soon.
           </p>
           <div className="row">
