@@ -9,7 +9,7 @@ import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import dayjs from "dayjs";
-import { ArrowUpRight } from "react-feather";
+// import { ArrowUpRight } from "react-feather";
 
 interface ReviewData {
   _id: string;
@@ -295,7 +295,7 @@ const Servicedetail = () => {
                 ) : null}
 
                 <button className="mb-5 mt-4 book_servi" onClick={handleBookNow}>
-                  <ArrowUpRight></ArrowUpRight>
+                  {/* <ArrowUpRight></ArrowUpRight> */}
                   Book Now
                 </button>
               </div>
