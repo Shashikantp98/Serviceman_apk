@@ -2004,3 +2004,43 @@ padding: 8px;
 
 
 }
+
+
+.review_ratcard{
+  border: 1px solid rgb(218, 218, 218);
+  padding: 18px;
+  border-radius: 13px;
+  background-color: #ffffff;
+}
+.review_ratcard h3{
+  font-size: 16px;
+  font-weight: 600;
+}
+.star_sizes{
+  font-size: 26px;
+  letter-spacing: 5px;
+}
+.based_on_re{
+  font-size: 13px;
+  letter-spacing: 0;
+  color: rgb(97, 97, 97);
+  padding-top: 2px;
+}
+.avrg_ratings{
+  font-size: 56px;
+  font-weight:600;
+  color: #424242;
+}
+
+.review_custm{
+  font-size: 15px;
+  line-height: 24px;
+  margin-bottom: 0;
+}
+
+.img_cust_prof{
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  border-radius: 100%;
+}

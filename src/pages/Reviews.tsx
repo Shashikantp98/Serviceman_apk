@@ -96,52 +96,30 @@ const Reviews = () => {
       )}
 
       <div className="main-content-service2">
-        {/* Summary Section */}
-        <div 
-          style={{
-            backgroundColor: '#fff',
-            padding: '20px',
-            margin: '16px',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            textAlign: 'center'
-          }}
-        >
-          <h3 style={{ margin: '0 0 12px 0', color: '#333', fontSize: '20px' }}>
-            Customer Reviews
-          </h3>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-            <div>
-              <p style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', color: '#2196F3' }}>
-                {averageRating}
-              </p>
-              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
-                Average Rating
-              </p>
-            </div>
-            <div style={{ fontSize: '24px' }}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span 
-                  key={star}
-                  style={{ color: star <= Math.round(averageRating) ? '#ffc107' : '#ddd' }}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#333' }}>
-                {reviews.length}
-              </p>
-              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
-                Total Reviews
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Reviews List */}
-        <div style={{ padding: '16px' }}>
+
+        <div className="container pt-4 pb-5 mb-5 ">
+          <div className="row px-1">
+            <div className="col-12 pb-2">
+              <div className="review_ratcard">
+                <h3 className='pt-1'>Reviews and ratings</h3>
+                <div className='d-flex gap-3 pt-2'>
+                    <h2 className='avrg_ratings mb-0'>{averageRating}.0</h2>
+                    <div className='star_sizes'>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                      <span 
+                        key={star}
+                        style={{ color: star <= Math.round(averageRating) ? '#ffc107' : '#ddd' }}
+                      >
+                        ★
+                      </span>
+                      ))}
+                      <p className='based_on_re mb-0'>Based on {reviews.length} Reviews</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+            <div className='col-12'>
           {reviews.length === 0 ? (
             <div 
               style={{
@@ -159,38 +137,25 @@ const Reviews = () => {
             reviews.map((review) => (
               <div
                 key={review._id}
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  marginBottom: '12px',
-                  border: '1px solid #e0e0e0',
-                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.05)'
-                }}
+              className='review_ratcard mb-2'
               >
                 {/* Customer Info */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div className='d-flex justify-content-between'>
+                  <div className='d-flex gap-2 pb-2'>
                     {/* Profile Image */}
                     <img
                       src={getProfileImageUrl(review.customer_id.profile_image)}
                       alt={review.customer_id.fname}
-                      style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        backgroundColor: '#e0e0e0'
-                      }}
+                        className='img_cust_prof'
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/44';
                       }}
                     />
                     <div>
-                      <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>
+                      <p className='font-14 mb-1'>
                         {review.customer_id.fname} {review.customer_id.lname}
                       </p>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#999' }}>
+                      <p className='font-12 mb-0 color-grey'>
                         {dayjs(review.created_on).format('MMM D, YYYY')} at {dayjs(review.created_on).format('h:mm A')}
                       </p>
                     </div>
@@ -198,9 +163,9 @@ const Reviews = () => {
 
                   {/* Rating */}
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
+                    {/* <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
                       {getRatingEmoji(review.rating)}
-                    </p>
+                    </p> */}
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span
@@ -222,26 +187,19 @@ const Reviews = () => {
 
                 {/* Review Text */}
                 <div
-                  style={{
-                    backgroundColor: '#fafafa',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    borderLeft: '3px solid #2196F3',
-                    marginTop: '12px'
-                  }}
+                 
                 >
-                  <p style={{ margin: 0, fontSize: '14px', color: '#555', lineHeight: '1.6' }}>
+                  <p className='review_custm'>
                     {review.review}
                   </p>
                 </div>
 
-                {/* Booking Info */}
-                <p style={{ margin: '12px 0 0 0', fontSize: '11px', color: '#bbb', textAlign: 'right' }}>
-                  Booking: {review.booking_id.bkng_id}
-                </p>
+               
               </div>
             ))
           )}
+        </div>
+          </div>
         </div>
       </div>
     </>
