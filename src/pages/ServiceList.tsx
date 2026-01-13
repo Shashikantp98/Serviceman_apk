@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
-import { ArrowUpRight } from "react-feather";
+// import { ArrowUpRight } from "react-feather";
 
 const ServiceList = () => {
   const navigate = useNavigate();
@@ -164,7 +164,7 @@ const ServiceList = () => {
                       onClick={() => handleBookNow(item)}
                       className=""
                     >
-                      <ArrowUpRight></ArrowUpRight>
+                      {/* <ArrowUpRight></ArrowUpRight> */}
                       Book Now
                     </button>
                   </div>

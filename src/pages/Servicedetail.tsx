@@ -107,16 +107,16 @@ const Servicedetail = () => {
     }
   };
 
-  // const getRatingEmoji = (rating: number) => {
-  //   const emojiMap: { [key: number]: string } = {
-  //     1: '😡',
-  //     2: '😒',
-  //     3: '🙂',
-  //     4: '☺️',
-  //     5: '🥳',
-  //   };
-  //   return emojiMap[rating] || '😐';
-  // };
+  const getRatingEmoji = (rating: number) => {
+    const emojiMap: { [key: number]: string } = {
+      1: '😡',
+      2: '😒',
+      3: '🙂',
+      4: '☺️',
+      5: '🥳',
+    };
+    return emojiMap[rating] || '😐';
+  };
 
   const getRatingLabel = (rating: number) => {
     const labelMap: { [key: number]: string } = {
@@ -258,12 +258,15 @@ const Servicedetail = () => {
                           </div>
 
                           <div className="text-right">
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1px', marginBottom: '2px' }}>
+                            <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
+                              {getRatingEmoji(review.rating)}
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
                               {[1, 2, 3, 4, 5].map((star) => (
                                 <span
                                   key={star}
                                   style={{
-                                    fontSize: '12px',
+                                    fontSize: '14px',
                                     color: star <= review.rating ? '#ffc107' : '#ddd'
                                   }}
                                 >
@@ -271,7 +274,7 @@ const Servicedetail = () => {
                                 </span>
                               ))}
                             </div>
-                            <p style={{ margin: 0, fontSize: '10px', color: '#666' }}>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
                               {getRatingLabel(review.rating)}
                             </p>
                           </div>

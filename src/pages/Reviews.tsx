@@ -58,16 +58,16 @@ const Reviews = () => {
     fetchReviews();
   }, [service_id]);
 
-  // const getRatingEmoji = (rating: number) => {
-  //   const emojiMap: { [key: number]: string } = {
-  //     1: '😡',
-  //     2: '😒',
-  //     3: '🙂',
-  //     4: '☺️',
-  //     5: '🥳',
-  //   };
-  //   return emojiMap[rating] || '😐';
-  // };
+  const getRatingEmoji = (rating: number) => {
+    const emojiMap: { [key: number]: string } = {
+      1: '😡',
+      2: '😒',
+      3: '🙂',
+      4: '☺️',
+      5: '🥳',
+    };
+    return emojiMap[rating] || '😐';
+  };
 
   const getRatingLabel = (rating: number) => {
     const labelMap: { [key: number]: string } = {
@@ -163,9 +163,9 @@ const Reviews = () => {
 
                   {/* Rating */}
                   <div style={{ textAlign: 'right' }}>
-                    {/* <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
+                    <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
                       {getRatingEmoji(review.rating)}
-                    </p> */}
+                    </p>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <span
