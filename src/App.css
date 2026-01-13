@@ -1821,7 +1821,7 @@ outline: none !important;
 
 /* Minimized header small top padding */
 .minimized-header {
-  padding-top: 14px !important;
+  padding-top: 40px !important;
   padding-right: 20px !important;
   padding-bottom: 20px !important;
   padding-left: 20px !important;
