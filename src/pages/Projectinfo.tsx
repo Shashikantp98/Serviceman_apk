@@ -149,13 +149,14 @@ const Projectinfo = () => {
                     </p>
                   </div>
                   <div className="col-12 pt-3">
-                    <p className="mb-1 font-12 color-grey">Customer</p>
-                    <p className="mb-0 mb-0 font-14">
+                   <b> <p className="mb-1 font-16 color-grey">Customer</p>
+                    <p className="mb-0 mb-0 font-15">
                       {bookingDetails?.customer?.name}
                     </p>
-                    <p className="mb-0 mb-0 font-14">
+                    <p className="mb-0 mb-0 font-15">
                       {bookingDetails?.customer?.phone_number}
                     </p>
+                    </b>
 
                   </div>
                   <div className="col-12 pt-3">

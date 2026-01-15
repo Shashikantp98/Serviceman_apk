@@ -99,11 +99,33 @@ const Servicedetail = () => {
     if (token == "guest") {
       setShowLoginModal(true);
     } else {
-      if (serviceDetails.is_available) {
-        navigate(`/summery/${serviceDetails?.service_id}`);
-      } else {
-        toast.error(serviceDetails.availability_message);
-      }
+      // Check customer details first
+      serviceLoader.setLoading(true);
+      ApiService.post(`/user/getCustomerDetails`, {})
+        .then((res: any) => {
+          const customerData = res.data.customer;
+          
+          // Check if fname or lname is missing or empty
+          if (!customerData?.fname || !customerData?.lname || 
+              customerData.fname.trim() === '' || customerData.lname.trim() === '') {
+            toast.warning("First add your name to book the service");
+            navigate('/editCustomer');
+          } else {
+            // Proceed with booking
+            if (serviceDetails.is_available) {
+              navigate(`/summery/${serviceDetails?.service_id}`);
+            } else {
+              toast.error(serviceDetails.availability_message);
+            }
+          }
+        })
+        .catch((err: any) => {
+          console.log('Error fetching customer details:', err);
+          toast.error("Error checking customer details");
+        })
+        .finally(() => {
+          serviceLoader.setLoading(false);
+        });
     }
   };
 

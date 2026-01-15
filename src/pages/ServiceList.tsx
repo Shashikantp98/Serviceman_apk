@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
 import { LoginModal } from "../components/LoginModal";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
@@ -13,7 +13,7 @@ import { useSectionLoader } from "../utils/useSectionLoader";
 
 const ServiceList = () => {
   const navigate = useNavigate();
-  const { token, logout } = useAuth();
+  const { logout } = useAuth(); //token
   const { isPopular } = useLocation().state;
   const { latitude, longitude } = useAuth();
   const [services, setServices] = useState<any>([]);
@@ -52,17 +52,19 @@ const ServiceList = () => {
   useEffect(() => {
     getAllServices();
   }, []);
-  const handleBookNow = (item: any) => {
-    if (token == "guest") {
-      setShowLoginModal(true);
-    } else {
-      if (item.is_available) {
-        navigate(`/summery/${item?.service_id}`);
-      } else {
-        toast.error(item.availability_message);
-      }
-    }
-  };
+
+  // const handleBookNow = (item: any) => {
+  //   if (token == "guest") {
+  //     setShowLoginModal(true);
+  //   } else {
+  //     if (item.is_available) {
+  //       navigate(`/summery/${item?.service_id}`);
+  //     } else {
+  //       toast.error(item.availability_message);
+  //     }
+  //   }
+  // };
+
   return (
     <>
       {/* <Header /> */}
@@ -154,20 +156,20 @@ const ServiceList = () => {
                     <span> ₹{item?.price}</span>
                   </p>
 
-                  <div className="booknow_btn">
+                  {/* <div className="booknow_btn"> */}
                     {/* <div>
                                     <span>
                                       <Clock size={16}></Clock> {item?.duration}
                                     </span>
                                    </div> */}
-                    <button
-                      onClick={() => handleBookNow(item)}
-                      className=""
-                    >
+                    {/* <button */}
+                      {/* onClick={() => handleBookNow(item)} */}
+                      {/* className="" */}
+                    {/* > */}
                       {/* <ArrowUpRight></ArrowUpRight> */}
-                      Book Now
-                    </button>
-                  </div>
+                      {/* Book Now */}
+                    {/* </button> */}
+                  {/* </div> */}
 
                   {/* Book Now Button */}
 
