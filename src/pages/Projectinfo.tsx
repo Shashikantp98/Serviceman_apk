@@ -47,23 +47,23 @@ const Projectinfo = () => {
         </div>
       )}
       <div className="main-content-service2">
-        <div className="pt-4 pb-0"> 
+        <div className="pt-4 pb-0">
           <div className="px-3">
             <div className="cards5">
               <p className="font-14 mb-2">Project Details</p>
 
-            <div className=" pb-2">
-              <h5 className="head5">
-                <b>{bookingDetails?.service_name}</b>
-              </h5>
-              <p className="mb-0 font-14 color-blue">
-                Booking ID: {bookingDetails?.bkng_id}
-              </p>
-            </div>
-            <div className="d-flex  align-items-center  gap-1 pb-2 pt-1">
-                            <MapPin size={14}></MapPin>
-                            <p className="m-0 font-14 ">Location</p>
-                          </div>  
+              <div className=" pb-2">
+                <h5 className="head5">
+                  <b>{bookingDetails?.service_name}</b>
+                </h5>
+                <p className="mb-0 font-14 color-blue">
+                  Booking ID: {bookingDetails?.bkng_id}
+                </p>
+              </div>
+              <div className="d-flex  align-items-center  gap-1 pb-2 pt-1">
+                <MapPin size={14}></MapPin>
+                <p className="m-0 font-14 ">Location</p>
+              </div>
               <p className="mb-0 font-14">
                 {bookingDetails?.address?.street_1},{" "}
                 {bookingDetails?.address?.city},{bookingDetails?.address?.state},{" "}
@@ -74,26 +74,23 @@ const Projectinfo = () => {
           <div className="px-3 pt-3">
             <div className="cards5">
               <p className="font-14 mb-0">
-            The request will start -{" "}
-            {dayjs(bookingDetails?.date).format("dddd, MMMM D YYYY")} @{" "}
-            {bookingDetails?.booking_time}
-          </p>
+                The request will start -{" "}
+                {dayjs(bookingDetails?.date).format("dddd, MMMM D YYYY")} @{" "}
+                {bookingDetails?.booking_time}
+              </p>
             </div>
           </div>
 
-
-         
-         
         </div>
-       
+
         <div className="container pb-10">
           <div className="row px-1 pt-3">
             <div className="col-12">
               <div className="cards5">
-                 <b className="mb-1 font-14 color-grey">Job Description</b>
-            <p className="mb-0 font-14">
-              {bookingDetails?.job_description || "No description provided"}
-            </p>
+                <b className="mb-1 font-14 color-grey">Job Description</b>
+                <p className="mb-0 font-14">
+                  {bookingDetails?.job_description || "No description provided"}
+                </p>
                 <h5 className="font-14 pt-3 ">Your request has been booked!</h5>
                 {bookingDetails?.booking_status === "cancelled" ? (
                   <p className="font-14 text-danger">
@@ -152,10 +149,14 @@ const Projectinfo = () => {
                     </p>
                   </div>
                   <div className="col-12 pt-3">
-                    <p className="mb-1 font-12 color-grey">Servicemen</p>
+                    <p className="mb-1 font-12 color-grey">Customer</p>
                     <p className="mb-0 mb-0 font-14">
-                      {bookingDetails?.servicemen_name}
+                      {bookingDetails?.customer?.name}
                     </p>
+                    <p className="mb-0 mb-0 font-14">
+                      {bookingDetails?.customer?.phone_number}
+                    </p>
+
                   </div>
                   <div className="col-12 pt-3">
                     <p className="mb-1 font-12 color-grey">Address</p>

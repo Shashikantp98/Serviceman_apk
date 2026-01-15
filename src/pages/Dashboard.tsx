@@ -301,7 +301,7 @@ const Dashboard = () => {
                     <div className="cards5 mb-2" key={booking.booking_id}>
                       <div
                         onClick={() =>
-                          navigate("/customerprojectinfo/" + booking.booking_id)
+                          navigate("/projectinfo/" + booking.booking_id)
                         }
                         className="d-flex align-items-center border-bottom pb-3 justify-content-between"
                       >
@@ -317,7 +317,7 @@ const Dashboard = () => {
                       <div
                         className="d-flex justify-content-between pt-3"
                         onClick={() =>
-                          navigate("/customerprojectinfo/" + booking.booking_id)
+                          navigate("/projectinfo/" + booking.booking_id)
                         }
                       >
                         <div className="d-flex align-items-center gap-10 font-12 color-grey">
@@ -333,7 +333,7 @@ const Dashboard = () => {
                       <div
                         className="d-flex justify-content-between pt-3"
                         onClick={() =>
-                          navigate("/customerprojectinfo/" + booking.booking_id)
+                          navigate("/projectinfo/" + booking.booking_id)
                         }
                       >
                         <div className="d-flex align-items-center gap-10 font-12 color-grey">
@@ -348,7 +348,7 @@ const Dashboard = () => {
 
                       <div
                         className="d-flex justify-content-between pt-3"
-                        onClick={() => navigate("/customerprojectinfo/" + booking.booking_id)}
+                        onClick={() => navigate("/projectinfo/" + booking.booking_id)}
                       >
                         <div className="d-flex align-items-center gap-10 font-12 color-grey">
                           <Calendar size={14} />

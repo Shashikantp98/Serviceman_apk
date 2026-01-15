@@ -14,10 +14,11 @@ import { useState } from "react";
 import ApiService from "../services/api";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
 // import Header from "../components/Header";
 const CustomerProfile = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [profileDetails, setProfileDetails] = useState<any>({});
   const getProfileDetails = () => {
@@ -35,13 +36,31 @@ const CustomerProfile = () => {
       getProfileDetails();
     }
   }, []);
-  const logout = () => {
-    setLoading(true);
-    localStorage.clear();
-    setTimeout(() => {
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      const user_type = localStorage.getItem("authmobileRole") || "customer";
+
+      const response: any = await ApiService.logout(user_type);
+
+      if (response && (response.status === "success" || response.status === 200)) {
+        // Clear all auth related data from localStorage
+        localStorage.clear();
+        // Clear auth context
+        logout();
+        // Redirect to select page
+        window.location.href = "/";
+      } else {
+        console.log("Logout failed:", response);
+        toast.error(response?.message || "Logout failed");
+        setLoading(false);
+      }
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast.error(error?.message || "An error occurred during logout");
       setLoading(false);
-      window.location.href = "/";
-    }, 1000);
+    }
   };
 
   return (
@@ -64,8 +83,8 @@ const CustomerProfile = () => {
                 <h1 className="font-16 mb-1">
                   {profileDetails?.customer?.fname
                     ? profileDetails?.customer?.fname +
-                      " " +
-                      profileDetails?.customer?.lname
+                    " " +
+                    profileDetails?.customer?.lname
                     : "N/A"}{" "}
                 </h1>
                 <p className="color-grey font-14 mb-0">
@@ -198,7 +217,7 @@ const CustomerProfile = () => {
             </div>
           </div>
           <div className="col-12 pt-2 pb-5 mb-5">
-            <button disabled={loading} onClick={logout} className="loggoutbtn">
+            <button disabled={loading} onClick={handleLogout} className="loggoutbtn">
               <LogOut size={16}></LogOut>
               {loading ? "Logging out..." : "Logout"}
             </button>

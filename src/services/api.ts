@@ -83,6 +83,19 @@ class ApiService {
     const response = await api.delete<T>(url, config);
     return response.data;
   }
+
+  // Logout request
+  static async logout<T>(
+    user_type: string,
+    config?: AxiosRequestConfig
+  ): ApiResponse<T> {
+    const response = await api.post<T>(
+      "/user/logout",
+      { user_type },
+      config
+    );
+    return response.data;
+  }
 }
 
 export default ApiService;
