@@ -149,7 +149,7 @@ const Projectinfo = () => {
                     </p>
                   </div>
                   <div className="col-12 pt-3">
-                   <b> <p className="mb-1 font-16 color-grey">Customer</p>
+                   <b> <p className="mb-1 font-14 color-grey">Customer</p>
                     <p className="mb-0 mb-0 font-15">
                       {bookingDetails?.customer?.name}
                     </p>
