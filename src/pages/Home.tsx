@@ -20,12 +20,14 @@ declare global {
 const Home = () => {
   const navigate = useNavigate();
   const { latitude, longitude, logout } = useAuth();//token
-  const [popularServices, setPopularServices] = useState<any>([]);
-  const [services, setServices] = useState<any>([]);
-  const [categories, setCategories] = useState<any>([]);
-  const [bannerData, setBannerData] = useState<any>([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [popularServices, setPopularServices] = useState<any>(null);
+  const [services, setServices] = useState<any>(null);
+  const [categories, setCategories] = useState<any>(null);
+  const [bannerData, setBannerData] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
+
+
   // Section-specific loaders
   const bannerLoader = useSectionLoader("banner");
   const categoriesLoader = useSectionLoader("categories");
@@ -53,14 +55,17 @@ const Home = () => {
       }, 300);
     }
   }, []);
-  useEffect(() => {
-    if (latitude || longitude) {
-      getPopularServices(true);
-      getPopularServices(false);
-      getCategories();
-      getBannerData(Number(latitude), Number(longitude));
-    }
-  }, [latitude, longitude]);
+ useEffect(() => {
+  if (!latitude || !longitude) return;
+
+  setPageLoading(true); // 🔥 immediately block UI
+
+  getPopularServices(true);
+  getPopularServices(false);
+  getCategories();
+  getBannerData(Number(latitude), Number(longitude));
+}, [latitude, longitude]);
+
   const getBannerData = (latitude: number, longitude: number) => {
     bannerLoader.setLoading(true);
     ApiService.post("/user/userBannerImages", { latitude, longitude })
@@ -131,6 +136,19 @@ const Home = () => {
         loader.setLoading(false);
       })
   };
+
+    // ✅ Stop full-page loader only when ALL data is ready
+  useEffect(() => {
+    if (
+      bannerData !== null &&
+      categories !== null &&
+      popularServices !== null &&
+      services !== null
+    ) {
+      setPageLoading(false);
+    }
+  }, [bannerData, categories, popularServices, services]);
+
   // const handleBookNow = (item: any) => {
   //   if (token == "guest") {
   //     setShowLoginModal(true);
@@ -248,14 +266,16 @@ const Home = () => {
             text="Loading services..."
           />
 
-          {!popularServicesLoader.loading && popularServices.length === 0 && (
-            <div className="col-12 ">
-              <p className="font-14 weight-bold">No Popular Services</p>
-            </div>
-          )}
+          {!pageLoading &&
+            !popularServicesLoader.loading &&
+            popularServices?.length === 0 && (
+              <div className="col-12 ">
+                <p className="font-14 weight-bold">No Popular Services</p>
+              </div>
+            )}
 
           {!popularServicesLoader.loading &&
-            popularServices.length > 0 &&
+            popularServices?.length > 0 &&
             popularServices.map((item: any) => (
               <div
                 className="col-6 px-2 "
@@ -294,13 +314,16 @@ const Home = () => {
             text="Loading categories..."
           />
 
-          {!categoriesLoader.loading && categories.length === 0 && (
-            <div className="col-12">
-              <p className="font-14 weight-bold">No Categories</p>
-            </div>
-          )}
+          {!pageLoading &&
+            !categoriesLoader.loading &&
+            categories?.length === 0 && (
 
-          {!categoriesLoader.loading && categories.length > 0 && (
+              <div className="col-12">
+                <p className="font-14 weight-bold">No Categories</p>
+              </div>
+            )}
+
+          {!categoriesLoader.loading && categories?.length > 0 && (
             <div className="col-12 d-flex gap-15 overflow-auto">
               {categories.map((item: any) => (
                 <span
@@ -323,7 +346,7 @@ const Home = () => {
                   </p>
                 </span>
               ))}
-            
+
             </div>
           )}
         </div>
@@ -351,15 +374,17 @@ const Home = () => {
           />
 
           {/* Show "No Services" only when loader is NOT running and data is empty */}
-          {!servicesLoader.loading && services.length === 0 && (
-            <div className="col-12">
-              <p className="font-14 weight-bold">No Services</p>
-            </div>
-          )}
+          {!pageLoading &&
+            !servicesLoader.loading &&
+            services?.length === 0 && (
+              <div className="col-12">
+                <p className="font-14 weight-bold">No Services</p>
+              </div>
+            )}
 
           {/* Show services list only when loader finished AND data is available */}
           {!servicesLoader.loading &&
-            services.length > 0 &&
+            services?.length > 0 &&
             services.map((item: any) => (
               <div className="col-6 px-2" key={item?.service_id}>
                 <div className="serv_cards mb-3">
@@ -401,7 +426,7 @@ const Home = () => {
                       }
                     >
                       <span>★
-</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
+                      </span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
                     </p></div>
 
                   {/* 

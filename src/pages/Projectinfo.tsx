@@ -174,12 +174,12 @@ const Projectinfo = () => {
             <div className="col-12 pt-3">
               <div className="row px-1">
                 <div className="col-6">
-                  <p className="font-14">Booking Cost</p>
+                  <b><p className="font-15">Booking Cost</p></b>
                 </div>
                 <div className="col-6">
-                  <p className="font-14 text-right">
+                 <b> <p className="font-15 text-right">
                     ₹{bookingDetails?.booking_amount}
-                  </p>
+                  </p></b>
                 </div>
               </div>
             </div>
