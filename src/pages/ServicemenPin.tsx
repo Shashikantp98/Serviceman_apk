@@ -142,7 +142,7 @@ const ServicemenPin = () => {
           onClick={() => onSubmit(pin)}
           disabled={pin.length !== 6 || loading || !fcmReady}
         >
-          {fcmReady ? (loading ? "Login..." : "Login") : "Getting device token..."}
+          {fcmReady ? (loading ? "Login..." : "Login") : "Login..."}
         </button>
       </div>
     </>
