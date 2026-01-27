@@ -1344,7 +1344,10 @@ body {
   border-radius: 15px;
   color: #1a1a1a;
   border: 1px solid grey;
-  margin-top: 25px;
+  
+}
+.col-12:has(.backs_butn) {
+    padding-top: 15px;
 }
 
 .reves_head {
