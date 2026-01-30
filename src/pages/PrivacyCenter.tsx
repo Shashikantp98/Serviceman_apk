@@ -35,7 +35,7 @@ const PrivacyCenter = () => {
     <div>
       <div className="fixed_header">
         <div className="row">
-          <div className="col-12 px-3">
+          <div className="col-12 px-3 back_btn_pro  ">
             <button className="backs_butn" onClick={() => navigate(-1)}>
               <ChevronLeft />
             </button>

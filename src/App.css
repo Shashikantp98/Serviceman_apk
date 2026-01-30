@@ -851,7 +851,7 @@ background: #ffffff;
 }
 
 .main-content-service2 {
-  padding-top: calc(max(env(safe-area-inset-top, 15px), 50px) + 30px);
+  padding-top: calc(max(env(safe-area-inset-top, 15px), 50px) + 50px);
 }
 
 /* Additional support for landscape mode on iPhone 16 */
@@ -2047,4 +2047,8 @@ padding: 8px;
   height: 45px;
   min-width: 45px;
   border-radius: 100%;
+}
+
+.back_btn_pro{
+  padding-top: 0 !important ;
 }
