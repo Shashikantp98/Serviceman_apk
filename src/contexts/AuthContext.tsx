@@ -86,6 +86,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("authmobileLongitude");
     setCurrentLocation(null);
     localStorage.removeItem("authmobileCurrentLocation");
+    
+    // Clear FCM token from memory and localStorage
+    (window as any).fcmToken = undefined;
+    localStorage.removeItem("fcm_token_ios");
+    console.log("🔓 Logout: Cleared FCM token from memory and localStorage");
   };
 
   const setLatLong = (newLatitude: number, newLongitude: number) => {

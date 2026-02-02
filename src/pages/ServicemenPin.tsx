@@ -24,7 +24,16 @@ const ServicemenPin = () => {
   // Check for FCM token availability
   React.useEffect(() => {
     const checkToken = () => {
-      if ((window as any).fcmToken && (window as any).fcmToken !== "") {
+      // Check window.fcmToken or localStorage
+      const windowToken = (window as any).fcmToken;
+      const storageToken = localStorage.getItem('fcm_token_ios');
+      
+      if ((windowToken && windowToken !== "") || (storageToken && storageToken !== "")) {
+        // Ensure window.fcmToken is set from localStorage if needed
+        if (!windowToken && storageToken) {
+          (window as any).fcmToken = storageToken;
+          console.log("✅ Restored FCM token from localStorage to window:", storageToken);
+        }
         setFcmReady(true);
       } else {
         setTimeout(checkToken, 500);
@@ -42,9 +51,34 @@ const ServicemenPin = () => {
     setError(null); // reset previous error
 
     try {
-      // Get FCM token from global or navigation state
-      const fcmToken = (window as any).fcmToken || "";
-      console.log("Logging in with FCM Token:", fcmToken);
+      // Debug: Check all possible token sources
+      console.log("🔍 Checking for FCM token...");
+      console.log("- window.fcmToken:", (window as any).fcmToken);
+      console.log("- localStorage fcm_token_ios:", localStorage.getItem('fcm_token_ios'));
+      console.log("- All localStorage keys:", Object.keys(localStorage));
+      
+      // Get FCM token from global or localStorage (iOS persists here)
+      let fcmToken = (window as any).fcmToken || "";
+      
+      // Fallback to localStorage for iOS - check immediately before sending
+      if (!fcmToken) {
+        fcmToken = localStorage.getItem('fcm_token_ios') || "";
+        if (fcmToken) {
+          console.log("✅ Using FCM token from localStorage:", fcmToken);
+          // Update window.fcmToken for future use
+          (window as any).fcmToken = fcmToken;
+        }
+      }
+      
+      if (!fcmToken) {
+        console.warn("⚠️ No FCM token available! Proceeding without token.");
+        console.warn("This means either:");
+        console.warn("1. Firebase didn't generate token yet");
+        console.warn("2. localStorage was cleared");
+        console.warn("3. Native bridge didn't inject token");
+      }
+      
+      console.log("📤 Logging in with FCM Token:", fcmToken || "(empty)");
       const res: any = await ApiService.post("/user/loginUser", {
         phone_number,
         pin: enteredPin,

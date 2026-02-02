@@ -7,13 +7,44 @@ import { pushNavigate } from "./PushNavigate";
 import { Capacitor } from "@capacitor/core";
 import ApiService from "../services/api";
 
-  console.log("PushNotifications.ts loaded");
+console.log("PushNotifications.ts loaded");
 
 export const initPushNotifications = async () => {
+  if (Capacitor.getPlatform() === "web") {
+    console.log("Skipping push notifications on web platform");
+    return;
+  }
+
+  console.log("Initializing Push Notifications on device...");
+
+  // On iOS, restore FCM token from localStorage if available
+  if (Capacitor.getPlatform() === "ios") {
+    const storedToken = localStorage.getItem('fcm_token_ios');
+    if (storedToken) {
+      console.log("✅ Restored FCM token from localStorage");
+      (window as any).fcmToken = storedToken;
+      (window as any).tokenType = "FCM";
+      console.log("FCM Token:", storedToken);
+    } else {
+      console.log("⏳ No stored FCM token, waiting for Firebase...");
+    }
+  }
+
   // Request permissions for both push and local notifications
-  const pushPermissions = await PushNotifications.requestPermissions();
-  if (pushPermissions.receive === "granted") {
-    PushNotifications.register();
+  try {
+    console.log("Requesting push permissions...");
+    const pushPermissions = await PushNotifications.requestPermissions();
+    console.log("Push permissions result:", pushPermissions);
+    
+    if (pushPermissions.receive === "granted") {
+      console.log("Push permission granted, registering for notifications...");
+      await PushNotifications.register();
+      console.log("PushNotifications.register() called successfully");
+    } else {
+      console.warn("Push permission not granted:", pushPermissions.receive);
+    }
+  } catch (error) {
+    console.error("Error requesting push permissions:", error);
   }
   
   // Request local notification permissions
@@ -66,13 +97,70 @@ export const initPushNotifications = async () => {
   
   console.log("Requesting push permission…");
 
-  PushNotifications.addListener("registration", (token: Token) => {
-    console.log("Push registration success, token: " + token.value);
-    console.log("Calling PushNotifications.register()");
-    // Store token globally
-    (window as any).fcmToken = token.value;
+  // For iOS: Listen for FCM token from native bridge (posted by MessagingDelegate)
+  if (Capacitor.getPlatform() === "ios") {
+    // Listen for FCM token notification from native iOS code
+    (window as any).addEventListener('FCMTokenReceived', (event: any) => {
+      const fcmToken = event.detail?.token;
+      if (fcmToken) {
+        console.log("✅ FCM Token received from native bridge!");
+        console.log("FCM Token:", fcmToken);
+        console.log("Token length:", fcmToken.length);
+        
+        // Store the correct FCM token in memory
+        (window as any).fcmToken = fcmToken;
+        (window as any).tokenType = "FCM";
+        
+        // Store in localStorage for persistence
+        try {
+          localStorage.setItem('fcm_token_ios', fcmToken);
+          console.log("✅ FCM Token saved to localStorage");
+        } catch (e) {
+          console.log("⚠️ Failed to save to localStorage:", e);
+        }
+        
+        console.log("📱 FCM Token stored globally:");
+        console.log("- window.fcmToken:", fcmToken);
+        console.log("- Token format: ✅ FCM (with colon)");
+      }
+    });
+    
+    // Also check UserDefaults in case token was already set
+    setTimeout(() => {
+      // Try to get FCM token from native storage
+      console.log("Checking for stored FCM token...");
+    }, 1000);
+  }
 
-    // ❌ Removed backend call (it fails before login)
+  // Add registration listener BEFORE calling register()
+  // Note: On iOS this returns APNs token, so we ignore it and use the FCM token from native bridge
+  PushNotifications.addListener("registration", (token: Token) => {
+    console.log("✅ Push registration SUCCESS!");
+    console.log("Token received from Capacitor:", token.value);
+    console.log("Token length:", token.value?.length);
+    console.log("Platform:", Capacitor.getPlatform());
+    
+    // Check if token is FCM or APNs format
+    const isFCMToken = token.value.includes(":");
+    const isAPNsToken = /^[0-9A-F]{64,}$/.test(token.value);
+    
+    console.log("Token format analysis:");
+    console.log("- Is FCM token:", isFCMToken ? "✅" : "❌");
+    console.log("- Is APNs token:", isAPNsToken ? "⚠️ (APNs - waiting for FCM from native)" : "❌");
+    
+    if (Capacitor.getPlatform() === "android" || isFCMToken) {
+      // On Android, Capacitor returns FCM token directly
+      // Or if we somehow got FCM token, use it
+      (window as any).fcmToken = token.value;
+      (window as any).tokenType = "FCM";
+      
+      console.log("📱 Token stored globally:");
+      console.log("- window.fcmToken:", (window as any).fcmToken ? "✅ Present" : "❌ Missing");
+      console.log("- Token type:", (window as any).tokenType);
+    } else if (Capacitor.getPlatform() === "ios" && isAPNsToken) {
+      console.log("⚠️ iOS returned APNs token - ignoring and waiting for FCM token from native bridge");
+      console.log("💡 The correct FCM token will be received via FCMTokenReceived event");
+    }
   });
 
   PushNotifications.addListener("registrationError", (err) => {
