@@ -177,7 +177,7 @@ const Addressdetails = () => {
             overlay={true}
           />
 
-          <div className="row px-2   ">
+          <div className="row px-2   pt-3">
             {addressDetails?.map((item: any) => (
               <div
                 className="col-12 mb-2"
