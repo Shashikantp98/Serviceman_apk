@@ -42,53 +42,65 @@ const GoogleMapComponent: React.FC<Props> = ({
   // 🧭 Fetch current location and reverse geocode on load
   useEffect(() => {
     const fetchCurrentLocation = async () => {
+      // Wait for Google Maps to be loaded before proceeding
+      if (!isLoaded) return;
+
       try {
         setLoadingLocation(true);
         const permission = await Geolocation.requestPermissions();
-        if (permission.location === "granted") {
-          const coordinates = await Geolocation.getCurrentPosition();
+        
+        if (permission.location === "granted" || permission.location === "prompt") {
+          const coordinates = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
           const lat = coordinates.coords.latitude;
           const lng = coordinates.coords.longitude;
           setLocation({ lat, lng });
 
           // 🧠 Reverse geocode to get address text
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            if (status === "OK" && results && results[0]) {
-              const address = results[0].formatted_address;
-              if (inputRef.current) inputRef.current.value = address;
+          if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+              if (status === "OK" && results && results[0]) {
+                const address = results[0].formatted_address;
+                if (inputRef.current) inputRef.current.value = address;
 
-              const components = results[0].address_components || [];
-              setAddress({
-                street_1: components[0]?.long_name || "",
-                city:
-                  components.find((c) => c.types.includes("locality"))
-                    ?.long_name || "",
-                state:
-                  components.find((c) =>
-                    c.types.includes("administrative_area_level_1")
-                  )?.long_name || "",
-                zip:
-                  components.find((c) => c.types.includes("postal_code"))
-                    ?.long_name || "",
-                country:
-                  components.find((c) => c.types.includes("country"))
-                    ?.long_name || "",
-              });
-            }
-          });
+                const components = results[0].address_components || [];
+                setAddress({
+                  street_1: components[0]?.long_name || "",
+                  city:
+                    components.find((c) => c.types.includes("locality"))
+                      ?.long_name || "",
+                  state:
+                    components.find((c) =>
+                      c.types.includes("administrative_area_level_1")
+                    )?.long_name || "",
+                  zip:
+                    components.find((c) => c.types.includes("postal_code"))
+                      ?.long_name || "",
+                  country:
+                    components.find((c) => c.types.includes("country"))
+                      ?.long_name || "",
+                });
+              }
+            });
+          }
         } else {
-          alert("Location permission not granted");
+          console.warn("Location permission not granted:", permission.location);
+          alert("Please enable location permissions in your device settings to use this feature.");
         }
       } catch (error) {
         console.error("Error fetching location:", error);
+        alert("Unable to get your current location. Please check your location settings.");
       } finally {
         setLoadingLocation(false);
       }
     };
 
     fetchCurrentLocation();
-  }, [setLocation, setAddress]);
+  }, [setLocation, setAddress, isLoaded]);
 
   const handlePlaceChanged = () => {
     if (autocompleteRef.current) {

@@ -7,6 +7,19 @@
   box-sizing: border-box;
 }
 
+/* iOS Status Bar Safe Area Background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top);
+  background-color: #DEDFFC;
+  z-index: 9999;
+  pointer-events: none;
+}
+
 .spalsh {
   height: 100vh;
   background: #a6b1ee;

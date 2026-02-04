@@ -42,16 +42,31 @@ const Location = () => {
   });
 
   const handleAllowGoogleMaps = async () => {
-    const permission = await Geolocation.requestPermissions();
-    if (permission.location === "granted") {
-      const coordinates = await Geolocation.getCurrentPosition();
-      setLocation({
-        lat: coordinates.coords.latitude,
-        lng: coordinates.coords.longitude,
-      });
-      setShowMap(true);
-    } else {
-      alert("Location permission not granted");
+    try {
+      const permission = await Geolocation.requestPermissions();
+      
+      if (permission.location === "granted" || permission.location === "prompt") {
+        try {
+          const coordinates = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+          setLocation({
+            lat: coordinates.coords.latitude,
+            lng: coordinates.coords.longitude,
+          });
+          setShowMap(true);
+        } catch (positionError) {
+          console.error("Error getting position:", positionError);
+          toast.error("Unable to get your current location. Please try again or set manually.");
+        }
+      } else {
+        toast.error("Location permission is required. Please enable it in your device settings.");
+      }
+    } catch (error) {
+      console.error("Permission error:", error);
+      toast.error("Unable to request location permission. Please check your settings.");
     }
   };
 

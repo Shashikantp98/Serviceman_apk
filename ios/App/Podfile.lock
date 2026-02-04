@@ -15,6 +15,8 @@ PODS:
     - Capacitor
   - CapacitorPushNotifications (7.0.4):
     - Capacitor
+  - CapacitorStatusBar (7.0.4):
+    - Capacitor
   - FirebaseCore (11.15.0):
     - FirebaseCoreInternal (~> 11.15.0)
     - GoogleUtilities/Environment (~> 8.1)
@@ -85,6 +87,7 @@ DEPENDENCIES:
   - "CapacitorGoogleMaps (from `../../node_modules/@capacitor/google-maps`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - FirebaseCore
   - FirebaseMessaging
 
@@ -117,6 +120,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/local-notifications"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
   Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
@@ -126,6 +131,7 @@ SPEC CHECKSUMS:
   CapacitorGoogleMaps: f899816fb5838e875445ec79094c08fadd20f0c0
   CapacitorLocalNotifications: c9577978cd598af5e2b5615548b8222b3b10d7e2
   CapacitorPushNotifications: 7604512af53bbfdf1dd8fb2256b9ef1e8a69cdc2
+  CapacitorStatusBar: d0e0151c89c001a9c7125bac59ddedf76b664768
   FirebaseCore: efb3893e5b94f32b86e331e3bd6dadf18b66568e
   FirebaseCoreInternal: 9afa45b1159304c963da48addb78275ef701c6b4
   FirebaseInstallations: 317270fec08a5d418fdbc8429282238cab3ac843
@@ -138,6 +144,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: 48adc48ad7320645019bfb51da846436e9a17b83
+PODFILE CHECKSUM: bc964a615dc4a196b884cf36c055c85ac24f520e
 
 COCOAPODS: 1.16.2

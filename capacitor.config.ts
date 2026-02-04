@@ -7,9 +7,17 @@ const config: CapacitorConfig = {
   plugins: {
     StatusBar: {
       backgroundColor: "#DEDFFC",
-      style: "DARK",
+      style: "LIGHT",  // LIGHT = light background with dark/black icons
       overlaysWebView: false,
     },
+    Geolocation: {
+      requestPermissions: true,
+      requireAuthorization: true,
+    },
+  },
+  ios: {
+    contentInset: "never",
+    allowsLinkPreview: false,
   },
   // server: {
   //   cleartext: true,
