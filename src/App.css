@@ -317,9 +317,9 @@ body::before {
 }
 
 .view_more {
-  font-size: 14px;
+  font-size: 13px;
   color: #283891;
-  font-weight: 600;
+  font-weight: 500;
   border: none;
   background-color: transparent;
 }
@@ -1203,8 +1203,8 @@ background: #ffffff;
 }
 
 .subcats {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: #161616;
   margin-bottom: 0 !important;
 }
@@ -1214,6 +1214,7 @@ background: #ffffff;
   border-radius: 15px;
   padding: 8px;
   height: 100%;
+  margin-bottom: 10px;
 }
 
 .ser_names {
@@ -1221,20 +1222,21 @@ background: #ffffff;
   color: #525252;
   font-weight: 500;
   margin-bottom: 0;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .s_cards img {
   height: 100px;
+  object-fit: cover;
 }
 
 .small_cat_img {
   width: 75px;
   height: 75px;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 2px;
   background: #ffffff;
-  background: linear-gradient(0deg, rgb(209, 211, 255) 0%, rgb(158, 158, 255) 100%);
+  background: linear-gradient(0deg, rgb(235, 236, 255) 0%, rgb(246, 246, 255) 100%);
 }
 
 .gap-15 {
@@ -1280,7 +1282,7 @@ background: #ffffff;
   font-size: 13px;
   font-weight: 600;
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 11px;
 }
 
 .booknow_btn {
@@ -2064,4 +2066,26 @@ padding: 8px;
 
 .back_btn_pro{
   padding-top: 0 !important ;
+}
+
+.servicies_tab_butons button{
+  background-color: #ffffff;
+  border: none;
+  border-radius: 100px;
+  padding: 7px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #8e8e8e;
+  margin-right: 10px;
+}
+
+.servicies_tab_butons button.active{
+  background-color: #283891;
+  border: none;
+  border-radius: 100px;
+  padding: 7px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-right: 10px;
 }

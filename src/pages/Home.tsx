@@ -246,55 +246,7 @@ const Home = () => {
             </div> */}
           </div>
         </div>
-        <div className="row pt-4 mt-2">
-          <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
-            <p className="subcats">Popular Services</p>
-            <button
-              className="view_more"
-              onClick={() =>
-                navigate("/service-list", { state: { isPopular: true } })
-              }
-            >
-              View all
-            </button>
-          </div>
-        </div>
-        <div className="row px-1">
-          <SectionLoader
-            show={popularServicesLoader.loading}
-            size="medium"
-            text="Loading services..."
-          />
-
-          {!pageLoading &&
-            !popularServicesLoader.loading &&
-            popularServices?.length === 0 && (
-              <div className="col-12 ">
-                <p className="font-14 weight-bold">No Popular Services</p>
-              </div>
-            )}
-
-          {!popularServicesLoader.loading &&
-            popularServices?.length > 0 &&
-            popularServices.map((item: any) => (
-              <div
-                className="col-6 px-2 "
-                key={item?.service_id}
-                onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
-              >
-                <div className="s_cards">
-                  <img
-                    src={item?.service_image}
-                    className="w-100 rounded-full"
-                  />
-                  <div className="px-2 pb-2">
-                    <p className="ser_names">{item?.service_name}</p>
-                  </div>
-                </div>
-
-              </div>
-            ))}
-        </div>
+       
         <div className="row pt-4 mt-2">
           <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
             <p className="subcats">Browse Categories</p>
@@ -305,8 +257,8 @@ const Home = () => {
               View More
             </button>
           </div>
-
         </div>
+         
         <div className="row">
           <SectionLoader
             show={categoriesLoader.loading}
@@ -350,6 +302,60 @@ const Home = () => {
             </div>
           )}
         </div>
+        <div className="row pt-4 mt-4">
+          <div className="col-12 pb-4 d-flex align-items-center justify-content-between">
+            <div className="servicies_tab_butons ">
+              <button className="active">Our Services</button>
+              <button>Popular services</button>
+            </div>
+            <button
+              className="view_more"
+              onClick={() =>
+                navigate("/service-list", { state: { isPopular: true } })
+              }
+            >
+              View all
+            </button>
+          </div>
+        </div>
+        <div className="row px-1">
+          <SectionLoader
+            show={popularServicesLoader.loading}
+            size="medium"
+            text="Loading services..."
+          />
+
+          {!pageLoading &&
+            !popularServicesLoader.loading &&
+            popularServices?.length === 0 && (
+              <div className="col-12 ">
+                <p className="font-14 weight-bold">No Popular Services</p>
+              </div>
+            )}
+
+          {!popularServicesLoader.loading &&
+            popularServices?.length > 0 &&
+            popularServices.map((item: any) => (
+              <div
+                className="col-6 px-2 pb-3"
+                key={item?.service_id}
+                onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+              >
+                <div className="s_cards">
+                  <img
+                    src={item?.service_image}
+                    className="w-100 rounded-full"
+                  />
+                  <div className="px-2 pb-2">
+                    <p className="ser_names">{item?.service_name}</p>
+                  </div>
+                </div>
+
+              </div>
+            ))}
+        </div>
+        
+        
         <div className="row pt-4 mt-2">
           <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
             <p className="subcats">Best Services</p>
