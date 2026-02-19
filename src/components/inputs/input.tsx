@@ -1,10 +1,11 @@
 import { Controller } from "react-hook-form";
 import { type InputHTMLAttributes } from "react";
+import { type ReactNode } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   control: any;
   name: string;
-  label: string;
+  label: ReactNode;
   error?: string;
   inputMode?:
     | "search"

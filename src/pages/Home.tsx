@@ -55,16 +55,16 @@ const Home = () => {
       }, 300);
     }
   }, []);
- useEffect(() => {
-  if (!latitude || !longitude) return;
+  useEffect(() => {
+    if (!latitude || !longitude) return;
 
-  setPageLoading(true); // 🔥 immediately block UI
+    setPageLoading(true); // 🔥 immediately block UI
 
-  getPopularServices(true);
-  getPopularServices(false);
-  getCategories();
-  getBannerData(Number(latitude), Number(longitude));
-}, [latitude, longitude]);
+    getPopularServices(true);
+    getPopularServices(false);
+    getCategories();
+    getBannerData(Number(latitude), Number(longitude));
+  }, [latitude, longitude]);
 
   const getBannerData = (latitude: number, longitude: number) => {
     bannerLoader.setLoading(true);
@@ -137,7 +137,7 @@ const Home = () => {
       })
   };
 
-    // ✅ Stop full-page loader only when ALL data is ready
+  // ✅ Stop full-page loader only when ALL data is ready
   useEffect(() => {
     if (
       bannerData !== null &&

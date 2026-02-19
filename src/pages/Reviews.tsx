@@ -31,7 +31,7 @@ const Reviews = () => {
 
   useEffect(() => {
     if (!service_id) return;
-    
+
     const fetchReviews = async () => {
       reviewsLoader.setLoading(true);
       try {
@@ -41,7 +41,7 @@ const Reviews = () => {
 
         if (response?.data && Array.isArray(response.data)) {
           setReviews(response.data);
-          
+
           // Calculate average rating
           if (response.data.length > 0) {
             const avgRating = response.data.reduce((sum: number, review: ReviewData) => sum + review.rating, 0) / response.data.length;
@@ -104,101 +104,101 @@ const Reviews = () => {
               <div className="review_ratcard">
                 <h3 className='pt-1'>Reviews and ratings</h3>
                 <div className='d-flex gap-3 pt-2'>
-                    <h2 className='avrg_ratings mb-0'>{averageRating}.0</h2>
-                    <div className='star_sizes'>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                      <span 
+                  <h2 className='avrg_ratings mb-0'>{averageRating}.0</h2>
+                  <div className='star_sizes'>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
                         key={star}
                         style={{ color: star <= Math.round(averageRating) ? '#ffc107' : '#ddd' }}
                       >
                         ★
                       </span>
-                      ))}
-                      <p className='based_on_re mb-0'>Based on {reviews.length} Reviews</p>
-                    </div>
+                    ))}
+                    <p className='based_on_re mb-0'>Based on {reviews.length} Reviews</p>
+                  </div>
                 </div>
               </div>
             </div>
             <div className='col-12'>
-          {reviews.length === 0 ? (
-            <div 
-              style={{
-                backgroundColor: '#f5f5f5',
-                padding: '40px 20px',
-                borderRadius: '12px',
-                textAlign: 'center'
-              }}
-            >
-              <p style={{ margin: 0, color: '#999', fontSize: '14px' }}>
-                No reviews yet. Be the first to review!
-              </p>
-            </div>
-          ) : (
-            reviews.map((review) => (
-              <div
-                key={review._id}
-              className='review_ratcard mb-2'
-              >
-                {/* Customer Info */}
-                <div className='d-flex justify-content-between'>
-                  <div className='d-flex gap-2 pb-2'>
-                    {/* Profile Image */}
-                    <img
-                      src={getProfileImageUrl(review.customer_id.profile_image)}
-                      alt={review.customer_id.fname}
-                        className='img_cust_prof'
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/44';
-                      }}
-                    />
-                    <div>
-                      <p className='font-14 mb-1'>
-                        {review.customer_id.fname} {review.customer_id.lname}
-                      </p>
-                      <p className='font-12 mb-0 color-grey'>
-                        {dayjs(review.created_on).format('MMM D, YYYY')} at {dayjs(review.created_on).format('h:mm A')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Rating */}
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
-                      {getRatingEmoji(review.rating)}
-                    </p>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span
-                          key={star}
-                          style={{
-                            fontSize: '14px',
-                            color: star <= review.rating ? '#ffc107' : '#ddd'
-                          }}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
-                      {getRatingLabel(review.rating)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Review Text */}
+              {reviews.length === 0 ? (
                 <div
-                 
+                  style={{
+                    backgroundColor: '#f5f5f5',
+                    padding: '40px 20px',
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}
                 >
-                  <p className='review_custm'>
-                    {review.review}
+                  <p style={{ margin: 0, color: '#999', fontSize: '14px' }}>
+                    No reviews yet. Be the first to review!
                   </p>
                 </div>
+              ) : (
+                reviews.map((review) => (
+                  <div
+                    key={review._id}
+                    className='review_ratcard mb-2'
+                  >
+                    {/* Customer Info */}
+                    <div className='d-flex justify-content-between'>
+                      <div className='d-flex gap-2 pb-2'>
+                        {/* Profile Image */}
+                        <img
+                          src={getProfileImageUrl(review.customer_id.profile_image)}
+                          alt={review.customer_id.fname}
+                          className='img_cust_prof'
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/44';
+                          }}
+                        />
+                        <div>
+                          <p className='font-14 mb-1'>
+                            {review.customer_id.fname} {review.customer_id.lname}
+                          </p>
+                          <p className='font-12 mb-0 color-grey'>
+                            {dayjs(review.created_on).format('MMM D, YYYY')} at {dayjs(review.created_on).format('h:mm A')}
+                          </p>
+                        </div>
+                      </div>
 
-               
-              </div>
-            ))
-          )}
-        </div>
+                      {/* Rating */}
+                      <div style={{ textAlign: 'right' }}>
+                        <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
+                          {getRatingEmoji(review.rating)}
+                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              style={{
+                                fontSize: '14px',
+                                color: star <= review.rating ? '#ffc107' : '#ddd'
+                              }}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
+                          {getRatingLabel(review.rating)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Review Text */}
+                    <div
+
+                    >
+                      <p className='review_custm'>
+                        {review.review}
+                      </p>
+                    </div>
+
+
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>

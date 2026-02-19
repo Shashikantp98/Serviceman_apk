@@ -42,7 +42,7 @@ export function SuccessConfirmModal({
             <strong>{itemName}</strong> has been registered successfully.
           </p>
         ) : (
-          <p>Success</p>
+          <p></p>
         )}
       </Modal.Body>
 

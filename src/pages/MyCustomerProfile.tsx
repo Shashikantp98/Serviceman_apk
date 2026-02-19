@@ -44,17 +44,17 @@ const MyCustomerProfile = () => {
         </div>
       )}
 
- <div className="fixed_header">
+      <div className="fixed_header">
         <div className="container">
-        <div className="row">
-          <div className="col-12 back_btn_pro">
-            <button className="backs_butn" onClick={() => navigate(-1)}>
-              <ChevronLeft />
-            </button>
+          <div className="row">
+            <div className="col-12 back_btn_pro">
+              <button className="backs_butn" onClick={() => navigate(-1)}>
+                <ChevronLeft />
+              </button>
+            </div>
           </div>
         </div>
-        </div>
-</div>
+      </div>
 
 
 

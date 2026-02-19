@@ -181,13 +181,13 @@ const CustomerProjectinfo = () => {
                     </p>
                   </div>
                   <div className="col-12 pt-3">
-                   <b><p className="mb-1 font-14 color-grey">Servicemen</p>
-                    <p className="mb-0 mb-0 font-15">
-                      {bookingDetails?.servicemen_name}
-                    </p>
-                    <p className="mb-0 mb-0 font-15">
-                      {bookingDetails?.servicemen_phone}
-                    </p></b>
+                    <b><p className="mb-1 font-14 color-grey">Servicemen</p>
+                      <p className="mb-0 mb-0 font-15">
+                        {bookingDetails?.servicemen_name}
+                      </p>
+                      <p className="mb-0 mb-0 font-15">
+                        {bookingDetails?.servicemen_phone}
+                      </p></b>
                   </div>
                   <div className="col-12 pt-3">
                     <p className="mb-1 font-12 color-grey">Address</p>

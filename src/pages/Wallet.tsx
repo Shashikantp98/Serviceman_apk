@@ -1,11 +1,13 @@
 import type { ChangeEvent } from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import ServiceManHeader from "../components/ServiceManHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
+import { SuccessConfirmModal } from "../components/SuccessConfirmModal";
 
 interface WalletResponse {
   data: {
@@ -19,6 +21,10 @@ const Wallet: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [checkingBank, setCheckingBank] = useState<boolean>(false);
+  const [bankModalOpen, setBankModalOpen] = useState<boolean>(false);
+  const [bankModalMessage, setBankModalMessage] = useState<string>("");
+  const navigate = useNavigate();
 
   // Section loaders
   const walletLoader = useSectionLoader("wallet-balance");
@@ -50,6 +56,25 @@ const Wallet: React.FC = () => {
         console.error("Error fetching withdrawal history:", err);
       })
       .finally(() => withdrawLoader.setLoading(false));
+  };
+
+  // Check bank status before opening modal
+  const checkBankStatus = () => {
+    setCheckingBank(true);
+    ApiService.get("/servicemen/checkServicemanBankStatus")
+      .then((res: any) => {
+        if (res.data?.bank_complete === true) {
+          setIsModalOpen(true);
+        } else {
+          setBankModalMessage(res.message);
+          setBankModalOpen(true);
+        }
+      })
+      .catch((err) => {
+        console.error("Error checking bank status:", err);
+        toast.error(err.response?.data?.message || "Could not verify bank details.");
+      })
+      .finally(() => setCheckingBank(false));
   };
 
   // Handle Withdraw
@@ -100,8 +125,8 @@ const Wallet: React.FC = () => {
                 )}
               </div>
 
-              <button className="fill mt-3" onClick={() => setIsModalOpen(true)}>
-                Withdraw Amount
+              <button className="fill mt-3" onClick={checkBankStatus} disabled={checkingBank}>
+                {checkingBank ? "Checking..." : "Withdraw Amount"}
               </button>
             </div>
           </div>
@@ -193,6 +218,18 @@ const Wallet: React.FC = () => {
           </div>
       
       </div>
+
+      <SuccessConfirmModal
+        show={bankModalOpen}
+        onCancel={() => setBankModalOpen(false)}
+        onConfirm={() => {
+          setBankModalOpen(false);
+          navigate("/editServicemen");
+        }}
+        title=" 🏦 Bank Details Required"
+        description={bankModalMessage}
+        confirmLabel="Update Bank Details"
+      />
     </>
   );
 }

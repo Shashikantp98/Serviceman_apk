@@ -38,7 +38,7 @@ const Select = () => {
         >
           Customer
         </button>
-         <button
+        <button
           className="outline brds100 mt-3 d-block"
           onClick={() => {
             setIsGuestFn(false);

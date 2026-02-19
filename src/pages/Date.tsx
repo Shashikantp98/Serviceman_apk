@@ -62,8 +62,8 @@ const DateTimePicker: React.FC<DateTimePickerProps> = ({
       setIsProceeding(true);
       onSelect(selectedDate, selectedTime, note || "");
       setTimeout(() => {
-      onExit && onExit();
-    }, 6000); 
+        onExit && onExit();
+      }, 6000);
     } else {
       toast.error("Please select date and time");
     }

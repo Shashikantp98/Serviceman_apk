@@ -15,14 +15,14 @@ const ServicemenRegister = () => {
   const [loading, setLoading] = useState(false);
 
   // ✅ Yup validation schema
-   const storeSchema = yup.object({
-     country_code: yup.string().default("+91"),
-     phone_number: yup
-       .string()
-       .required("Phone number is required")
-       .matches(/^[6-9]\d{9,11}$/, "Invalid Phone number, Phone number must start with 6, 7, 8, or 9 and be 10 digits"),
-     user_type: yup.string().default(role),
-   });
+  const storeSchema = yup.object({
+    country_code: yup.string().default("+91"),
+    phone_number: yup
+      .string()
+      .required("Phone number is required")
+      .matches(/^[6-9]\d{9,11}$/, "Invalid Phone number, Phone number must start with 6, 7, 8, or 9 and be 10 digits"),
+    user_type: yup.string().default(role),
+  });
 
   const {
     handleSubmit,
@@ -35,10 +35,10 @@ const ServicemenRegister = () => {
 
   const onSubmit = (data: any) => {
     setLoading(true);
-    
+
     // Get FCM token from global or localStorage (iOS persists here)
     let fcmToken = (window as any).fcmToken || "";
-    
+
     // Fallback to localStorage for iOS - check immediately before sending
     if (!fcmToken) {
       fcmToken = localStorage.getItem('fcm_token_ios') || "";
@@ -48,11 +48,11 @@ const ServicemenRegister = () => {
         (window as any).fcmToken = fcmToken;
       }
     }
-    
+
     if (!fcmToken) {
       console.warn("⚠️ No FCM token available!");
     }
-    
+
     const payload = {
       ...data,
       fcm_token: fcmToken,
@@ -60,23 +60,14 @@ const ServicemenRegister = () => {
     ApiService.post("/user/sendOtp", payload)
       .then((res: any) => {
         setLoading(false);
-        if (res.data.is_existing) {
-          navigate("/servicemenpin", {
-            state: {
-              phone_number: data.phone_number,
-              country_code: data.country_code,
-              user_type: data.user_type,
-            },
-          });
-        } else {
-          navigate("/servicemenotp", {
-            state: {
-              phone_number: data.phone_number,
-              country_code: data.country_code,
-              user_type: data.user_type,
-            },
-          });
-        }
+        navigate("/servicemenotp", {
+          state: {
+            phone_number: data.phone_number,
+            country_code: data.country_code,
+            user_type: data.user_type,
+            is_existing: res.data.is_existing,
+          },
+        });
       })
       .catch((err: any) => {
         console.log(err);

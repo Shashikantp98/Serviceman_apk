@@ -157,18 +157,18 @@ const ServiceList = () => {
                   </p>
 
                   {/* <div className="booknow_btn"> */}
-                    {/* <div>
+                  {/* <div>
                                     <span>
                                       <Clock size={16}></Clock> {item?.duration}
                                     </span>
                                    </div> */}
-                    {/* <button */}
-                      {/* onClick={() => handleBookNow(item)} */}
-                      {/* className="" */}
-                    {/* > */}
-                      {/* <ArrowUpRight></ArrowUpRight> */}
-                      {/* Book Now */}
-                    {/* </button> */}
+                  {/* <button */}
+                  {/* onClick={() => handleBookNow(item)} */}
+                  {/* className="" */}
+                  {/* > */}
+                  {/* <ArrowUpRight></ArrowUpRight> */}
+                  {/* Book Now */}
+                  {/* </button> */}
                   {/* </div> */}
 
                   {/* Book Now Button */}

@@ -68,7 +68,7 @@ const Servicedetail = () => {
   // Fetch reviews
   useEffect(() => {
     if (!id) return;
-    
+
     const fetchReviews = async () => {
       reviewsLoader.setLoading(true);
       try {
@@ -78,7 +78,7 @@ const Servicedetail = () => {
 
         if (response?.data && Array.isArray(response.data)) {
           setReviews(response.data);
-          
+
           // Calculate average rating
           if (response.data.length > 0) {
             const avgRating = response.data.reduce((sum: number, review: ReviewData) => sum + review.rating, 0) / response.data.length;
@@ -104,10 +104,10 @@ const Servicedetail = () => {
       ApiService.post(`/user/getCustomerDetails`, {})
         .then((res: any) => {
           const customerData = res.data.customer;
-          
+
           // Check if fname or lname is missing or empty
-          if (!customerData?.fname || !customerData?.lname || 
-              customerData.fname.trim() === '' || customerData.lname.trim() === '') {
+          if (!customerData?.fname || !customerData?.lname ||
+            customerData.fname.trim() === '' || customerData.lname.trim() === '') {
             toast.warning("First add your name to book the service");
             navigate('/editCustomer');
           } else {
@@ -183,17 +183,17 @@ const Servicedetail = () => {
               <div className="col-12 sder_detail">
 
                 <div className="d-flex gap-3  justify-content-between pt-4 align-items-center">
-                <h4 className="mb-0">{serviceDetails?.service_name}</h4>
-                <button className=" book_servi2" onClick={handleBookNow}>
-                 
-                  Book Now
-                </button>
+                  <h4 className="mb-0">{serviceDetails?.service_name}</h4>
+                  <button className=" book_servi2" onClick={handleBookNow}>
+
+                    Book Now
+                  </button>
                 </div>
 
 
-                <h6 
+                <h6
                   className="pt-2"
-                 
+
                   onClick={() => {
                     if (serviceDetails?.total_reviews > 0 && reviewsRef.current) {
                       reviewsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -240,7 +240,7 @@ const Servicedetail = () => {
                         </span>
                         <div>
                           {[1, 2, 3, 4, 5].map((star) => (
-                            <span 
+                            <span
                               key={star}
                               style={{ fontSize: '14px', color: star <= Math.round(averageRating) ? '#ffc107' : '#ddd' }}
                             >
@@ -309,8 +309,8 @@ const Servicedetail = () => {
                     ))}
 
                     {reviews.length > 3 && (
-                      <button 
-                      className="view_all_revi"
+                      <button
+                        className="view_all_revi"
                         onClick={() => navigate(`/reviews/${id}`)}
                       >
                         View All Reviews ({reviews.length})

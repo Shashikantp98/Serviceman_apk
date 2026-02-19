@@ -27,7 +27,7 @@ const ServicemenPin = () => {
       // Check window.fcmToken or localStorage
       const windowToken = (window as any).fcmToken;
       const storageToken = localStorage.getItem('fcm_token_ios');
-      
+
       if ((windowToken && windowToken !== "") || (storageToken && storageToken !== "")) {
         // Ensure window.fcmToken is set from localStorage if needed
         if (!windowToken && storageToken) {
@@ -56,10 +56,10 @@ const ServicemenPin = () => {
       console.log("- window.fcmToken:", (window as any).fcmToken);
       console.log("- localStorage fcm_token_ios:", localStorage.getItem('fcm_token_ios'));
       console.log("- All localStorage keys:", Object.keys(localStorage));
-      
+
       // Get FCM token from global or localStorage (iOS persists here)
       let fcmToken = (window as any).fcmToken || "";
-      
+
       // Fallback to localStorage for iOS - check immediately before sending
       if (!fcmToken) {
         fcmToken = localStorage.getItem('fcm_token_ios') || "";
@@ -69,7 +69,7 @@ const ServicemenPin = () => {
           (window as any).fcmToken = fcmToken;
         }
       }
-      
+
       if (!fcmToken) {
         console.warn("⚠️ No FCM token available! Proceeding without token.");
         console.warn("This means either:");
@@ -77,7 +77,7 @@ const ServicemenPin = () => {
         console.warn("2. localStorage was cleared");
         console.warn("3. Native bridge didn't inject token");
       }
-      
+
       console.log("📤 Logging in with FCM Token:", fcmToken || "(empty)");
       const res: any = await ApiService.post("/user/loginUser", {
         phone_number,

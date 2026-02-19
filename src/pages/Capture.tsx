@@ -187,25 +187,25 @@ const Capture = () => {
               <h2 className="qr-payment-title">Scan to Pay</h2>
               <p className="qr-payment-subtitle">Complete your payment instantly</p>
             </div>
-            
+
             <div className="qr-code-wrapper">
               <QRCode value={qr_data} size={260} />
             </div>
-            
+
             <div className="qr-payment-info">
               <p className="qr-payment-amount">Amount to Pay</p>
               <div className="amount-display">
                 <span className="amount-value">₹{watch("payment_amount")}</span>
               </div>
             </div>
-            
+
             <div className="qr-payment-instructions">
               <p className="instruction-title">How to pay:</p>
               <p className="instruction-text">
                 Open Google Pay, PhonePe, Paytm, or any UPI app and scan this QR code. Amount will be pre-filled.
               </p>
             </div>
-            
+
             <div className="qr-payment-footer">
               <p className="footer-note">Payment will be verified automatically</p>
             </div>

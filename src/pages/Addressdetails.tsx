@@ -91,7 +91,7 @@ const Addressdetails = () => {
         {showModal && (
           <div
             className="modal-overlay"
-            onClick={() => setShowModal(false)} 
+            onClick={() => setShowModal(false)}
             style={{
               position: "fixed",
               top: 0,

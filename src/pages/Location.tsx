@@ -3,6 +3,7 @@ import { ChevronLeft, MapPin, Radio } from "react-feather";
 import { useState, useEffect } from "react";
 import { Geolocation } from "@capacitor/geolocation";
 import GoogleMapComponent from "../components/GoogleMapComponent";
+import Loader from "../components/Loader";
 import { useLocation, useNavigate } from "react-router-dom";
 import { GOOGLE_API_KEY } from "../config";
 import { toast } from "react-toastify";
@@ -24,6 +25,7 @@ const Location = () => {
   const country_code = locationData.state?.country_code;
   const user_type = locationData.state?.user_type;
   const [showMap, setShowMap] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
@@ -42,9 +44,10 @@ const Location = () => {
   });
 
   const handleAllowGoogleMaps = async () => {
+    setLocationLoading(true);
     try {
       const permission = await Geolocation.requestPermissions();
-      
+
       if (permission.location === "granted" || permission.location === "prompt") {
         try {
           const coordinates = await Geolocation.getCurrentPosition({
@@ -57,16 +60,20 @@ const Location = () => {
             lng: coordinates.coords.longitude,
           });
           setShowMap(true);
+          setLocationLoading(false);
         } catch (positionError) {
           console.error("Error getting position:", positionError);
           toast.error("Unable to get your current location. Please try again or set manually.");
+          setLocationLoading(false);
         }
       } else {
         toast.error("Location permission is required. Please enable it in your device settings.");
+        setLocationLoading(false);
       }
     } catch (error) {
       console.error("Permission error:", error);
       toast.error("Unable to request location permission. Please check your settings.");
+      setLocationLoading(false);
     }
   };
 
@@ -129,7 +136,7 @@ const Location = () => {
         .then(async (res: any) => {
           console.log(res);
           toast.success(res.message);
-          
+
           // Update FCM token after customer login
           const fcmToken = (window as any).fcmToken || "";
           if (fcmToken) {
@@ -142,7 +149,7 @@ const Location = () => {
               },
             }).catch(err => console.error('FCM token update failed:', err));
           }
-          
+
           setLoading(false);
           login(token, user_type);
           navigate("/home", {
@@ -360,6 +367,7 @@ const Location = () => {
 
   return (
     <>
+      <Loader show={locationLoading} text="Getting your location..." />
       <div style={{ position: "absolute" }}>
         <button
           className="back-btn mb-3 mt-5 px-3 py-3"

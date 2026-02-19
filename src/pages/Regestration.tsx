@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { SubmitHandler, Resolver } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import Input from "../components/inputs/input";
@@ -12,6 +12,10 @@ import { toast } from "react-toastify";
 import { SuccessConfirmModal } from "../components/SuccessConfirmModal";
 import { ChevronLeft, ChevronDown, ChevronUp } from "react-feather";
 import { useAuth } from "../contexts/AuthContext";
+import GooglePlacesAutocomplete from "../components/GooglePlacesAutocomplete";
+import { useLoadScript } from "@react-google-maps/api";
+import { GOOGLE_API_KEY } from "../config";
+import Loader from "../components/Loader";
 
 interface Bank {
   account_name: string;
@@ -21,23 +25,30 @@ interface Bank {
   upi_id: string;
 }
 
+interface Address {
+  street_1: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
 interface FormValues {
   fname: string;
   lname: string;
   service_ids: string[];
   bank: Bank;
+  address: Address;
   profile_image: FileList;
   serviceman_document: FileList;
 }
 
-// ✅ Yup validation schema
+// ✅ Yup validation schema - only `fname` is required; everything else optional
 const validationSchema = Yup.object().shape({
   fname: Yup.string().required("First name is required"),
-  lname: Yup.string(),
-  service_ids: Yup.array()
-    .of(Yup.string().required("Invalid service ID"))
-    .min(1, "At least one service required")
-    .required("Service IDs are required"),
+  lname: Yup.string().required("Last name is required"),
+
+  service_ids: Yup.array().of(Yup.string()).required("At least one service is required"),
 
   bank: Yup.object({
     upi_id: Yup.string()
@@ -48,57 +59,39 @@ const validationSchema = Yup.object().shape({
       })
       .nullable(),
 
-    account_name: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) => schema.required("Account name is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    bank_name: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) => schema.required("Bank name is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    account_number: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) =>
-        schema
-          .required("Account number is required")
-          .matches(/^[0-9]{9,18}$/, "Account number must be 9–18 digits"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    ifsc_code: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) =>
-        schema
-          .required("IFSC code is required")
-          .matches(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC format"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  }).test("upiOrBank", "Either UPI ID or bank details required", (value) => {
-    const { upi_id, account_name, bank_name, account_number, ifsc_code } =
-      value || {};
-    const hasUPI = !!upi_id;
-    const hasBank =
-      !!account_name && !!bank_name && !!account_number && !!ifsc_code;
-    return hasUPI || hasBank;
-  }),
+    account_name: Yup.string().notRequired(),
+    bank_name: Yup.string().notRequired(),
+    account_number: Yup.string()
+      .notRequired()
+      .nullable()
+      .matches(/^[0-9]{9,18}$/, { message: "Account number must be 9–18 digits", excludeEmptyString: true }),
+    ifsc_code: Yup.string()
+      .notRequired()
+      .nullable()
+      .matches(/^[A-Za-z]{4}\d{7}$/, { message: "Invalid IFSC format", excludeEmptyString: true }),
+  }).notRequired(),
+
+  address: Yup.object({
+    street_1: Yup.string().notRequired(),
+    city: Yup.string().notRequired(),
+    state: Yup.string().notRequired(),
+    zip: Yup.string().notRequired(),
+    country: Yup.string().notRequired(),
+  }).notRequired(),
 
   profile_image: Yup.mixed<FileList>()
-    .test("fileRequired", "Profile image is required", (value) => {
-      return value instanceof FileList && value.length > 0;
-    })
+    .required("Profile image is required")
     .test("fileType", "Invalid document type", (value) => {
-      if (!value || value.length === 0) return false; // required already ensures non-empty
+      if (!value || value.length === 0) return true;
       const file = value[0];
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
       return allowedTypes.includes(file.type);
     }),
+
   serviceman_document: Yup.mixed<FileList>()
-    .test("fileRequired", "Serviceman document is required", (value) => {
-      return value instanceof FileList && value.length > 0;
-    })
+    .notRequired()
     .test("fileType", "Invalid document type", (value) => {
-      if (!value || value.length === 0) return false; // required already ensures non-empty
+      if (!value || value.length === 0) return true;
       const file = value[0];
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
       return allowedTypes.includes(file.type);
@@ -114,15 +107,17 @@ const Registration = () => {
   const phone_number = locationData.state?.phone_number;
   const country_code = locationData.state?.country_code;
   const user_type = locationData.state?.user_type;
-  const [loading, setLoading] = useState(false);
+  const [loadingGeneral, setLoadingGeneral] = useState(false);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+  const [generalInfoDone, setGeneralInfoDone] = useState(false);
   const [openSection, setOpenSection] = useState<
     "general" | "bank" | "docs" | "none"
   >("general");
   const [paymentType, setPaymentType] = useState<"upi" | "bank">("bank");
   const {
-    handleSubmit,
     control,
-
+    trigger,
+    getValues,
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
@@ -135,6 +130,13 @@ const Registration = () => {
         account_number: "",
         ifsc_code: "",
         upi_id: "",
+      },
+      address: {
+        street_1: "",
+        city: "",
+        state: "",
+        zip: "",
+        country: "",
       },
     },
   });
@@ -158,32 +160,71 @@ const Registration = () => {
     value: service.service_id,
   }));
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "profile_image" || key === "serviceman_document") {
-        formData.append(key, (value as FileList)[0]);
-      } else if (typeof value === "object") {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, String(value));
-      }
-    });
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: GOOGLE_API_KEY,
+    libraries: ["places"],
+  });
 
-    setLoading(true);
+  const handleAddressSelect = (addressData: any) => {
+    setValue("address.street_1" as any, addressData.fullAddress, { shouldValidate: true, shouldDirty: true });
+    if (addressData.city) setValue("address.city" as any, addressData.city, { shouldValidate: true, shouldDirty: true });
+    if (addressData.state) setValue("address.state" as any, addressData.state, { shouldValidate: true, shouldDirty: true });
+    if (addressData.postalCode) setValue("address.zip" as any, addressData.postalCode, { shouldValidate: true, shouldDirty: true });
+    if (addressData.country) setValue("address.country" as any, addressData.country, { shouldValidate: true, shouldDirty: true });
+  };
+
+  const submitGeneralInfo = async () => {
+    const valid = await trigger(["fname", "lname", "service_ids", "profile_image"]);
+    if (!valid) {
+      const { fname, lname, service_ids, profile_image } = errors;
+      const firstErr = (fname || lname || (service_ids as any) || profile_image) as any;
+      toast.error(firstErr?.message || "Please fix the errors in General Info");
+      return;
+    }
+    const data = getValues();
+    const formData = new FormData();
+    formData.append("fname", data.fname);
+    if (data.lname) formData.append("lname", data.lname);
+    if (data.service_ids?.length) formData.append("service_ids", JSON.stringify(data.service_ids));
+    if (data.profile_image?.[0]) formData.append("profile_image", data.profile_image[0]);
+    setLoadingGeneral(true);
     ApiService.post("/servicemen/editServicemen", formData, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
-        setLoading(false);
-        // setShowSuccessModal(true);
-        login(token, user_type);
+        setLoadingGeneral(false);
+        setGeneralInfoDone(true);
+        setOpenSection("docs");
+        toast.success("General info saved!");
+      })
+      .catch((err: any) => {
+        toast.error(err.response?.data?.message || "Error updating general info");
+        setLoadingGeneral(false);
+      });
+  };
 
+  const submitVerificationInfo = async () => {
+    const valid = await trigger(["address", "serviceman_document"]);
+    if (!valid) {
+      toast.error("Please fix the errors in Verification Info");
+      return;
+    }
+    const data = getValues();
+    const formData = new FormData();
+    if (data.address) formData.append("address", JSON.stringify(data.address));
+    if (data.serviceman_document?.[0]) formData.append("serviceman_document", data.serviceman_document[0]);
+    setLoadingDocs(true);
+    ApiService.post("/servicemen/editServicemen", formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(() => {
+        setLoadingDocs(false);
+        login(token, user_type);
         navigate("/dashboard");
       })
       .catch((err: any) => {
-        toast.error(err.response?.data?.message || "Error submitting form");
-        setLoading(false);
+        toast.error(err.response?.data?.message || "Error updating verification info");
+        setLoadingDocs(false);
       });
   };
 
@@ -199,6 +240,7 @@ const Registration = () => {
 
   return (
     <div className="container py-4">
+      <Loader show={!isLoaded} text="Loading maps..." />
       <button
         className="back-btn mb-3 px-3 py-3"
         style={{ color: "#000" }}
@@ -220,7 +262,7 @@ const Registration = () => {
             }
             style={{ cursor: "pointer" }}
           >
-                <h6 className="m-0">General Info</h6>
+            <h6 className="m-0">General Info</h6>
             {openSection === "general" ? <ChevronUp /> : <ChevronDown />}
           </div>
 
@@ -229,7 +271,7 @@ const Registration = () => {
               <div className="row">
                 <div className="col-12 pt-3">
                   <Input
-                    label="First Name"
+                    label={<><span>First Name</span><span style={{ color: "red" }}> *</span></>}
                     control={control}
                     name="fname"
                     type="text"
@@ -239,7 +281,7 @@ const Registration = () => {
                 </div>
                 <div className="col-12 pt-3">
                   <Input
-                    label="Last Name"
+                    label={<><span>Last Name</span><span style={{ color: "red" }}> *</span></>}
                     control={control}
                     name="lname"
                     type="text"
@@ -249,35 +291,58 @@ const Registration = () => {
                 </div>
                 <div className="col-12 pt-3">
                   <MultiSelect
-                    label="Service Type"
+                    label={<><span>Service Type</span></>}
                     control={control}
                     name="service_ids"
                     options={serviceListOptions}
                     error={errors.service_ids?.message as string}
+                    required
                   />
                 </div>
                 <div className="col-12 pt-1">
                   <FileInput
-                    label="Upload Profile Image"
+                    label={<><span>Upload Profile Image</span><span style={{ color: "red" }}> *</span></>}
                     name="profile_image"
                     control={control}
                     error={errors.profile_image?.message as string}
+                    openCamera
+                    captureMode="user"
+                    accept="image/*"
                   />
+                </div>
+                <div className="col-12 pt-3">
+                  <button
+                    className="fill w-100"
+                    onClick={submitGeneralInfo}
+                    disabled={loadingGeneral}
+                  >
+                    {loadingGeneral ? "Saving..." : "Update General Info"}
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
-        {/* <div className="col-12 pt-3">
+        {/* <div className="col-12 pt-3">  
           {" "}
           {errors.bank?.message && (
             <p className="alert alert-danger">{errors.bank?.message}</p>
           )}{" "}
         </div> */}
 
+        {/* Banner shown after General Info is saved */}
+        {generalInfoDone && (
+          <div
+            className="alert alert-success d-flex align-items-center gap-2 mb-3"
+            role="alert"
+          >
+            <span>✅</span>
+            <span>General info saved! Now fill the verification details below.</span>
+          </div>
+        )}
+
         {/* Banking Info */}
-        {/* Banking Info */}
-        <div className="accordion-item mb-3 border rounded p-3">
+        {false && (<div className="accordion-item mb-3 border rounded p-3">
           <div
             className="d-flex justify-content-between align-items-center"
             onClick={() =>
@@ -415,6 +480,7 @@ const Registration = () => {
             </div>
           )}
         </div>
+        )}
 
         {/* Docs Upload */}
         <div className="accordion-item mb-3 border rounded p-3">
@@ -425,14 +491,84 @@ const Registration = () => {
             }
             style={{ cursor: "pointer" }}
           >
-            <h6 className="m-0">Docs Upload</h6>
+            <h6 className="m-0"> Verification Info</h6>
             {openSection === "docs" ? <ChevronUp /> : <ChevronDown />}
           </div>
 
           {openSection === "docs" && (
             <div className="mt-3">
               <div className="row">
+                {/* Service Location Address */}
+                <div className="col-12 pt-2">
+                  <p className="font-14 weight-bold mb-1">Service Location</p>
+                </div>
+                <div className="col-12 pt-2">
+                  {isLoaded ? (
+                    <GooglePlacesAutocomplete
+                      control={control}
+                      name="address.street_1"
+                      onSelect={handleAddressSelect}
+                      label="Street Address"
+                      error={(errors as any).address?.street_1?.message}
+                    />
+                  ) : (
+                    <Input
+                      label="Street Address"
+                      control={control}
+                      name="address.street_1"
+                      type="text"
+                      placeholder="Enter street address"
+                      error={(errors as any).address?.street_1?.message}
+                    />
+                  )}
+                </div>
+                <div className="col-6 pt-3">
+                  <Input
+                    label="City"
+                    control={control}
+                    name="address.city"
+                    type="text"
+                    placeholder="Enter city"
+                    error={(errors as any).address?.city?.message}
+                  />
+                </div>
+                <div className="col-6 pt-3">
+                  <Input
+                    label="State"
+                    control={control}
+                    name="address.state"
+                    type="text"
+                    placeholder="Enter state"
+                    error={(errors as any).address?.state?.message}
+                  />
+                </div>
+                <div className="col-6 pt-3">
+                  <Input
+                    label="Country"
+                    control={control}
+                    name="address.country"
+                    type="text"
+                    placeholder="Enter country"
+                    error={(errors as any).address?.country?.message}
+                  />
+                </div>
+                <div className="col-6 pt-3">
+                  <Input
+                    label="Zip Code"
+                    control={control}
+                    name="address.zip"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Enter zip"
+                    error={(errors as any).address?.zip?.message}
+                  />
+                </div>
+
+                {/* Document Upload */}
                 <div className="col-12 pt-3">
+                  <p className="font-14 weight-bold mb-1">Documents</p>
+                </div>
+                <div className="col-12">
                   <FileInput
                     label="Upload Aadhar / PAN Card"
                     name="serviceman_document"
@@ -440,17 +576,25 @@ const Registration = () => {
                     error={errors.serviceman_document?.message as string}
                   />
                 </div>
+                <div className="col-12 pt-3">
+                  <button
+                    className="fill w-100"
+                    onClick={submitVerificationInfo}
+                    disabled={loadingDocs}
+                  >
+                    {loadingDocs ? "Saving..." : "Update Verification Info"}
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
 
         <div className="text-center mt-4">
-          <button onClick={handleSubmit(onSubmit)} className="fill">
-            Register Profile
-          </button>
-          <button onClick={handleSkip} className="fill mt-2">
-            Skip
+          <button
+            className="fill w-100"
+            onClick={handleSkip}>
+            Go to Dashboard
           </button>
         </div>
       </div>
@@ -459,7 +603,7 @@ const Registration = () => {
         show={showSuccessModal}
         onCancel={() => setShowSuccessModal(false)}
         onConfirm={handleClose}
-        loading={loading}
+        loading={loadingGeneral}
         itemName={country_code + phone_number}
         title=" 🥳 Thanks for joining Instasevak"
         description="Your account has been registered successfully."

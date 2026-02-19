@@ -17,7 +17,7 @@ const AuthLocation = () => {
   const { latitude, longitude, token, setCurrentLocationFn, login } = useAuth();
   const { setLatLong } = useAuth();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    latitude && longitude 
+    latitude && longitude
       ? { lat: Number(latitude), lng: Number(longitude) }
       : { lat: 28.6139, lng: 77.2090 } // Default to Delhi
   );
@@ -143,8 +143,8 @@ const AuthLocation = () => {
     <>
       <div>
         <div className="fixed_header">
-          <button 
-            className="back-btn mb-2" 
+          <button
+            className="back-btn mb-2"
             onClick={() => {
               window.history.back();
             }}

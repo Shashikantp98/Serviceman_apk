@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Controller, type Control } from "react-hook-form";
+import { ChevronDown, ChevronUp } from "react-feather";
 
 export interface Option {
   label: string;
@@ -9,7 +10,7 @@ export interface Option {
 interface MultiSelectProps {
   control: Control<any>;
   name: string;
-  label?: string;
+  label?: React.ReactNode;
   options: Option[];
   error?: string;
   disabled?: boolean;
@@ -65,13 +66,19 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
               <div
                 className="npt"
                 onClick={() => !disabled && setIsOpen(!isOpen)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: disabled ? "not-allowed" : "pointer" }}
               >
-                {value.length > 0
-                  ? options
-                      .filter((opt) => value.includes(opt.value))
-                      .map((opt) => opt.label)
-                      .join(", ")
-                  : "Select options"}
+                <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {value.length > 0
+                    ? options
+                        .filter((opt) => value.includes(opt.value))
+                        .map((opt) => opt.label)
+                        .join(", ")
+                    : "Select options"}
+                </span>
+                <span style={{ marginLeft: "8px", flexShrink: 0, color: "#666" }}>
+                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </span>
               </div>
 
               {/* Dropdown */}

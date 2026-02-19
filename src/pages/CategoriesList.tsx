@@ -73,7 +73,7 @@ const CategoriesList = () => {
                 key={item?._id}
                 onClick={() =>
                   navigate(`/service-by-cat`, {
-                    state: { category: item?._id },
+                    state: { category: item?.category_id },
                   })
                 }
               >

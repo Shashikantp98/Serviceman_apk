@@ -23,10 +23,10 @@ const NotificationsList = () => {
 
   // Track if component has mounted at least once
   const hasMounted = useRef(false);
-  
+
   // Store initial is_seen state to prevent backend from removing badges prematurely
   const initialSeenState = useRef<Map<string, boolean>>(new Map());
-  
+
   // Prevent double fetch in StrictMode
   const hasFetchedOnce = useRef(false);
 
@@ -36,13 +36,13 @@ const NotificationsList = () => {
     try {
       const res: any = await ApiService.post("/user/listNotificationForCustomer", {});
       const fetchedNotifications = res.data || [];
-      
-      console.log('📦 Fetched notifications:', fetchedNotifications.map((n: any) => ({ 
-        id: n._id, 
-        is_seen: n.is_seen, 
-        is_read: n.is_read 
+
+      console.log('📦 Fetched notifications:', fetchedNotifications.map((n: any) => ({
+        id: n._id,
+        is_seen: n.is_seen,
+        is_read: n.is_read
       })));
-      
+
       if (preserveSeenState) {
         // Preserve the original is_seen state for notifications that were unseen on first load
         const preservedNotifications = fetchedNotifications.map((notif: any) => {
@@ -89,7 +89,7 @@ const NotificationsList = () => {
       return;
     }
     hasFetchedOnce.current = true;
-    
+
     hasMounted.current = true;
     fetchNotifications();
 
@@ -112,7 +112,7 @@ const NotificationsList = () => {
       // Mark all unseen as seen when component unmounts (user leaves the page)
       if (hasMounted.current) {
         console.log("Component unmounting - marking all as seen");
-        ApiService.post("/user/markNotificationsAsSeen").catch(() => {});
+        ApiService.post("/user/markNotificationsAsSeen").catch(() => { });
       }
     };
   }, []);
@@ -130,7 +130,7 @@ const NotificationsList = () => {
         .then(() => {
           console.log(`Notification ${_id} marked as read`);
           // Update local state to reflect the change
-          setNotifications(prev => 
+          setNotifications(prev =>
             prev.map(n => n._id === _id ? { ...n, is_read: true } : n)
           );
         })
@@ -172,24 +172,24 @@ const NotificationsList = () => {
 
         <div className="row px-2 mb-5 pb-5 fixed_header_padding">
           <SectionLoader
-          show={notificationLoader.loading}
-          size="medium"
-          text="Loading notifications..."
-          overlay={true}
-        />
+            show={notificationLoader.loading}
+            size="medium"
+            text="Loading notifications..."
+            overlay={true}
+          />
 
-        {loading && (
-          <div className="col-12 text-center pt-5 fixed_header_padding">
-            <div className="loader"></div>
-          </div>
-        )}
+          {loading && (
+            <div className="col-12 text-center pt-5 fixed_header_padding">
+              <div className="loader"></div>
+            </div>
+          )}
 
-        {!loading && notifications.length === 0 && (
-          <div className="col-12 text-center mt-5 fixed_header_padding">
-            <h1 className="bigemj">👨🏼‍🦯</h1>
-            <p>No notifications found</p>
-          </div>
-        )}
+          {!loading && notifications.length === 0 && (
+            <div className="col-12 text-center mt-5 fixed_header_padding">
+              <h1 className="bigemj">👨🏼‍🦯</h1>
+              <p>No notifications found</p>
+            </div>
+          )}
 
           {!loading &&
             notifications.map((item: any, index: number) => (

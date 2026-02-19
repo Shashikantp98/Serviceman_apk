@@ -100,9 +100,8 @@ const Bookinghistory = () => {
               <li className="nav-item">
                 <button
                   onClick={() => setbooking_status("in_progress")}
-                  className={`nav-link ${
-                    booking_status === "in_progress" ? "active" : ""
-                  }`}
+                  className={`nav-link ${booking_status === "in_progress" ? "active" : ""
+                    }`}
                   type="button"
                 >
                   In Progress
@@ -112,9 +111,8 @@ const Bookinghistory = () => {
               <li className="nav-item">
                 <button
                   onClick={() => setbooking_status("completed")}
-                  className={`nav-link ${
-                    booking_status === "completed" ? "active" : ""
-                  }`}
+                  className={`nav-link ${booking_status === "completed" ? "active" : ""
+                    }`}
                   type="button"
                 >
                   Completed
@@ -124,9 +122,8 @@ const Bookinghistory = () => {
               <li className="nav-item">
                 <button
                   onClick={() => setbooking_status("cancelled")}
-                  className={`nav-link ${
-                    booking_status === "cancelled" ? "active" : ""
-                  }`}
+                  className={`nav-link ${booking_status === "cancelled" ? "active" : ""
+                    }`}
                   type="button"
                 >
                   Cancelled
@@ -226,8 +223,8 @@ const Bookinghistory = () => {
                         }
                       >
                         {actionLoading &&
-                        activeBookingId === booking.booking_id &&
-                        activeAction === "cancel"
+                          activeBookingId === booking.booking_id &&
+                          activeAction === "cancel"
                           ? "Cancelling..."
                           : "Cancel Request"}
                       </button>
@@ -246,8 +243,8 @@ const Bookinghistory = () => {
                         }}
                       >
                         {actionLoading &&
-                        activeBookingId === booking.booking_id &&
-                        activeAction === "complete"
+                          activeBookingId === booking.booking_id &&
+                          activeAction === "complete"
                           ? "Completing..."
                           : "Complete"}
                       </button>

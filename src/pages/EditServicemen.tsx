@@ -90,50 +90,24 @@ const validationSchema = Yup.object().shape({
     upi_id: Yup.string()
       .trim()
       .test("isValidUPI", "Invalid UPI ID format", (value) => {
-        if (!value) return true; // allow empty
-        // very general UPI regex: allows xxx@bank or number@bank
+        if (!value) return true;
         return /^[\w.-]{2,}@[\w.-]{2,}$/.test(value);
       })
       .nullable(),
 
-    account_name: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) => schema.required("Account name is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
+    account_name: Yup.string().notRequired(),
+    bank_name: Yup.string().notRequired(),
 
-    bank_name: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) => schema.required("Bank name is required"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
+    account_number: Yup.string()
+      .notRequired()
+      .nullable()
+      .matches(/^[0-9]{9,18}$/, { message: "Account number must be 9–18 digits", excludeEmptyString: true }),
 
-    account_number: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) =>
-        schema
-          .required("Account number is required")
-          .matches(/^[0-9]{9,18}$/, "Account number must be 9–18 digits"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-
-    ifsc_code: Yup.string().when("upi_id", {
-      is: (upi_id: string | null | undefined) => !upi_id,
-      then: (schema) =>
-        schema
-          .required("IFSC code is required")
-          .matches(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC format"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  }).test("upiOrBank", "Either UPI ID or bank details required", (value) => {
-    const { upi_id, account_name, bank_name, account_number, ifsc_code } =
-      value || {};
-    const hasUPI = !!upi_id;
-    const hasBank =
-      !!account_name && !!bank_name && !!account_number && !!ifsc_code;
-
-    return hasUPI || hasBank;
-  }),
+    ifsc_code: Yup.string()
+      .notRequired()
+      .nullable()
+      .matches(/^[A-Za-z]{4}\d{7}$/, { message: "Invalid IFSC format", excludeEmptyString: true }),
+  }).notRequired(),
 
   profile_image: Yup.mixed<FileList | string>()
     .test("fileOrUrl", "Profile image is required", (value) => {
@@ -207,7 +181,12 @@ const EditServicemen = () => {
         });
         setValue("service_ids", service_ids);
         if (res.data.documents && res.data.documents.length > 0) {
-          setValue("serviceman_document", res.data.documents[0].file_url);
+          // Sort by updated_on desc and pick the most recent document
+          const latestDoc = [...res.data.documents].sort(
+            (a: any, b: any) =>
+              new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
+          )[0];
+          setValue("serviceman_document", latestDoc.file_url);
         }
         if (res.data.profile_image) {
           setValue("profile_image", res.data.profile_image);
@@ -760,53 +739,51 @@ const EditServicemen = () => {
             )}
           </div>
 
-               <div className="accordion-item mb-3 border rounded p-3">
-          <div
-            className="d-flex justify-content-between align-items-center"
-            onClick={() =>
-              setOpenSection(openSection === "docs" ? "none" : "docs")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            <h6 className="m-0">Docs Upload</h6>
-            {openSection === "docs" ? <ChevronUp /> : <ChevronDown />}
-          </div>
+          <div className="accordion-item mb-3 border rounded p-3">
+            <div
+              className="d-flex justify-content-between align-items-center"
+              onClick={() =>
+                setOpenSection(openSection === "docs" ? "none" : "docs")
+              }
+              style={{ cursor: "pointer" }}
+            >
+              <h6 className="m-0">Docs Upload</h6>
+              {openSection === "docs" ? <ChevronUp /> : <ChevronDown />}
+            </div>
 
-          {openSection === "docs" && (
-            <div className="mt-3">
-              <div className="row">
-                <div className="col-12 pt-3">
-                  <FileInput
-                    label="Upload Aadhar / PAN Card"
-                    name="serviceman_document"
-                    control={control}
-                    error={errors.serviceman_document?.message as string}
-                  />
-                  <div className="col-12 pt-2" style={{ textAlign: "center" }}>
-                    {docPreview && (
-                      (/\.(jpe?g|png|gif|webp|bmp)$/i.test(docPreview) ? (
-                        <img
-                          style={{ height: "120px", width: "240px", objectFit: 'contain' }}
-                          src={docPreview}
-                          alt="Document preview"
-                          className="img-fluid"
-                        />
-                      ) : (
-                        <p className="font-12 text-secondary mb-0 pt-1">
-                          <Paperclip size={14} />&nbsp;
-                          <a href={docPreview} target="_blank" rel="noreferrer">Open document</a>
-                        </p>
-                      ))
-                    )}
+            {openSection === "docs" && (
+              <div className="mt-3">
+                <div className="row">
+                  <div className="col-12 pt-3">
+                    <FileInput
+                      label="Upload Aadhar / PAN Card"
+                      name="serviceman_document"
+                      control={control}
+                      error={errors.serviceman_document?.message as string}
+                    />
+                    <div className="col-12 pt-2" style={{ textAlign: "center" }}>
+                      {docPreview && (
+                        (/\.(jpe?g|png|gif|webp|bmp|pdf)$/i.test(docPreview) ? (
+                          <img
+                            style={{ height: "120px", width: "240px", objectFit: 'contain' }}
+                            src={docPreview}
+                            alt="Document preview"
+                            className="img-fluid"
+                          />
+                        ) : (
+                          <p className="font-12 text-secondary mb-0 pt-1">
+                            <Paperclip size={14} />&nbsp;
+                            <a href={docPreview} target="_blank" rel="noreferrer">Open document</a>
+                          </p>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-        </div>
-
-   
 
         <div className="row  pt-3">
           <div className="col-12">

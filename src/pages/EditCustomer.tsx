@@ -199,7 +199,7 @@ const EditCustomer = () => {
     <>
       <CommonHeader />
       <div className="container mb-8 main-content-service">
-         {profileDetailsLoader.loading && (
+        {profileDetailsLoader.loading && (
           <div className="full-page-loader">
             <div className="loader-spinner"></div>
             <p>Loading Profile details...</p>

@@ -40,9 +40,9 @@ const Profile = () => {
     try {
       setLoading(true);
       const user_type = localStorage.getItem("authmobileRole") || "servicemen";
-      
+
       const response: any = await ApiService.logout(user_type);
-      
+
       if (response && (response.status === "success" || response.status === 200)) {
         // Clear all auth related data from localStorage
         localStorage.clear();

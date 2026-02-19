@@ -61,30 +61,30 @@ const Servicemenprofile = () => {
             </p>
           </div>
           <div className="cards5 p-4 mt-3">
-          <div className="col-12 ">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <Phone size={20}></Phone>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">Phone Number</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.country_code}
-                  {profileDetails?.phone_number}
-                </p>
+            <div className="col-12 ">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <Phone size={20}></Phone>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">Phone Number</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.country_code}
+                    {profileDetails?.phone_number}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <Mail size={20}></Mail>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">Email Address</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.email ? profileDetails?.email : "N/A"}
-                </p>
+            <div className="col-12 pt-4">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <Mail size={20}></Mail>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">Email Address</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.email ? profileDetails?.email : "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          {/* <div className="col-12 pt-4">
+            {/* <div className="col-12 pt-4">
             <div className="d-flex align-items-center gap-10">
               <Lock size={20}></Lock>
               <div className="px-2">
@@ -93,33 +93,33 @@ const Servicemenprofile = () => {
               </div>
             </div>
           </div> */}
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <MapPin size={20}></MapPin>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">Home</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.home_address
-                    ? profileDetails?.home_address?.street_1
-                    : "N/A"}
-                </p>
+            <div className="col-12 pt-4">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <MapPin size={20}></MapPin>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">Home</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.home_address
+                      ? profileDetails?.home_address?.street_1
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <MapPin size={20}></MapPin>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">Service Area</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.service_location
-                    ? profileDetails?.service_location?.street_1
-                    : "N/A"}
-                </p>
+            <div className="col-12 pt-4">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <MapPin size={20}></MapPin>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">Service Area</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.service_location
+                      ? profileDetails?.service_location?.street_1
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          {/* <div className="col-12 pt-4">
+            {/* <div className="col-12 pt-4">
             <div className="d-flex align-items-center gap-10">
               <div className="px-2">
                 <h6 className="font-12 mb-1">Experience</h6>
@@ -127,34 +127,34 @@ const Servicemenprofile = () => {
               </div>
             </div>
           </div> */}
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <List size={20}></List>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">Services</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.services
-                    ? profileDetails?.services
-                      ?.map((item: any) => item.service_name)
-                      .join(", ")
-                    : "N/A"}
-                </p>
+            <div className="col-12 pt-4">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <List size={20}></List>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">Services</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.services
+                      ? profileDetails?.services
+                        ?.map((item: any) => item.service_name)
+                        .join(", ")
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10 minsvg">
-              <User size={20}></User>
-              <div className="px-2">
-                <h6 className="font-14 mb-1">UPI ID</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.bank_details?.upi_id
-                    ? profileDetails?.bank_details?.upi_id
-                    : "N/A"}
-                </p>
+            <div className="col-12 pt-4">
+              <div className="d-flex align-items-center gap-10 minsvg">
+                <User size={20}></User>
+                <div className="px-2">
+                  <h6 className="font-14 mb-1">UPI ID</h6>
+                  <p className="font-14 mb-0">
+                    {profileDetails?.bank_details?.upi_id
+                      ? profileDetails?.bank_details?.upi_id
+                      : "N/A"}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
           </div>
 
           <div className="col-12 px-0 mt-4">

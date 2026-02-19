@@ -4,13 +4,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ApiService from "../services/api";
 import { ChevronLeft } from "react-feather";
+import { useAuth } from "../contexts/AuthContext";
 
 const ServicemenOtp = () => {
+  const { login } = useAuth();
   const [otp, setOtp] = useState("");
   const location = useLocation();
   const phone_number = location.state?.phone_number;
   const country_code = location.state?.country_code;
   const user_type = location.state?.user_type;
+  const is_existing = location.state?.is_existing;
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -35,14 +38,23 @@ const ServicemenOtp = () => {
 
       setLoading(false);
       toast.success(res.message);
-      navigate("/setpin", {
-        state: {
-          phone_number,
-          country_code,
-          user_type,
-          token: res.data.token,
-        },
-      });
+
+      if (is_existing) {
+        // Existing user — log them in directly
+        login(res.data.token, user_type);
+        if (user_type === "customer") navigate("/home");
+        else navigate("/dashboard");
+      } else {
+        // New user — go through onboarding
+        navigate("/location", {
+          state: {
+            phone_number,
+            country_code,
+            user_type,
+            token: res.data.token,
+          },
+        });
+      }
     } catch (err: any) {
       console.log(err);
       toast.error(err.response?.data?.message || "OTP verification failed");

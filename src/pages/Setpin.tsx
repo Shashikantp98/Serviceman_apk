@@ -23,10 +23,10 @@ const Setpin = () => {
         return;
       }
       setLoading(true);
-      
+
       // Get FCM token from global or localStorage (iOS persists here)
       let fcmToken = (window as any).fcmToken || "";
-      
+
       // Fallback to localStorage for iOS - check immediately before sending
       if (!fcmToken) {
         fcmToken = localStorage.getItem('fcm_token_ios') || "";
@@ -36,13 +36,13 @@ const Setpin = () => {
           (window as any).fcmToken = fcmToken;
         }
       }
-      
+
       if (!fcmToken) {
         console.warn("⚠️ No FCM token available!");
       }
-      
+
       console.log("Setting customer PIN with FCM Token:", fcmToken);
-      
+
       ApiService.post(
         "/user/setCustomerPin",
         {

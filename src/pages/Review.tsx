@@ -31,7 +31,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
         const response: any = await ApiService.post("/user/getCustomerServiceReview", {
           booking_id,
         });
-        
+
         if (response?.data) {
           setExistingReview(response.data);
         }
@@ -66,26 +66,26 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
       };
 
       const response = await ApiService.post("/user/addServiceReview", payload);
-      
+
       if (response) {
         setSuccess(true);
         setRating(null);
         setReview("");
-        
+
         // Show success message for 3 seconds, then re-fetch the review
         setTimeout(async () => {
           try {
             const reviewResponse: any = await ApiService.post("/user/getCustomerServiceReview", {
               booking_id,
             });
-            
+
             if (reviewResponse?.data) {
               setExistingReview(reviewResponse.data);
             }
           } catch (err: any) {
             console.log("Error re-fetching review after submission");
           }
-          
+
           setSuccess(false);
           if (onSubmitSuccess) {
             onSubmitSuccess();
@@ -133,7 +133,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
     return (
       <div className="  pb-5 mb-5">
         <div className="">
-          <div 
+          <div
             style={{
               backgroundColor: "#fff",
               borderRadius: "12px",
@@ -151,7 +151,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
             </div>
 
             {/* Rating Section */}
-            <div 
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -171,7 +171,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
                 </p>
                 <div style={{ display: "flex", gap: "4px" }}>
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span 
+                    <span
                       key={star}
                       style={{
                         fontSize: "16px",
@@ -187,7 +187,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
 
             {/* Review Text */}
             <div style={{ marginTop: "16px" }}>
-              <p 
+              <p
                 style={{
                   margin: 0,
                   fontSize: "14px",
@@ -204,7 +204,7 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
             </div>
 
             {/* Thank You Message */}
-            <div 
+            <div
               style={{
                 marginTop: "16px",
                 padding: "10px 12px",
@@ -247,8 +247,8 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
               onChange={() => setRating(1)}
               style={{ display: "none" }}
             />
-            <label 
-              className="emj_lbl" 
+            <label
+              className="emj_lbl"
               htmlFor="verybad"
               onClick={(e) => {
                 e.preventDefault();
@@ -268,8 +268,8 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
               onChange={() => setRating(2)}
               style={{ display: "none" }}
             />
-            <label 
-              className="emj_lbl" 
+            <label
+              className="emj_lbl"
               htmlFor="bad"
               onClick={(e) => {
                 e.preventDefault();
@@ -289,8 +289,8 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
               onChange={() => setRating(3)}
               style={{ display: "none" }}
             />
-            <label 
-              className="emj_lbl" 
+            <label
+              className="emj_lbl"
               htmlFor="good"
               onClick={(e) => {
                 e.preventDefault();
@@ -310,8 +310,8 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
               onChange={() => setRating(4)}
               style={{ display: "none" }}
             />
-            <label 
-              className="emj_lbl" 
+            <label
+              className="emj_lbl"
               htmlFor="verygood"
               onClick={(e) => {
                 e.preventDefault();
@@ -331,8 +331,8 @@ const Review = ({ booking_id, service_id, onSubmitSuccess }: ReviewProps) => {
               onChange={() => setRating(5)}
               style={{ display: "none" }}
             />
-            <label 
-              className="emj_lbl" 
+            <label
+              className="emj_lbl"
               htmlFor="excellent"
               onClick={(e) => {
                 e.preventDefault();
