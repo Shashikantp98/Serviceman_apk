@@ -370,7 +370,7 @@ const Location = () => {
       <Loader show={locationLoading} text="Getting your location..." />
       <div style={{ position: "absolute" }}>
         <button
-          className="back-btn mb-3 mt-5 px-3 py-3"
+          className="back-btn mb-3 mt-3 px-3 py-3"
           style={{ color: "#000" }}
           onClick={() => {
             navigate(-1);
@@ -379,18 +379,18 @@ const Location = () => {
           <ChevronLeft /> Back
         </button>
       </div>
-      <div className="px-5 pt-5 pb-3">
-        <div className="pin">
-          <MapPin></MapPin>
+      <div className="px-5 pt-5 pb-3 ">
+        <div className="pin mt-5">
+          <MapPin size={18}></MapPin>
         </div>
-        <h3 className="head2 pt-3">What’s your location?</h3>
+        <h3 className="head2 pt-2 font_14s">What’s your location?</h3>
         <p className="text-center color-grey font-12">
           Find an artist or studio near your location
         </p>
       </div>
 
       {!showMap ? (
-        <div>
+        <div className="container" >
           <div className="px-4">
             <button
               className="outline d-flex align-items-center"

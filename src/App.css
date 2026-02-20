@@ -204,7 +204,10 @@ body::before {
 
 .head2 {
   text-align: center;
-  font-weight: 700;
+  font-weight: 500;
+}
+.font_14s{
+  font-size: 15px;
 }
 
 .otp input {
@@ -224,8 +227,8 @@ body::before {
 }
 
 .pin svg {
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   text-align: center;
 }
 
