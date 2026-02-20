@@ -29,6 +29,8 @@ interface ReviewData {
   };
 }
 
+
+
 const Servicedetail = () => {
   const navigate = useNavigate();
   const { logout, token, latitude, longitude } = useAuth();
@@ -172,6 +174,10 @@ const Servicedetail = () => {
         </div>
       ) : (
         <>
+
+
+
+
           <div className="container pb-5 mb-5 main-content-service">
             <div className="row">
               <div className="col-12 pt-3">

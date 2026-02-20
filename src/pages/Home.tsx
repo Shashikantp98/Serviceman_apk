@@ -302,20 +302,17 @@ const Home = () => {
             </div>
           )}
         </div>
+
+
+        
         <div className="row pt-4 mt-4">
           <div className="col-12 pb-4 d-flex align-items-center justify-content-between">
             <div className="servicies_tab_butons ">
               <button className="active">Our Services</button>
               <button>Popular services</button>
+               <button>Best services</button>
             </div>
-            <button
-              className="view_more"
-              onClick={() =>
-                navigate("/service-list", { state: { isPopular: true } })
-              }
-            >
-              View all
-            </button>
+            
           </div>
         </div>
         <div className="row px-1">
