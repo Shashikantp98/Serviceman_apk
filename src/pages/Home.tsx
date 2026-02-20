@@ -23,9 +23,11 @@ const Home = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [popularServices, setPopularServices] = useState<any>(null);
   const [services, setServices] = useState<any>(null);
+  const [bestServices, setBestServices] = useState<any>(null);
   const [categories, setCategories] = useState<any>(null);
   const [bannerData, setBannerData] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'our-services' | 'popular' | 'best'>('our-services');
 
 
   // Section-specific loaders
@@ -33,6 +35,7 @@ const Home = () => {
   const categoriesLoader = useSectionLoader("categories");
   const popularServicesLoader = useSectionLoader("popular-services");
   const servicesLoader = useSectionLoader("services");
+  const bestServicesLoader = useSectionLoader("best-services");
 
   useEffect(() => {
     const el = document.querySelector("#carouselExampleIndicators");
@@ -62,6 +65,7 @@ const Home = () => {
 
     getPopularServices(true);
     getPopularServices(false);
+    getBestServices();
     getCategories();
     getBannerData(Number(latitude), Number(longitude));
   }, [latitude, longitude]);
@@ -91,7 +95,7 @@ const Home = () => {
 
       pagination: {
         page: 1,
-        pageSize: 10,
+        pageSize: 50,
       },
     })
       .then((res: any) => {
@@ -113,9 +117,8 @@ const Home = () => {
       longitude: Number(longitude),
       filters: {
         search: "",
-        is_popular: isPopular ? "true" : "",
+        ...(isPopular && { is_popular: true }),
       },
-
       pagination: {
         page: 1,
         pageSize: 20,
@@ -134,7 +137,33 @@ const Home = () => {
       })
       .finally(() => {
         loader.setLoading(false);
+      });
+  };
+
+  const getBestServices = () => {
+    bestServicesLoader.setLoading(true);
+    ApiService.post("/user/getServiceList", {
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      filters: {
+        search: "",
+        best_service: true,
+      },
+      pagination: {
+        page: 1,
+        pageSize: 50,
+      },
+    })
+      .then((res: any) => {
+        console.log(res);
+        setBestServices(res.data.list);
       })
+      .catch((err: any) => {
+        console.log(err);
+      })
+      .finally(() => {
+        bestServicesLoader.setLoading(false);
+      });
   };
 
   // ✅ Stop full-page loader only when ALL data is ready
@@ -143,11 +172,12 @@ const Home = () => {
       bannerData !== null &&
       categories !== null &&
       popularServices !== null &&
-      services !== null
+      services !== null &&
+      bestServices !== null
     ) {
       setPageLoading(false);
     }
-  }, [bannerData, categories, popularServices, services]);
+  }, [bannerData, categories, popularServices, services, bestServices]);
 
   // const handleBookNow = (item: any) => {
   //   if (token == "guest") {
@@ -308,179 +338,90 @@ const Home = () => {
         <div className="row pt-4 mt-4">
           <div className="col-12 pb-4 d-flex align-items-center justify-content-between">
             <div className="servicies_tab_butons ">
-              <button className="active">Our Services</button>
-              <button>Popular services</button>
-               <button>Best services</button>
+              <button
+                className={activeTab === 'our-services' ? 'active' : ''}
+                onClick={() => setActiveTab('our-services')}
+              >Our Services</button>
+              <button
+                className={activeTab === 'popular' ? 'active' : ''}
+                onClick={() => setActiveTab('popular')}
+              >Popular Services</button>
+              <button
+                className={activeTab === 'best' ? 'active' : ''}
+                onClick={() => setActiveTab('best')}
+              >Best Services</button>
             </div>
-            
           </div>
         </div>
         <div className="row px-1">
-          <SectionLoader
-            show={popularServicesLoader.loading}
-            size="medium"
-            text="Loading services..."
-          />
-
-          {!pageLoading &&
-            !popularServicesLoader.loading &&
-            popularServices?.length === 0 && (
-              <div className="col-12 ">
-                <p className="font-14 weight-bold">No Popular Services</p>
-              </div>
-            )}
-
-          {!popularServicesLoader.loading &&
-            popularServices?.length > 0 &&
-            popularServices.map((item: any) => (
-              <div
-                className="col-6 px-2 pb-3"
-                key={item?.service_id}
-                onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
-              >
-                <div className="s_cards">
-                  <img
-                    src={item?.service_image}
-                    className="w-100 rounded-full"
-                  />
-                  <div className="px-2 pb-2">
-                    <p className="ser_names">{item?.service_name}</p>
-                  </div>
-                </div>
-
-              </div>
-            ))}
-        </div>
-        
-        
-        <div className="row pt-4 mt-2">
-          <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
-            <p className="subcats">Best Services</p>
-            <button
-              className="view_more"
-              onClick={() =>
-                navigate("/service-list", { state: { isPopular: false } })
-              }
-            >
-              View More
-            </button>
-          </div>
-
-        </div>
-        <div className="row px-1">
-
-          {/* Section Loader - appears on top of the section while loading */}
-          <SectionLoader
-            show={servicesLoader.loading}
-            size="medium"
-            text="Loading services..."
-          />
-
-          {/* Show "No Services" only when loader is NOT running and data is empty */}
-          {!pageLoading &&
-            !servicesLoader.loading &&
-            services?.length === 0 && (
-              <div className="col-12">
-                <p className="font-14 weight-bold">No Services</p>
-              </div>
-            )}
-
-          {/* Show services list only when loader finished AND data is available */}
-          {!servicesLoader.loading &&
-            services?.length > 0 &&
-            services.map((item: any) => (
-              <div className="col-6 px-2" key={item?.service_id}>
-                <div className="serv_cards mb-3">
-                  {!servicesLoader.loading && services.length === 0 && (
-                    <div className="col-12">
-                      <p className="font-14 weight-bold">No Services</p>
+          {activeTab === 'our-services' && (
+            <>
+              <SectionLoader show={servicesLoader.loading} size="medium" text="Loading services..." />
+              {!pageLoading && !servicesLoader.loading && services?.length === 0 && (
+                <div className="col-12"><p className="font-14 weight-bold">No Services</p></div>
+              )}
+              {!servicesLoader.loading && services?.length > 0 && services.map((item: any) => (
+                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                  <div className="s_cards">
+                    <img src={item?.service_image} className="w-100 rounded-full" />
+                    <div className="px-2 pb-2">
+                      <p className="ser_names">{item?.service_name}</p>
+                      <p className="ser_rts my-0 d-flex align-items-center gap-1">
+                        <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
+                      </p>
                     </div>
-                  )}
-                  {/* Thumbnail Image */}
-                  <img
-
-                    src={item.service_image}
-                    className="w-100"
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
-                  />
-
-                  {/* Service Name */}
-                  <div className="d-flex pt-3 align-items-center justify-content-between">
-                    <h3
-                      className=" ser_nms my-0"
-                      onClick={() =>
-                        navigate(`/servicedeatils/${item?.service_id}`)
-                      }
-                    >
-                      {item?.service_name
-                        ? item?.service_name.length > 12
-                          ? item?.service_name.slice(0, 12) + "..."
-                          : item?.service_name
-                        : ""}
-                    </h3>
-
-                    {/* Rating */}
-                    <p
-                      className="ser_rts my-0 d-flex align-items-center gap-1"
-                      onClick={() =>
-                        navigate(`/servicedeatils/${item?.service_id}`)
-                      }
-                    >
-                      <span>★
-                      </span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
-                    </p></div>
-
-                  {/* 
-            Service Description (commented by you earlier — kept same)
-            <p
-              onClick={() =>
-                navigate(`/servicedeatils/${item?.service_id}`)
-              }
-              className="s_d"
-              dangerouslySetInnerHTML={{
-                __html: item?.description
-                  ? item?.description.slice(0, 120)
-                  : "",
-              }}
-            ></p> 
-          */}
-
-                  {/* Price & Duration */}
-
-                  <p
-                    className="ser_pric"
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
-                  >
-                    Best Price<br></br>
-                    <span> ₹{item?.price}</span>
-                  </p>
-
-                  <div className="booknow_btn">
-                    {/* <div>
-                    <span>
-                      <Clock size={16}></Clock> {item?.duration}
-                    </span>
-                   </div> */}
-                    {/* <button
-                      onClick={() => handleBookNow(item)}
-                      className=""
-                    >
-                      <ArrowUpRight></ArrowUpRight>
-                      Book Now
-                    </button> */}
                   </div>
-
-                  {/* Book Now Button */}
-
-
                 </div>
-              </div>
-            ))}
+              ))}
+            </>
+          )}
+
+          {activeTab === 'popular' && (
+            <>
+              <SectionLoader show={popularServicesLoader.loading} size="medium" text="Loading popular services..." />
+              {!pageLoading && !popularServicesLoader.loading && popularServices?.length === 0 && (
+                <div className="col-12"><p className="font-14 weight-bold">No Popular Services</p></div>
+              )}
+              {!popularServicesLoader.loading && popularServices?.length > 0 && popularServices.map((item: any) => (
+                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                  <div className="s_cards">
+                    <img src={item?.service_image} className="w-100 rounded-full" />
+                    <div className="px-2 pb-2">
+                      <p className="ser_names">{item?.service_name}</p>
+                      <p className="ser_rts my-0 d-flex align-items-center gap-1">
+                        <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {activeTab === 'best' && (
+            <>
+              <SectionLoader show={bestServicesLoader.loading} size="medium" text="Loading best services..." />
+              {!pageLoading && !bestServicesLoader.loading && bestServices?.length === 0 && (
+                <div className="col-12"><p className="font-14 weight-bold">No Best Services</p></div>
+              )}
+              {!bestServicesLoader.loading && bestServices?.length > 0 && bestServices.map((item: any) => (
+                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                  <div className="s_cards">
+                    <img src={item?.service_image} className="w-100 rounded-full" />
+                    <div className="px-2 pb-2">
+                      <p className="ser_names">{item?.service_name}</p>
+                      <p className="ser_rts my-0 d-flex align-items-center gap-1">
+                        <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
+        
+
         <LoginModal
           show={showLoginModal}
           onCancel={() => setShowLoginModal(false)}

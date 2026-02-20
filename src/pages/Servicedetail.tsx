@@ -37,11 +37,13 @@ const Servicedetail = () => {
   const [serviceDetails, setServiceDetails] = useState<any>({});
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [categories, setCategories] = useState<any>(null);
   const reviewsRef = useRef<HTMLDivElement>(null);
 
   // Loader for service details
   const serviceLoader = useSectionLoader("service-details");
   const reviewsLoader = useSectionLoader("reviews");
+  const categoriesLoader = useSectionLoader("categories");
 
   const { id } = useParams();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -64,6 +66,18 @@ const Servicedetail = () => {
         .finally(() => {
           serviceLoader.setLoading(false);
         })
+
+      // Fetch categories for the horizontal strip
+      categoriesLoader.setLoading(true);
+      ApiService.post("/user/getAllCategoryList", {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        filters: { search: "" },
+        pagination: { page: 1, pageSize: 50 },
+      })
+        .then((res: any) => setCategories(res.data.list))
+        .catch((err: any) => console.log(err))
+        .finally(() => categoriesLoader.setLoading(false));
     }
   }, [id]);
 
@@ -175,10 +189,35 @@ const Servicedetail = () => {
       ) : (
         <>
 
-
-
-
           <div className="container pb-5 mb-5 main-content-service">
+            {/* ===== Categories Strip ===== */}
+            <div className="row pt-3">
+              <SectionLoader show={categoriesLoader.loading} size="medium" text="" />
+              {!categoriesLoader.loading && categories?.length > 0 && (
+                <div className="col-12 d-flex gap-15 overflow-auto pb-2">
+                  {categories.map((cat: any) => (
+                    <span
+                      key={cat?.category_id}
+                      onClick={() =>
+                        navigate(`/service-by-cat`, {
+                          state: { category: cat?.category_id },
+                        })
+                      }
+                      className="d-flex direction-cloumn align-items-center"
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img className="small_cat_img" src={cat?.category_image} />
+                      <p className="font-14 mb-0 pt-1">
+                        {cat?.category_name?.length > 8
+                          ? cat?.category_name.slice(0, 8) + "..."
+                          : cat?.category_name}
+                      </p>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="row">
               <div className="col-12 pt-3">
                 <img
