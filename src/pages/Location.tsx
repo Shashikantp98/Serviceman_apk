@@ -50,17 +50,35 @@ const Location = () => {
 
       if (permission.location === "granted" || permission.location === "prompt") {
         try {
-          const coordinates = await Geolocation.getCurrentPosition({
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
+          // Step 1 – fast network/WiFi-based fix (~200-500ms), open map immediately
+          const coarse = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 30000, // accept a cached fix up to 30s old
           });
           setLocation({
-            lat: coordinates.coords.latitude,
-            lng: coordinates.coords.longitude,
+            lat: coarse.coords.latitude,
+            lng: coarse.coords.longitude,
           });
           setShowMap(true);
           setLocationLoading(false);
+
+          // Step 2 – silently refine with GPS in the background
+          Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          })
+            .then((precise) => {
+              setLocation({
+                lat: precise.coords.latitude,
+                lng: precise.coords.longitude,
+              });
+            })
+            .catch(() => {
+              // coarse position already shown – ignore GPS failure silently
+            });
+
         } catch (positionError) {
           console.error("Error getting position:", positionError);
           toast.error("Unable to get your current location. Please try again or set manually.");

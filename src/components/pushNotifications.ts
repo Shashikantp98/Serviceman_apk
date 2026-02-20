@@ -225,19 +225,23 @@ export const initPushNotifications = async () => {
 
       if (Capacitor.getPlatform() === "web") return;
 
-      // Extract notification data based on platform
-      let notificationData: any;
-      
-      if (Capacitor.getPlatform() === "ios") {
-        notificationData = notification.notification.data.aps?.alert?.body || notification.notification.data;
-      } else {
-        notificationData = notification.notification.data;
+      // On both iOS and Android the custom payload is in notification.notification.data
+      // (On iOS, Capacitor merges the APS + custom keys into .data)
+      let notificationData: any = notification.notification.data;
+
+      // Capacitor sometimes serialises the data as a JSON string on iOS — parse it
+      if (typeof notificationData === "string") {
+        try {
+          notificationData = JSON.parse(notificationData);
+        } catch {
+          notificationData = {};
+        }
       }
 
       console.log("Notification data extracted:", notificationData);
 
       // Handle navigation based on notification type
-      const { notify_type, booking_id, support_id, notification_id, route } = notificationData;
+      const { notify_type, booking_id, support_id, notification_id, route } = notificationData ?? {};
 
       // Mark notification as seen if notification_id is provided
       if (notification_id) {
