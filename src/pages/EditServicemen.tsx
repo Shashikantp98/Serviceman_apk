@@ -442,7 +442,9 @@ const EditServicemen = () => {
           </div>
         </div>
         {/* Accordion Sections */}
-        <div className="accordion">
+        <div className="row">
+          <div className="col-12">
+ <div className="accordion">
           {/* 1. General Info */}
           <div className="accordion-item mb-3 border rounded p-3">
             <div
@@ -697,6 +699,9 @@ const EditServicemen = () => {
             )}
           </div>
         </div>
+          </div>
+        </div>
+       
 
         <div className="row  pt-3">
           <div className="col-12">
