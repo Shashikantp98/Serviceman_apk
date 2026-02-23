@@ -242,6 +242,10 @@ const Registration = () => {
 
   return (
     <div className="container py-4">
+      <div className="row">
+        <div className="col-12">
+
+        
       <Loader show={!isLoaded} text="Loading maps..." />
       <button
         className="back-btn mb-3 px-3 py-3"
@@ -599,6 +603,8 @@ const Registration = () => {
             Go to Dashboard
           </button>
         </div>
+      </div>
+      </div>
       </div>
 
       <SuccessConfirmModal
