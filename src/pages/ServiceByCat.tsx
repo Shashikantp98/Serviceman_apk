@@ -14,10 +14,12 @@ const ServiceByCat = () => {
   const { category } = useLocation().state;
   const { latitude, longitude, token, logout } = useAuth();
   const [services, setServices] = useState<any>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Loader for service by category
   const catServiceLoader = useSectionLoader("catServ-loader");
+  const categoriesLoader = useSectionLoader("categories");
 
   const getAllServices = () => {
     catServiceLoader.setLoading(true);
@@ -47,6 +49,18 @@ const ServiceByCat = () => {
 
   useEffect(() => {
     getAllServices();
+
+    // Fetch categories for the horizontal strip
+    categoriesLoader.setLoading(true);
+    ApiService.post("/user/getAllCategoryList", {
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      filters: { search: "" },
+      pagination: { page: 1, pageSize: 50 },
+    })
+      .then((res: any) => setCategories(res.data.list))
+      .catch((err: any) => console.log(err))
+      .finally(() => categoriesLoader.setLoading(false));
   }, []);
 
   const handleBookNow = (item: any) => {
@@ -66,6 +80,34 @@ const ServiceByCat = () => {
       <CommonHeader />
 
       <div className="container pb-10 main-content-service">
+        {/* ===== Categories Strip ===== */}
+        <div className="row pt-3">
+          <SectionLoader show={categoriesLoader.loading} size="medium" text="" />
+          {!categoriesLoader.loading && categories.length > 0 && (
+            <div className="col-12 d-flex gap-15 overflow-auto pb-2">
+              {categories.map((cat: any) => (
+                <span
+                  key={cat?.category_id}
+                  onClick={() =>
+                    navigate(`/service-by-cat`, {
+                      state: { category: cat?.category_id },
+                    })
+                  }
+                  className="d-flex direction-cloumn align-items-center"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img className="small_cat_img" src={cat?.category_image} />
+                  <p className="font-14 mb-0 pt-1">
+                    {cat?.category_name?.length > 8
+                      ? cat?.category_name.slice(0, 8) + "..."
+                      : cat?.category_name}
+                  </p>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="row pt-4">
           <div className="col-12">
             <p className="font-14 weight-bold mb-0">Services by Category</p>

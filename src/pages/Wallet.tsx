@@ -224,7 +224,7 @@ const Wallet: React.FC = () => {
         onCancel={() => setBankModalOpen(false)}
         onConfirm={() => {
           setBankModalOpen(false);
-          navigate("/editServicemen");
+          navigate("/update-bank");
         }}
         title=" 🏦 Bank Details Required"
         description={bankModalMessage}

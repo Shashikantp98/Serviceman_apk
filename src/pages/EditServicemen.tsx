@@ -155,7 +155,7 @@ const validationSchema = Yup.object().shape({
 const EditServicemen = () => {
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<
-    "general" | "home_address" | "service_address" | "bank" | "docs" | "none"
+    "general" | "bank" | "verification" | "none"
   >("general");
   const [paymentType, setPaymentType] = useState<"upi" | "bank">("bank");
 
@@ -369,25 +369,10 @@ const EditServicemen = () => {
       errors.lname ||
       errors.email ||
       errors.service_ids ||
-      errors.profile_image
+      errors.profile_image ||
+      errors.home_address
     ) {
       setOpenSection("general");
-    } else if (
-      errors.home_address?.street_1 ||
-      errors.home_address?.city ||
-      errors.home_address?.state ||
-      errors.home_address?.country ||
-      errors.home_address?.zip
-    ) {
-      setOpenSection("home_address");
-    } else if (
-      errors.address?.street_1 ||
-      errors.address?.city ||
-      errors.address?.state ||
-      errors.address?.country ||
-      errors.address?.zip
-    ) {
-      setOpenSection("service_address");
     } else if (
       errors.bank?.upi_id ||
       errors.bank?.account_name ||
@@ -397,8 +382,8 @@ const EditServicemen = () => {
       errors.bank?.message
     ) {
       setOpenSection("bank");
-    } else if (errors.serviceman_document) {
-      setOpenSection("docs");
+    } else if (errors.address || errors.serviceman_document) {
+      setOpenSection("verification");
     }
   }, [errors]);
   const handleAddressSelect2 = (address: any) => {
@@ -458,7 +443,7 @@ const EditServicemen = () => {
         </div>
         {/* Accordion Sections */}
         <div className="accordion">
-          {/* General Info */}
+          {/* 1. General Info */}
           <div className="accordion-item mb-3 border rounded p-3">
             <div
               className="d-flex justify-content-between align-items-center"
@@ -522,12 +507,15 @@ const EditServicemen = () => {
                     disabled={loading}
                   />
                 </div>
-                <div className="col-12 pt-1">
+                <div className="col-12 pt-3">
                   <FileInput
                     label="Upload Profile Image"
                     name="profile_image"
                     control={control}
                     error={errors.profile_image?.message as string}
+                    openCamera
+                    captureMode="user"
+                    accept="image/*"
                   />
                   <div className="col-12 pt-2" style={{ textAlign: "center" }}>
                     {profilePreview && (
@@ -540,71 +528,21 @@ const EditServicemen = () => {
                     )}
                   </div>
                 </div>
+                <div className="col-12 pt-3">
+                  <label className="lbl2">Home Address</label>
+                  <GooglePlacesAutocomplete
+                    control={control}
+                    name="home_address.street_1"
+                    onSelect={handleAddressSelect}
+                    label=""
+                    error={errors.home_address?.street_1?.message?.toString()}
+                  />
+                </div>
               </div>
             )}
           </div>
 
-          {/* General Info */}
-          <div className="accordion-item mb-3 border rounded p-3">
-            <div
-              className="d-flex justify-content-between align-items-center"
-              onClick={() =>
-                setOpenSection(
-                  openSection === "home_address" ? "none" : "home_address"
-                )
-              }
-              style={{ cursor: "pointer" }}
-            >
-              <h6 className="m-0">Home Address</h6>
-              {openSection === "home_address" ? <ChevronUp /> : <ChevronDown />}
-            </div>
-            {openSection === "home_address" && (
-              <div className="col-12 pt-3">
-                <GooglePlacesAutocomplete
-                  control={control}
-                  name="home_address.street_1"
-                  onSelect={handleAddressSelect}
-                  label=""
-                  error={errors.home_address?.street_1?.message?.toString()}
-                />
-              </div>
-            )}
-          </div>
-          <div className="accordion-item mb-3 border rounded p-3">
-            <div
-              className="d-flex justify-content-between align-items-center"
-              onClick={() =>
-                setOpenSection(
-                  openSection === "service_address" ? "none" : "service_address"
-                )
-              }
-              style={{ cursor: "pointer" }}
-            >
-              <h6 className="m-0">Service Address</h6>
-              {openSection === "service_address" ? (
-                <ChevronUp />
-              ) : (
-                <ChevronDown />
-              )}
-            </div>
-            {openSection === "service_address" && (
-              <div className="col-12 pt-3">
-                <GooglePlacesAutocomplete
-                  control={control}
-                  name="address.street_1"
-                  onSelect={handleAddressSelect2}
-                  label=""
-                  error={errors.address?.message?.toString()}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* <div className="col-12 pt-3">
-            {errors.bank?.message && (
-              <p className="alert alert-danger">{errors.bank?.message}</p>
-            )}
-          </div> */}
+          {/* 2. Bank Info */}
           <div className="accordion-item mb-3 border rounded p-3">
             <div
               className="d-flex justify-content-between align-items-center"
@@ -613,18 +551,14 @@ const EditServicemen = () => {
               }
               style={{ cursor: "pointer" }}
             >
-              <h6 className="m-0">Banking Info</h6>
+              <h6 className="m-0">Bank Info</h6>
               {openSection === "bank" ? <ChevronUp /> : <ChevronDown />}
             </div>
-
             {openSection === "bank" && (
               <div className="mt-3">
                 <div className="row">
-                  {/* --- Select Payment Type --- */}
                   <div className="col-12 pt-3">
-                    <label className="lbl2 d-block mb-2">
-                      Select Payment Method
-                    </label>
+                    <label className="lbl2 d-block mb-2">Select Payment Method</label>
                     <div className="d-flex gap-4">
                       <div className="form-check">
                         <input
@@ -633,18 +567,10 @@ const EditServicemen = () => {
                           id="upiOption"
                           name="payment_type"
                           checked={paymentType === "upi"}
-                          onChange={() => {
-                            setPaymentType("upi");
-                          }}
+                          onChange={() => setPaymentType("upi")}
                         />
-                        <label
-                          htmlFor="upiOption"
-                          className="form-check-label font-14"
-                        >
-                          UPI ID
-                        </label>
+                        <label htmlFor="upiOption" className="form-check-label font-14">UPI ID</label>
                       </div>
-
                       <div className="form-check">
                         <input
                           type="radio"
@@ -652,86 +578,65 @@ const EditServicemen = () => {
                           id="bankOption"
                           name="payment_type"
                           checked={paymentType === "bank"}
-                          onChange={() => {
-                            setPaymentType("bank");
-                          }}
+                          onChange={() => setPaymentType("bank")}
                         />
-                        <label
-                          htmlFor="bankOption"
-                          className="form-check-label font-14"
-                        >
-                          Bank Account
-                        </label>
+                        <label htmlFor="bankOption" className="form-check-label font-14">Bank Account</label>
                       </div>
                     </div>
                   </div>
-
-                  {/* ✅ Show form-level bank error here */}
                   {errors.bank?.message && (
                     <div className="col-12 pt-3">
-                      <div className="alert alert-danger py-2">
-                        {errors.bank?.message}
-                      </div>
+                      <div className="alert alert-danger py-2">{errors.bank?.message}</div>
                     </div>
                   )}
-
-                  {/* --- UPI Section --- */}
                   {paymentType === "upi" && (
                     <div className="col-12 pt-3">
-                      <div className="">
-                        <Input
-                          label="UPI ID"
-                          control={control}
-                          name="bank.upi_id"
-                          type="text"
-                          placeholder="example@bank"
-                          error={errors.bank?.upi_id?.message as string}
-                        />
-                        <p className="text-muted font-12 mt-2">
-                          Enter your valid UPI handle (e.g. name@bank)
-                        </p>
-                      </div>
+                      <Input
+                        label="UPI ID"
+                        control={control}
+                        name="bank.upi_id"
+                        type="text"
+                        placeholder="example@bank"
+                        error={errors.bank?.upi_id?.message as string}
+                      />
+                      <p className="text-muted font-12 mt-2">Enter your valid UPI handle (e.g. name@bank)</p>
                     </div>
                   )}
-
-                  {/* --- Bank Details Section --- */}
                   {paymentType === "bank" && (
                     <div className="col-12 pt-3">
-                      <div className="">
-                        <Input
-                          label="Account Name"
-                          control={control}
-                          name="bank.account_name"
-                          type="text"
-                          placeholder="Enter Account Name"
-                          error={errors.bank?.account_name?.message as string}
-                        />
-                        <Input
-                          label="Bank Name"
-                          control={control}
-                          name="bank.bank_name"
-                          type="text"
-                          placeholder="Enter Bank Name"
-                          error={errors.bank?.bank_name?.message as string}
-                        />
-                        <Input
-                          label="Account Number"
-                          control={control}
-                          name="bank.account_number"
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="Enter Account Number"
-                          error={errors.bank?.account_number?.message as string}
-                        />
-                        <Input
-                          label="IFSC Code"
-                          control={control}
-                          name="bank.ifsc_code"
-                          type="text"
-                          placeholder="Enter IFSC Code"
-                          error={errors.bank?.ifsc_code?.message as string}
-                        />
-                      </div>
+                      <Input
+                        label="Account Name"
+                        control={control}
+                        name="bank.account_name"
+                        type="text"
+                        placeholder="Enter Account Name"
+                        error={errors.bank?.account_name?.message as string}
+                      />
+                      <Input
+                        label="Bank Name"
+                        control={control}
+                        name="bank.bank_name"
+                        type="text"
+                        placeholder="Enter Bank Name"
+                        error={errors.bank?.bank_name?.message as string}
+                      />
+                      <Input
+                        label="Account Number"
+                        control={control}
+                        name="bank.account_number"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Enter Account Number"
+                        error={errors.bank?.account_number?.message as string}
+                      />
+                      <Input
+                        label="IFSC Code"
+                        control={control}
+                        name="bank.ifsc_code"
+                        type="text"
+                        placeholder="Enter IFSC Code"
+                        error={errors.bank?.ifsc_code?.message as string}
+                      />
                     </div>
                   )}
                 </div>
@@ -739,45 +644,53 @@ const EditServicemen = () => {
             )}
           </div>
 
+          {/* 3. Verification Info */}
           <div className="accordion-item mb-3 border rounded p-3">
             <div
               className="d-flex justify-content-between align-items-center"
               onClick={() =>
-                setOpenSection(openSection === "docs" ? "none" : "docs")
+                setOpenSection(openSection === "verification" ? "none" : "verification")
               }
               style={{ cursor: "pointer" }}
             >
-              <h6 className="m-0">Docs Upload</h6>
-              {openSection === "docs" ? <ChevronUp /> : <ChevronDown />}
+              <h6 className="m-0">Verification Info</h6>
+              {openSection === "verification" ? <ChevronUp /> : <ChevronDown />}
             </div>
-
-            {openSection === "docs" && (
+            {openSection === "verification" && (
               <div className="mt-3">
-                <div className="row">
-                  <div className="col-12 pt-3">
-                    <FileInput
-                      label="Upload Aadhar / PAN Card"
-                      name="serviceman_document"
-                      control={control}
-                      error={errors.serviceman_document?.message as string}
-                    />
-                    <div className="col-12 pt-2" style={{ textAlign: "center" }}>
-                      {docPreview && (
-                        (/\.(jpe?g|png|gif|webp|bmp|pdf)$/i.test(docPreview) ? (
-                          <img
-                            style={{ height: "120px", width: "240px", objectFit: 'contain' }}
-                            src={docPreview}
-                            alt="Document preview"
-                            className="img-fluid"
-                          />
-                        ) : (
-                          <p className="font-12 text-secondary mb-0 pt-1">
-                            <Paperclip size={14} />&nbsp;
-                            <a href={docPreview} target="_blank" rel="noreferrer">Open document</a>
-                          </p>
-                        ))
-                      )}
-                    </div>
+                <div className="col-12 pt-3">
+                  <label className="lbl2">Service Address</label>
+                  <GooglePlacesAutocomplete
+                    control={control}
+                    name="address.street_1"
+                    onSelect={handleAddressSelect2}
+                    label=""
+                    error={errors.address?.street_1?.message?.toString()}
+                  />
+                </div>
+                <div className="col-12 pt-3">
+                  <FileInput
+                    label="Upload Aadhar / PAN Card"
+                    name="serviceman_document"
+                    control={control}
+                    error={errors.serviceman_document?.message as string}
+                  />
+                  <div className="col-12 pt-2" style={{ textAlign: "center" }}>
+                    {docPreview && (
+                      /\.(jpe?g|png|gif|webp|bmp|pdf)$/i.test(docPreview) ? (
+                        <img
+                          style={{ height: "120px", width: "240px", objectFit: "contain" }}
+                          src={docPreview}
+                          alt="Document preview"
+                          className="img-fluid"
+                        />
+                      ) : (
+                        <p className="font-12 text-secondary mb-0 pt-1">
+                          <Paperclip size={14} />&nbsp;
+                          <a href={docPreview} target="_blank" rel="noreferrer">Open document</a>
+                        </p>
+                      )
+                    )}
                   </div>
                 </div>
               </div>

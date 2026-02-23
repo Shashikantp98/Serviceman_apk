@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 // import SectionLoader from "../components/SectionLoader";
 
@@ -15,7 +15,15 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
+  const location = useLocation();
+
   if (isAuthenticated) {
+    // Allow certain navigations to public routes even when authenticated
+    // e.g., navigate('/registration', { state: { allowWhenAuth: true } })
+    if ((location.state as any)?.allowWhenAuth) {
+      return <>{children}</>;
+    }
+
     return (
       <Navigate to={role === "customer" ? "/home" : "/dashboard"} replace />
     );

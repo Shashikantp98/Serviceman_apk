@@ -189,14 +189,16 @@ const Dashboard = () => {
     setIsOrder(false);
   };
   const handleConfirm = () => {
-    setShowSuccessModal(true);
+    // hide modal first, then navigate or logout
+    setShowSuccessModal(false);
     if (profile_complete) {
       localStorage.clear();
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
     } else {
-      navigate("/editServicemen");
+      // navigate to registration but allow access even when authenticated
+      navigate("/registration", { state: { allowWhenAuth: true } });
     }
   };
   return (
@@ -453,7 +455,7 @@ const Dashboard = () => {
 
       <SuccessConfirmModal
         show={showSuccessModal}
-        onCancel={() => setShowSuccessModal(true)}
+        onCancel={() => setShowSuccessModal(false)}
         onConfirm={handleConfirm}
         loading={loading}
         itemName={

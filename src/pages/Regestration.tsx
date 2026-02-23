@@ -101,7 +101,7 @@ const validationSchema = Yup.object().shape({
 const Registration = () => {
   const navigate = useNavigate();
   const locationData = useLocation();
-  const { login } = useAuth();
+  const { login, token: authToken } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const token = locationData.state?.token;
   const phone_number = locationData.state?.phone_number;
@@ -148,7 +148,7 @@ const Registration = () => {
       `/servicemen/listServicesForServiceman`,
       {},
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token || authToken}` },
       }
     ).then((res: any) => {
       setServiceList(res.data.list);
@@ -189,7 +189,7 @@ const Registration = () => {
     if (data.profile_image?.[0]) formData.append("profile_image", data.profile_image[0]);
     setLoadingGeneral(true);
     ApiService.post("/servicemen/editServicemen", formData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token || authToken}` },
     })
       .then(() => {
         setLoadingGeneral(false);
@@ -215,11 +215,14 @@ const Registration = () => {
     if (data.serviceman_document?.[0]) formData.append("serviceman_document", data.serviceman_document[0]);
     setLoadingDocs(true);
     ApiService.post("/servicemen/editServicemen", formData, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token || authToken}` },
     })
       .then(() => {
         setLoadingDocs(false);
-        login(token, user_type);
+        // Only call login when we have a token from navigation (fresh login flow)
+        if (token) {
+          login(token, user_type);
+        }
         navigate("/dashboard");
       })
       .catch((err: any) => {
@@ -230,11 +233,10 @@ const Registration = () => {
 
   const handleClose = () => {
     setShowSuccessModal(false);
-    navigate("/");
+    navigate("/dashboard");
   };
   const handleSkip = () => {
-    login(token, user_type);
-
+    if (token) login(token, user_type);
     navigate("/dashboard");
   };
 

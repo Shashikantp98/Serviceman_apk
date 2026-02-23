@@ -50,6 +50,7 @@ const ForgotOtp = lazy(() => import("./pages/ForgotOtp"));
 const UpdatePin = lazy(() => import("./components/UpdatePin"));
 const PolicyDetails = lazy(() => import("./pages/PolicyDetails"));
 const EditServicemen = lazy(() => import("./pages/EditServicemen"));
+const UpdateBankDetails = lazy(() => import("./pages/UpdateBankDetails"));
 const AuthLocation = lazy(() => import("./pages/AuthLocation"));
 const NotificationsList = lazy(() => import("./pages/NotificationsList"));
 const Searchpage = lazy(() => import("./pages/Searchpage"));
@@ -181,6 +182,7 @@ function AppContent() {
               <Route path="updatePin" element={<UpdatePin />} />
               <Route path="policydetails" element={<PolicyDetails />} />
               <Route path="editServicemen" element={<EditServicemen />} />
+              <Route path="update-bank" element={<UpdateBankDetails />} />
               <Route path="notifications" element={<NotificationsList />} />
               <Route path="search" element={<Searchpage />} />
               <Route path="customerprofile" element={<CustomerProfile />} />
