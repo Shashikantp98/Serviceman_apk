@@ -7,6 +7,10 @@
   box-sizing: border-box;
 }
 
+body{
+  overflow-x: hidden;
+}
+
 /* iOS Status Bar Safe Area Background */
 body::before {
   content: "";
