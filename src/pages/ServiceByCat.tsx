@@ -11,17 +11,20 @@ import { useSectionLoader } from "../utils/useSectionLoader";
 
 const ServiceByCat = () => {
   const navigate = useNavigate();
-  const { category } = useLocation().state;
+  const locationState = useLocation().state;
   const { latitude, longitude, token, logout } = useAuth();
   const [services, setServices] = useState<any>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    locationState?.category || ""
+  );
 
   // Loader for service by category
   const catServiceLoader = useSectionLoader("catServ-loader");
   const categoriesLoader = useSectionLoader("categories");
 
-  const getAllServices = () => {
+  const getAllServices = (categoryId: string) => {
     catServiceLoader.setLoading(true);
 
     ApiService.post("/user/getServiceList", {
@@ -29,7 +32,7 @@ const ServiceByCat = () => {
       longitude: Number(longitude),
       filters: {
         search: "",
-        category_id: category,
+        category_id: categoryId,
       },
       pagination: {
         page: 1,
@@ -47,10 +50,13 @@ const ServiceByCat = () => {
       });
   };
 
+  // Reload services whenever the selected category changes
   useEffect(() => {
-    getAllServices();
+    getAllServices(selectedCategoryId);
+  }, [selectedCategoryId]);
 
-    // Fetch categories for the horizontal strip
+  // Fetch categories once on mount
+  useEffect(() => {
     categoriesLoader.setLoading(true);
     ApiService.post("/user/getAllCategoryList", {
       latitude: Number(latitude),
@@ -85,25 +91,37 @@ const ServiceByCat = () => {
           <SectionLoader show={categoriesLoader.loading} size="medium" text="" />
           {!categoriesLoader.loading && categories.length > 0 && (
             <div className="col-12 d-flex gap-15 overflow-auto pb-2">
-              {categories.map((cat: any) => (
-                <span
-                  key={cat?.category_id}
-                  onClick={() =>
-                    navigate(`/service-by-cat`, {
-                      state: { category: cat?.category_id },
-                    })
-                  }
-                  className="d-flex direction-cloumn align-items-center"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <img className="small_cat_img" src={cat?.category_image} />
-                  <p className="font-14 mb-0 pt-1">
-                    {cat?.category_name?.length > 8
-                      ? cat?.category_name.slice(0, 8) + "..."
-                      : cat?.category_name}
-                  </p>
-                </span>
-              ))}
+              {categories.map((cat: any) => {
+                const isActive = cat?.category_id === selectedCategoryId;
+                return (
+                  <span
+                    key={cat?.category_id}
+                    onClick={() => setSelectedCategoryId(cat?.category_id)}
+                    className="d-flex direction-cloumn align-items-center"
+                    style={{ cursor: "pointer", flexShrink: 0 }}
+                  >
+                    <img
+                      className="small_cat_img"
+                      src={cat?.category_image}
+                      style={{
+                        border: isActive ? "2px solid var(--primary-color, #283891)" : "2px solid transparent",
+                        borderRadius: "50%",
+                      }}
+                    />
+                    <p
+                      className="font-14 mb-0 pt-1"
+                      style={{
+                        fontWeight: isActive ? 700 : 400,
+                        color: isActive ? "var(--primary-color, #283891)" : undefined,
+                      }}
+                    >
+                      {cat?.category_name?.length > 8
+                        ? cat?.category_name.slice(0, 8) + "..."
+                        : cat?.category_name}
+                    </p>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>
