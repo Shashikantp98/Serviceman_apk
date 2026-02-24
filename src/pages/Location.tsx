@@ -1,6 +1,7 @@
 import { ChevronLeft, MapPin, Radio } from "react-feather";
 // import notification from "../assets/location.png";
 import { useState, useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import GoogleMapComponent from "../components/GoogleMapComponent";
 import Loader from "../components/Loader";
@@ -45,47 +46,96 @@ const Location = () => {
 
   const handleAllowGoogleMaps = async () => {
     setLocationLoading(true);
-    try {
-      const permission = await Geolocation.requestPermissions();
+    const isAndroid = Capacitor.getPlatform() === "android";
 
-      if (permission.location === "granted" || permission.location === "prompt") {
+    try {
+      // Step 1: Check current permission state first
+      let permissionStatus: { location: string; coarseLocation?: string };
+      try {
+        permissionStatus = await Geolocation.checkPermissions();
+      } catch {
+        // checkPermissions not supported in browser fallback
+        permissionStatus = { location: "prompt" };
+      }
+
+      // Step 2: Request only if not already granted
+      if (permissionStatus.location !== "granted") {
         try {
-          // Step 1 – fast network/WiFi-based fix (~200-500ms), open map immediately
-          const coarse = await Geolocation.getCurrentPosition({
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 30000, // accept a cached fix up to 30s old
+          permissionStatus = await Geolocation.requestPermissions();
+        } catch (err) {
+          console.error("Permission request failed:", err);
+          toast.error(
+            isAndroid
+              ? "Location permission is required. Please go to Settings → Apps → Permissions and enable Location."
+              : "Location permission is required. Please enable it in Settings."
+          );
+          setLocationLoading(false);
+          return;
+        }
+      }
+
+      if (permissionStatus.location !== "granted") {
+        toast.error(
+          isAndroid
+            ? "Location access was denied. Please enable it in Settings → Apps → [App Name] → Permissions → Location."
+            : "Location access was denied. Please enable it in your device Settings."
+        );
+        setLocationLoading(false);
+        return;
+      }
+
+      // Step 3: Get coarse (network-based) fix first — fast, opens map quickly
+      try {
+        const coarse = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: isAndroid ? 15000 : 8000, // Android network fix can be slower
+          maximumAge: 60000,                 // accept a cached fix up to 60s old
+        });
+        setLocation({
+          lat: coarse.coords.latitude,
+          lng: coarse.coords.longitude,
+        });
+        setShowMap(true);
+        setLocationLoading(false);
+
+        // Step 4: Silently refine with GPS in the background
+        Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: isAndroid ? 30000 : 15000, // Android GPS cold-start needs more time
+          maximumAge: 0,
+        })
+          .then((precise) => {
+            setLocation({
+              lat: precise.coords.latitude,
+              lng: precise.coords.longitude,
+            });
+          })
+          .catch(() => {
+            // Coarse position already shown – GPS refinement failure is non-fatal
+          });
+
+      } catch (coarseError) {
+        // Coarse fix failed (e.g. no network) — fall back to GPS directly
+        console.warn("Coarse location failed, trying high-accuracy GPS:", coarseError);
+        try {
+          const precise = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: isAndroid ? 30000 : 20000,
+            maximumAge: 0,
           });
           setLocation({
-            lat: coarse.coords.latitude,
-            lng: coarse.coords.longitude,
+            lat: precise.coords.latitude,
+            lng: precise.coords.longitude,
           });
           setShowMap(true);
-          setLocationLoading(false);
-
-          // Step 2 – silently refine with GPS in the background
-          Geolocation.getCurrentPosition({
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0,
-          })
-            .then((precise) => {
-              setLocation({
-                lat: precise.coords.latitude,
-                lng: precise.coords.longitude,
-              });
-            })
-            .catch(() => {
-              // coarse position already shown – ignore GPS failure silently
-            });
-
-        } catch (positionError) {
-          console.error("Error getting position:", positionError);
-          toast.error("Unable to get your current location. Please try again or set manually.");
-          setLocationLoading(false);
+        } catch (gpsError) {
+          console.error("GPS location failed:", gpsError);
+          toast.error(
+            isAndroid
+              ? "Unable to get your location. Please ensure GPS is enabled in Settings and try again."
+              : "Unable to get your location. Please check that Location Services are enabled."
+          );
         }
-      } else {
-        toast.error("Location permission is required. Please enable it in your device settings.");
         setLocationLoading(false);
       }
     } catch (error) {
@@ -108,18 +158,34 @@ const Location = () => {
   };
   const convertLatLongToAddress = async () => {
     if (!location?.lat || !location?.lng) return;
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location?.lat},${location?.lng}&key=${GOOGLE_API_KEY}`
-    );
-    const data = await response.json();
-    // setAddress(data.results[0].formatted_address);
-    setAddress({
-      street_1: data.results[0].address_components[0].long_name,
-      city: data.results[0].address_components[1].long_name,
-      state: data.results[0].address_components[2].long_name,
-      zip: data.results[0].address_components[3].long_name,
-      country: data.results[0].address_components[4].long_name,
-    });
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${GOOGLE_API_KEY}`
+      );
+      const data = await response.json();
+      if (!data.results || data.results.length === 0) return;
+
+      const components: any[] = data.results[0].address_components || [];
+
+      // Use type-based lookup — component order varies by country/region
+      const getComponent = (types: string[]) =>
+        components.find((c) => types.some((t) => c.types.includes(t)))?.long_name || "";
+
+      setAddress({
+        street_1: data.results[0].formatted_address ||
+          [getComponent(["street_number"]), getComponent(["route"])].filter(Boolean).join(" ") ||
+          components[0]?.long_name || "",
+        city:
+          getComponent(["locality"]) ||
+          getComponent(["sublocality", "sublocality_level_1"]) ||
+          getComponent(["administrative_area_level_2"]),
+        state: getComponent(["administrative_area_level_1"]),
+        zip: getComponent(["postal_code"]),
+        country: getComponent(["country"]),
+      });
+    } catch (err) {
+      console.error("Error converting location to address:", err);
+    }
   };
   useEffect(() => {
     if (location?.lat && location?.lng) {

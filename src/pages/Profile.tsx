@@ -96,6 +96,7 @@ const Profile = () => {
             </div>
             <ChevronRight size={20}></ChevronRight>
           </div>
+          {/* Change Pin — temporarily disabled
           <div
             onClick={() => navigate("/updatePin")}
             className="col-12 d-flex align-items-center justify-content-between border-bottom pb-3 pt-3"
@@ -106,6 +107,7 @@ const Profile = () => {
             </div>
             <ChevronRight size={20}></ChevronRight>
           </div>
+          */}
 
           <div
             onClick={() => navigate("/supportlist")}

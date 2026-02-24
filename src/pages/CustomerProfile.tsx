@@ -110,7 +110,7 @@ const CustomerProfile = () => {
             </div>
             <ChevronRight size={20}></ChevronRight>
           </div>
-          <div
+          {/* <div
             onClick={() => navigate("/updatePin")}
             className="col-12 d-flex align-items-center justify-content-between border-bottom pb-3 pt-3"
           >
@@ -119,7 +119,7 @@ const CustomerProfile = () => {
               Change Pin
             </div>
             <ChevronRight size={20}></ChevronRight>
-          </div>
+          </div> */}
           <div
             onClick={() => navigate("/myrequest")}
             className="col-12 d-flex align-items-center justify-content-between border-bottom pb-3 pt-3"

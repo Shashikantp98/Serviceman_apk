@@ -39,57 +39,74 @@ const GoogleMapComponent: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
 
-  // 🧭 Fetch current location and reverse geocode on load
+  // 🧭 Fetch current location and reverse geocode on load — only if no location is already provided
   useEffect(() => {
     const fetchCurrentLocation = async () => {
-      // Wait for Google Maps to be loaded before proceeding
-      if (!isLoaded) return;
+      // If location is already passed from parent, no need to fetch again
+      if (location || !isLoaded) return;
 
       try {
         setLoadingLocation(true);
-        const permission = await Geolocation.requestPermissions();
-        
-        if (permission.location === "granted" || permission.location === "prompt") {
-          const coordinates = await Geolocation.getCurrentPosition({
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
-          });
-          const lat = coordinates.coords.latitude;
-          const lng = coordinates.coords.longitude;
-          setLocation({ lat, lng });
 
-          // 🧠 Reverse geocode to get address text
-          if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-              if (status === "OK" && results && results[0]) {
-                const address = results[0].formatted_address;
-                if (inputRef.current) inputRef.current.value = address;
+        // Check permission state first to avoid redundant dialogs
+        let permissionStatus: { location: string; coarseLocation?: string };
+        try {
+          permissionStatus = await Geolocation.checkPermissions();
+        } catch {
+          permissionStatus = { location: "prompt" };
+        }
 
-                const components = results[0].address_components || [];
-                setAddress({
-                  street_1: components[0]?.long_name || "",
-                  city:
-                    components.find((c) => c.types.includes("locality"))
-                      ?.long_name || "",
-                  state:
-                    components.find((c) =>
-                      c.types.includes("administrative_area_level_1")
-                    )?.long_name || "",
-                  zip:
-                    components.find((c) => c.types.includes("postal_code"))
-                      ?.long_name || "",
-                  country:
-                    components.find((c) => c.types.includes("country"))
-                      ?.long_name || "",
-                });
-              }
-            });
+        if (permissionStatus.location !== "granted") {
+          try {
+            permissionStatus = await Geolocation.requestPermissions();
+          } catch (err) {
+            console.warn("Permission request failed:", err);
+            alert("Please enable location permissions in your device settings to use this feature.");
+            setLoadingLocation(false);
+            return;
           }
-        } else {
-          console.warn("Location permission not granted:", permission.location);
+        }
+
+        if (permissionStatus.location !== "granted") {
+          console.warn("Location permission not granted:", permissionStatus.location);
           alert("Please enable location permissions in your device settings to use this feature.");
+          setLoadingLocation(false);
+          return;
+        }
+
+        const coordinates = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0,
+        });
+        const lat = coordinates.coords.latitude;
+        const lng = coordinates.coords.longitude;
+        setLocation({ lat, lng });
+
+        // 🧠 Reverse geocode to get address text
+        if (typeof google !== "undefined" && google.maps && google.maps.Geocoder) {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === "OK" && results && results[0]) {
+              const address = results[0].formatted_address;
+              if (inputRef.current) inputRef.current.value = address;
+
+              const components = results[0].address_components || [];
+              const getComponent = (types: string[]) =>
+                components.find((c) => types.some((t) => c.types.includes(t)))?.long_name || "";
+
+              setAddress({
+                street_1: results[0].formatted_address || components[0]?.long_name || "",
+                city:
+                  getComponent(["locality"]) ||
+                  getComponent(["sublocality", "sublocality_level_1"]) ||
+                  getComponent(["administrative_area_level_2"]),
+                state: getComponent(["administrative_area_level_1"]),
+                zip: getComponent(["postal_code"]),
+                country: getComponent(["country"]),
+              });
+            }
+          });
         }
       } catch (error) {
         console.error("Error fetching location:", error);
@@ -111,12 +128,19 @@ const GoogleMapComponent: React.FC<Props> = ({
         setLocation({ lat, lng });
         inputRef.current!.value = place.formatted_address || "";
 
+        const components = place.address_components || [];
+        const getComponent = (types: string[]) =>
+          components.find((c) => types.some((t) => c.types.includes(t)))?.long_name || "";
+
         setAddress({
-          street_1: place.address_components?.[0].long_name || "",
-          city: place.address_components?.[1].long_name || "",
-          state: place.address_components?.[2].long_name || "",
-          zip: place.address_components?.[3].long_name || "",
-          country: place.address_components?.[4].long_name || "",
+          street_1: place.formatted_address || components[0]?.long_name || "",
+          city:
+            getComponent(["locality"]) ||
+            getComponent(["sublocality", "sublocality_level_1"]) ||
+            getComponent(["administrative_area_level_2"]),
+          state: getComponent(["administrative_area_level_1"]),
+          zip: getComponent(["postal_code"]),
+          country: getComponent(["country"]),
         });
       }
     }

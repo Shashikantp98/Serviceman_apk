@@ -9,6 +9,7 @@ import { RazorpayPayment } from "../components/RazorpayPayment";
 import { useAuth } from "../contexts/AuthContext";
 import CommonHeader from "../components/CommonHeader";
 import Loader from "../components/Loader"; // import the Loader
+import { useSectionLoader } from "../utils/useSectionLoader";
 
 const Summery = () => {
   const { latitude, longitude } = useAuth();
@@ -35,8 +36,12 @@ const Summery = () => {
   const [booking_time, setBookingTime] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // Full-page loader for initial data fetch
+  const pageLoader = useSectionLoader("summery-page");
+
   useEffect(() => {
     if (id) {
+      pageLoader.setLoading(true);
       getCoupons();
       getProfileDetails();
       ApiService.post(`/user/serviceDetails`, {
@@ -62,6 +67,9 @@ const Summery = () => {
         })
         .catch((err: any) => {
           console.log(err);
+        })
+        .finally(() => {
+          pageLoader.setLoading(false);
         });
     }
   }, [id]);
@@ -215,6 +223,12 @@ const Summery = () => {
     <>
       <Loader show={isVerifying} text="Please wait..." />
       <CommonHeader />
+      {pageLoader.loading && (
+        <div className="full-page-loader">
+          <div className="loader-spinner"></div>
+          <p>Loading service details...</p>
+        </div>
+      )}
       {/* PAYMENT VERIFYING LOADER */}
       <div className="container mb-5 pb-5 main-content-service">
         <div className="row">
