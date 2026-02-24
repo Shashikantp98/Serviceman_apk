@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-body{
+body {
   overflow-x: hidden;
 }
 
@@ -2090,4 +2090,9 @@ padding: 8px;
   background-color: #283891;
    color: #ffffff;
 
+}
+
+input[type="file"]{
+  top: 0;
+  left: 0;
 }
