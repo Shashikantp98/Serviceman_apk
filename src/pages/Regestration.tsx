@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { SuccessConfirmModal } from "../components/SuccessConfirmModal";
 import { ChevronLeft, ChevronDown, ChevronUp } from "react-feather";
 import { useAuth } from "../contexts/AuthContext";
+import { useSectionLoader } from "../utils/useSectionLoader";
 import GooglePlacesAutocomplete from "../components/GooglePlacesAutocomplete";
 import { useLoadScript } from "@react-google-maps/api";
 import { GOOGLE_API_KEY } from "../config";
@@ -39,8 +40,8 @@ interface FormValues {
   service_ids: string[];
   bank: Bank;
   address: Address;
-  profile_image: FileList;
-  serviceman_document: FileList;
+  profile_image: FileList | string;
+  serviceman_document: FileList | string;
 }
 
 // ✅ Yup validation schema - only `fname` is required; everything else optional
@@ -79,18 +80,30 @@ const validationSchema = Yup.object().shape({
     country: Yup.string().notRequired(),
   }).notRequired(),
 
-  profile_image: Yup.mixed<FileList>()
-    .required("Profile image is required")
+  profile_image: Yup.mixed<FileList | string>()
+    .test("fileOrUrl", "Profile image is required", (value) => {
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
     .test("fileType", "Invalid document type", (value) => {
-      if (!value || value.length === 0) return true;
+      if (typeof value === "string") return true;
+      if (!value || value.length === 0) return false;
       const file = value[0];
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
       return allowedTypes.includes(file.type);
     }),
 
-  serviceman_document: Yup.mixed<FileList>()
+  serviceman_document: Yup.mixed<FileList | string>()
     .notRequired()
+    .test("fileOrUrl", "Invalid document", (value) => {
+      if (!value) return true;
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
     .test("fileType", "Invalid document type", (value) => {
+      if (typeof value === "string") return true;
       if (!value || value.length === 0) return true;
       const file = value[0];
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
@@ -142,6 +155,60 @@ const Registration = () => {
   });
 
   const [serviceList, setServiceList] = useState<any[]>([]);
+  // Loader while fetching serviceman details
+  const servicemanDetailsLoader = useSectionLoader("serviceman-edit");
+
+  const getServicemenDetails = () => {
+    if (!token && !authToken) return;
+    servicemanDetailsLoader.setLoading(true);
+    ApiService.post(
+      "/servicemen/getServicemenDetails",
+      {},
+      {
+        headers: { Authorization: `Bearer ${token || authToken}` },
+      }
+    )
+      .then((res: any) => {
+        const data = res?.data || {};
+        if (data.fname) setValue("fname", data.fname);
+        if (data.lname) setValue("lname", data.lname);
+        if (data.service_location) setValue("address", data.service_location);
+        if (data.bank_details) setValue("bank", data.bank_details);
+        if (Array.isArray(data.services)) {
+          const service_ids = data.services.map((service: any) => service._id || service.service_id || service);
+          setValue("service_ids", service_ids);
+        }
+        if (data.documents && data.documents.length > 0) {
+          const latestDoc = [...data.documents].sort(
+            (a: any, b: any) =>
+              new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
+          )[0];
+          if (latestDoc?.file_url) {
+            setValue("serviceman_document", latestDoc.file_url);
+          }
+        }
+        if (data.profile_image) {
+          setValue("profile_image", data.profile_image);
+        }
+        // If API returns general info already filled, open verification section directly
+        const hasGeneralInfo = Boolean(
+          data.fname ||
+          data.lname ||
+          (Array.isArray(data.services) && data.services.length > 0) ||
+          data.profile_image
+        );
+        if (hasGeneralInfo) {
+          setGeneralInfoDone(true);
+          setOpenSection("docs");
+        }
+      })
+      .catch(() => {
+        // ignore if details not available
+      })
+      .finally(() => {
+        servicemanDetailsLoader.setLoading(false);
+      });
+  };
 
   useEffect(() => {
     ApiService.post(
@@ -153,7 +220,11 @@ const Registration = () => {
     ).then((res: any) => {
       setServiceList(res.data.list);
     });
-  }, [token]);
+  }, [token, authToken]);
+
+  useEffect(() => {
+    getServicemenDetails();
+  }, [token, authToken]);
 
   const serviceListOptions = serviceList.map((service: any) => ({
     label: service.service_name,
@@ -186,7 +257,9 @@ const Registration = () => {
     formData.append("fname", data.fname);
     if (data.lname) formData.append("lname", data.lname);
     if (data.service_ids?.length) formData.append("service_ids", JSON.stringify(data.service_ids));
-    if (data.profile_image?.[0]) formData.append("profile_image", data.profile_image[0]);
+    if (data.profile_image instanceof FileList && data.profile_image?.[0]) {
+      formData.append("profile_image", data.profile_image[0]);
+    }
     setLoadingGeneral(true);
     ApiService.post("/servicemen/editServicemen", formData, {
       headers: { Authorization: `Bearer ${token || authToken}` },
@@ -212,7 +285,9 @@ const Registration = () => {
     const data = getValues();
     const formData = new FormData();
     if (data.address) formData.append("address", JSON.stringify(data.address));
-    if (data.serviceman_document?.[0]) formData.append("serviceman_document", data.serviceman_document[0]);
+    if (data.serviceman_document instanceof FileList && data.serviceman_document?.[0]) {
+      formData.append("serviceman_document", data.serviceman_document[0]);
+    }
     setLoadingDocs(true);
     ApiService.post("/servicemen/editServicemen", formData, {
       headers: { Authorization: `Bearer ${token || authToken}` },
@@ -247,6 +322,12 @@ const Registration = () => {
 
         
       <Loader show={!isLoaded} text="Loading maps..." />
+      {servicemanDetailsLoader.loading && (
+        <div className="full-page-loader">
+          <div className="loader-spinner"></div>
+          <p>Loading profile details...</p>
+        </div>
+      )}
       <button
         className="back-btn mb-3 px-3 py-3"
         style={{ color: "#000" }}
