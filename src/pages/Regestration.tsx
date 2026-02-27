@@ -316,7 +316,7 @@ const Registration = () => {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container py-4 ">
       <div className="row">
         <div className="col-12">
 
