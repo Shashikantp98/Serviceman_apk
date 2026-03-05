@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -16,6 +16,7 @@ import CommonHeader from "../components/CommonHeader";
 import { ChevronDown, ChevronUp, Paperclip } from "react-feather";
 // import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
+import { useAuth } from "../contexts/AuthContext";
 
 // ✅ Define TypeScript interface
 interface Address {
@@ -40,12 +41,15 @@ interface FormValues {
   email: string;
   //   country_code: string;
   //   phone_number: string;
+  category_ids: string[];
   service_ids: string[];
   address: Address;
   home_address: Address;
   bank: Bank;
   profile_image: FileList;
   serviceman_document: FileList;
+  serviceman_document_2: FileList | string;
+  serviceman_document_3: FileList | string;
 }
 
 // ✅ Define Yup validation schema
@@ -64,6 +68,8 @@ const validationSchema = Yup.object().shape({
   // phone_number: Yup.string()
   //   .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
   //   .required("Phone number is required"),
+
+  category_ids: Yup.array().of(Yup.string()).notRequired(),
 
   service_ids: Yup.array()
     .of(Yup.string().required("Invalid service ID"))
@@ -150,10 +156,43 @@ const validationSchema = Yup.object().shape({
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
       return allowedTypes.includes(file.type);
     }),
+
+  serviceman_document_2: Yup.mixed<FileList | string>()
+    .notRequired()
+    .test("fileOrUrl2", "Invalid document", (value) => {
+      if (!value) return true;
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
+    .test("fileType2", "Invalid document type", (value) => {
+      if (typeof value === "string") return true;
+      if (!value || value.length === 0) return true;
+      const file = value[0];
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+      return allowedTypes.includes(file.type);
+    }),
+
+  serviceman_document_3: Yup.mixed<FileList | string>()
+    .notRequired()
+    .test("fileOrUrl3", "Invalid document", (value) => {
+      if (!value) return true;
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
+    .test("fileType3", "Invalid document type", (value) => {
+      if (typeof value === "string") return true;
+      if (!value || value.length === 0) return true;
+      const file = value[0];
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+      return allowedTypes.includes(file.type);
+    }),
 });
 
 const EditServicemen = () => {
   const navigate = useNavigate();
+  const { latitude, longitude } = useAuth();
   const [openSection, setOpenSection] = useState<
     "general" | "bank" | "verification" | "none"
   >("general");
@@ -161,6 +200,10 @@ const EditServicemen = () => {
 
   // Loader for edit serviceman
   const servicemanEditLoader = useSectionLoader("serviceman-edit");
+  // Tracks existing document _ids to send in document_ids payload
+  const [documentIds, setDocumentIds] = useState<string[]>([]);
+  // Holds pre-existing service_ids to restore after services list loads (avoids reset wipe)
+  const pendingServiceIds = useRef<string[] | null>(null);
 
   const getProfileDetails = () => {
     servicemanEditLoader.setLoading(true);
@@ -175,18 +218,30 @@ const EditServicemen = () => {
         }
         setValue("home_address", res.data.home_address);
         setValue("bank", res.data.bank_details);
-        var service_ids: any = [];
-        res.data.services.map((service: any) => {
-          service_ids.push(service._id);
-        });
-        setValue("service_ids", service_ids);
+        // Store service_ids in ref — will be restored after the services list loads
+        if (Array.isArray(res.data.services)) {
+          pendingServiceIds.current = res.data.services.map((s: any) => s._id || s.service_id || s);
+        }
+        // Pre-select categories from API response
+        if (Array.isArray(res.data.categories) && res.data.categories.length > 0) {
+          const category_ids = res.data.categories.map((c: any) => c._id || c.category_id || c);
+          setValue("category_ids", category_ids);
+          // category_ids being set will trigger the services useEffect which restores service_ids
+        } else if (pendingServiceIds.current?.length) {
+          // No categories in response — set service_ids directly
+          setValue("service_ids", pendingServiceIds.current);
+          pendingServiceIds.current = null;
+        }
         if (res.data.documents && res.data.documents.length > 0) {
-          // Sort by updated_on desc and pick the most recent document
-          const latestDoc = [...res.data.documents].sort(
-            (a: any, b: any) =>
-              new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
-          )[0];
-          setValue("serviceman_document", latestDoc.file_url);
+          const docs = res.data.documents;
+          // Track all existing document _ids (handles both `_id` and `id` field names)
+          setDocumentIds(
+            docs.map((d: any) => d._id || d.id || "").filter(Boolean)
+          );
+          // Load each doc into its corresponding field by index
+          if (docs[0]?.file_url) setValue("serviceman_document", docs[0].file_url);
+          if (docs[1]?.file_url) setValue("serviceman_document_2", docs[1].file_url);
+          if (docs[2]?.file_url) setValue("serviceman_document_3", docs[2].file_url);
         }
         if (res.data.profile_image) {
           setValue("profile_image", res.data.profile_image);
@@ -208,12 +263,14 @@ const EditServicemen = () => {
     handleSubmit,
     control,
     setValue,
+    getValues,
     formState: { errors },
     watch,
   } = useForm<FormValues>({
     resolver: yupResolver(validationSchema) as Resolver<FormValues>,
 
     defaultValues: {
+      category_ids: [],
       service_ids: [],
       address: { street_1: "", city: "", state: "", country: "", zip: "" },
       home_address: { street_1: "", city: "", state: "", country: "", zip: "" },
@@ -230,9 +287,13 @@ const EditServicemen = () => {
   // Previews for profile image and document (accepts FileList or existing URL string)
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<string | null>(null);
+  const [docPreview2, setDocPreview2] = useState<string | null>(null);
+  const [docPreview3, setDocPreview3] = useState<string | null>(null);
 
   const watchedProfile = watch("profile_image") as FileList | string | undefined;
   const watchedDoc = watch("serviceman_document") as FileList | string | undefined;
+  const watchedDoc2 = watch("serviceman_document_2") as FileList | string | undefined;
+  const watchedDoc3 = watch("serviceman_document_3") as FileList | string | undefined;
 
   useEffect(() => {
     let url: string | null = null;
@@ -285,22 +346,85 @@ const EditServicemen = () => {
       if (url) URL.revokeObjectURL(url);
     };
   }, [watchedDoc]);
+
+  useEffect(() => {
+    let url: string | null = null;
+    if (!watchedDoc2) { setDocPreview2(null); return; }
+    if (typeof watchedDoc2 === "string") { setDocPreview2(watchedDoc2); return; }
+    if (watchedDoc2 instanceof FileList && watchedDoc2.length > 0) {
+      url = URL.createObjectURL(watchedDoc2[0]);
+      setDocPreview2(url);
+    } else {
+      setDocPreview2(null);
+    }
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [watchedDoc2]);
+
+  useEffect(() => {
+    let url: string | null = null;
+    if (!watchedDoc3) { setDocPreview3(null); return; }
+    if (typeof watchedDoc3 === "string") { setDocPreview3(watchedDoc3); return; }
+    if (watchedDoc3 instanceof FileList && watchedDoc3.length > 0) {
+      url = URL.createObjectURL(watchedDoc3[0]);
+      setDocPreview3(url);
+    } else {
+      setDocPreview3(null);
+    }
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [watchedDoc3]);
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const formData = new FormData();
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "profile_image" || key === "serviceman_document") {
-        formData.append(key, (value as FileList)[0]);
-      } else if (typeof value === "object") {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, String(value));
+    // Scalar fields
+    if (data.fname) formData.append("fname", data.fname);
+    if (data.lname) formData.append("lname", data.lname);
+    if (data.email) formData.append("email", data.email);
+    if (data.service_ids?.length) formData.append("service_ids", JSON.stringify(data.service_ids));
+    if (data.address) formData.append("address", JSON.stringify(data.address));
+    if (data.home_address) formData.append("home_address", JSON.stringify(data.home_address));
+    if (data.bank) {
+      // Strip extra API-response fields (_id, serviceman_id, etc.) before sending
+      const { account_name, bank_name, account_number, ifsc_code, upi_id, country } = data.bank as any;
+      const cleanBank = { account_name, bank_name, account_number, ifsc_code, upi_id, country };
+      formData.append("bank", JSON.stringify(cleanBank));
+    }
+
+    // Profile image
+    if (data.profile_image instanceof FileList && data.profile_image[0]) {
+      formData.append("profile_image", data.profile_image[0]);
+    }
+
+    // Documents — read directly from form store to bypass any Yup mixed() cast
+    // that could silently drop FileList values for notRequired() fields.
+    const rawDocs = getValues(["serviceman_document", "serviceman_document_2", "serviceman_document_3"]);
+    const docSlots: { field: FileList | string | undefined; idIndex: number }[] = [
+      { field: rawDocs[0] as FileList | string | undefined, idIndex: 0 },
+      { field: rawDocs[1] as FileList | string | undefined, idIndex: 1 },
+      { field: rawDocs[2] as FileList | string | undefined, idIndex: 2 },
+    ];
+    console.log("📄 Doc slots at submit:", docSlots.map(s => ({
+      idIndex: s.idIndex,
+      isFileList: s.field instanceof FileList,
+      fileCount: s.field instanceof FileList ? s.field.length : "n/a",
+      isString: typeof s.field === "string",
+    })));
+    const uploadedIds: string[] = [];
+    docSlots.forEach(({ field, idIndex }) => {
+      if (field instanceof FileList && field[0]) {
+        formData.append("serviceman_document", field[0]);
+        if (documentIds[idIndex]) uploadedIds.push(documentIds[idIndex]);
       }
     });
+    if (uploadedIds.length > 0) {
+      formData.append("document_ids", JSON.stringify(uploadedIds));
+    }
 
     console.log("✅ Final FormData (to send via API):", data);
     setLoading(true);
-    ApiService.post("/servicemen/editServicemen", formData)
+    ApiService.post("/servicemen/editServicemen", formData, {
+      timeout: 120000, // 2 minutes — needed for file uploads on mobile
+    })
       .then((res: any) => {
         console.log(res);
         setLoading(false);
@@ -309,22 +433,67 @@ const EditServicemen = () => {
       })
       .catch((err: any) => {
         console.log(err);
-        toast.error(err.response.data.message);
         setLoading(false);
+        const msg =
+          err?.response?.data?.message ||
+          (err?.code === "ECONNABORTED" ? "Upload timed out. Please try again." : "Something went wrong.");
+        toast.error(msg);
       });
   };
   const [serviceList, setserviceList] = useState<any>([]);
+  const [categoryList, setCategoryList] = useState<any[]>([]);
+  const selectedCategoryIds = watch("category_ids") ?? [];
+  const selectedCategoriesKey = JSON.stringify(selectedCategoryIds);
+
+  // Fetch all categories on mount
   useEffect(() => {
-    ApiService.post(`/servicemen/listServicesForServiceman`, {}).then(
-      (res: any) => {
-        console.log(res);
-        setserviceList(res.data.list);
-      }
-    );
-  }, []);
+    ApiService.post(`/user/getAllCategoryList`, {
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      filters: { search: "" },
+      pagination: { page: 1, pageSize: 50 },
+    })
+      .then((res: any) => {
+        setCategoryList(res.data?.list || []);
+      })
+      .catch(() => {});
+  }, [latitude, longitude]);
+
+  // Fetch services filtered by selected categories
+  useEffect(() => {
+    if (!selectedCategoryIds.length) {
+      setserviceList([]);
+      return;
+    }
+    ApiService.post(`/servicemen/listServicesForServiceman`, {
+       filters: { category_id: selectedCategoryIds } ,
+    })
+      .then((res: any) => {
+        const list = res.data?.list || [];
+        setserviceList(list);
+        if (pendingServiceIds.current !== null) {
+          // Restore pre-existing selections on initial load
+          setValue("service_ids", pendingServiceIds.current);
+          pendingServiceIds.current = null;
+        } else {
+          // User changed categories — keep selections still valid in the new list
+          const newIds = new Set(list.map((s: any) => s.service_id));
+          const current = getValues("service_ids") || [];
+          setValue("service_ids", current.filter((id: string) => newIds.has(id)));
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategoriesKey]);
+
   const serviceListOptions = serviceList.map((service: any) => ({
     label: service.service_name,
     value: service.service_id,
+  }));
+
+  const categoryListOptions = categoryList.map((cat: any) => ({
+    label: cat.category_name,
+    value: cat.category_id || cat._id,
   }));
   const handleAddressSelect = (address: any) => {
     console.log("Selected Address:", address);
@@ -499,15 +668,38 @@ const EditServicemen = () => {
                   />
                 </div>
                 <div className="col-12 pt-3">
-                  <label className="lbl2">Service Type</label>
+                  <label className="lbl2">Select Category</label>
                   <MultiSelect
                     control={control}
-                    name="service_ids"
+                    name="category_ids"
                     label=""
-                    options={serviceListOptions}
-                    error={errors.service_ids?.message as string}
+                    options={categoryListOptions}
                     disabled={loading}
                   />
+                </div>
+                <div className="col-12 pt-3">
+                  <label className="lbl2">Service Type</label>
+                  <div
+                    onClick={() => {
+                      if (!selectedCategoryIds.length) {
+                        toast.info("Please select a category first");
+                      }
+                    }}
+                  >
+                    <MultiSelect
+                      control={control}
+                      name="service_ids"
+                      label=""
+                      options={serviceListOptions}
+                      error={errors.service_ids?.message as string}
+                      disabled={loading || !selectedCategoryIds.length}
+                    />
+                  </div>
+                  {!selectedCategoryIds.length && (
+                    <p className="text-muted font-12 mt-1">
+                      ⚠️ Select a category above to load available services.
+                    </p>
+                  )}
                 </div>
                 <div className="col-12 pt-3">
                   <FileInput
@@ -672,7 +864,7 @@ const EditServicemen = () => {
                 </div>
                 <div className="col-12 pt-3">
                   <FileInput
-                    label="Upload Aadhar / PAN Card"
+                    label="Upload Aadhar Card (Front)"
                     name="serviceman_document"
                     control={control}
                     error={errors.serviceman_document?.message as string}
@@ -690,6 +882,56 @@ const EditServicemen = () => {
                         <p className="font-12 text-secondary mb-0 pt-1">
                           <Paperclip size={14} />&nbsp;
                           <a href={docPreview} target="_blank" rel="noreferrer">Open document</a>
+                        </p>
+                      )
+                    )}
+                  </div>
+                </div>
+                <div className="col-12 pt-3">
+                  <FileInput
+                    label="Upload Aadhar Card (Back)"
+                    name="serviceman_document_2"
+                    control={control}
+                    error={(errors as any).serviceman_document_2?.message as string}
+                  />
+                  <div className="col-12 pt-2" style={{ textAlign: "center" }}>
+                    {docPreview2 && (
+                      /\.(jpe?g|png|gif|webp|bmp|pdf)$/i.test(docPreview2) ? (
+                        <img
+                          style={{ height: "120px", width: "240px", objectFit: "contain" }}
+                          src={docPreview2}
+                          alt="Document 2 preview"
+                          className="img-fluid"
+                        />
+                      ) : (
+                        <p className="font-12 text-secondary mb-0 pt-1">
+                          <Paperclip size={14} />&nbsp;
+                          <a href={docPreview2} target="_blank" rel="noreferrer">Open document</a>
+                        </p>
+                      )
+                    )}
+                  </div>
+                </div>
+                <div className="col-12 pt-3">
+                  <FileInput
+                    label="Upload Driving License"
+                    name="serviceman_document_3"
+                    control={control}
+                    error={(errors as any).serviceman_document_3?.message as string}
+                  />
+                  <div className="col-12 pt-2" style={{ textAlign: "center" }}>
+                    {docPreview3 && (
+                      /\.(jpe?g|png|gif|webp|bmp|pdf)$/i.test(docPreview3) ? (
+                        <img
+                          style={{ height: "120px", width: "240px", objectFit: "contain" }}
+                          src={docPreview3}
+                          alt="Document 3 preview"
+                          className="img-fluid"
+                        />
+                      ) : (
+                        <p className="font-12 text-secondary mb-0 pt-1">
+                          <Paperclip size={14} />&nbsp;
+                          <a href={docPreview3} target="_blank" rel="noreferrer">Open document</a>
                         </p>
                       )
                     )}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -37,17 +37,22 @@ interface Address {
 interface FormValues {
   fname: string;
   lname: string;
+  category_ids: string[];
   service_ids: string[];
   bank: Bank;
   address: Address;
   profile_image: FileList | string;
   serviceman_document: FileList | string;
+  serviceman_document_2: FileList | string;
+  serviceman_document_3: FileList | string;
 }
 
 // ✅ Yup validation schema - only `fname` is required; everything else optional
 const validationSchema = Yup.object().shape({
   fname: Yup.string().required("First name is required"),
   lname: Yup.string().required("Last name is required"),
+
+  category_ids: Yup.array().of(Yup.string()).notRequired(),
 
   service_ids: Yup.array().of(Yup.string()).required("At least one service is required"),
 
@@ -109,12 +114,44 @@ const validationSchema = Yup.object().shape({
       const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
       return allowedTypes.includes(file.type);
     }),
+
+  serviceman_document_2: Yup.mixed<FileList | string>()
+    .notRequired()
+    .test("fileOrUrl2", "Invalid document", (value) => {
+      if (!value) return true;
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
+    .test("fileType2", "Invalid document type", (value) => {
+      if (typeof value === "string") return true;
+      if (!value || value.length === 0) return true;
+      const file = value[0];
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+      return allowedTypes.includes(file.type);
+    }),
+
+  serviceman_document_3: Yup.mixed<FileList | string>()
+    .notRequired()
+    .test("fileOrUrl3", "Invalid document", (value) => {
+      if (!value) return true;
+      if (typeof value === "string" && value.trim() !== "") return true;
+      if (value instanceof FileList && value.length > 0) return true;
+      return false;
+    })
+    .test("fileType3", "Invalid document type", (value) => {
+      if (typeof value === "string") return true;
+      if (!value || value.length === 0) return true;
+      const file = value[0];
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+      return allowedTypes.includes(file.type);
+    }),
 });
 
 const Registration = () => {
   const navigate = useNavigate();
   const locationData = useLocation();
-  const { login, token: authToken } = useAuth();
+  const { login, token: authToken, latitude, longitude } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const token = locationData.state?.token;
   const phone_number = locationData.state?.phone_number;
@@ -132,10 +169,12 @@ const Registration = () => {
     trigger,
     getValues,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: yupResolver(validationSchema) as Resolver<FormValues>,
     defaultValues: {
+      category_ids: [],
       service_ids: [],
       bank: {
         account_name: "",
@@ -155,6 +194,12 @@ const Registration = () => {
   });
 
   const [serviceList, setServiceList] = useState<any[]>([]);
+  const [categoryList, setCategoryList] = useState<any[]>([]);
+  const [documentIds, setDocumentIds] = useState<string[]>([]);
+  const selectedCategoryIds = watch("category_ids") ?? [];
+  const selectedCategoriesKey = JSON.stringify(selectedCategoryIds);
+  // Holds pre-existing service_ids to restore after services list loads (avoids reset wipe)
+  const pendingServiceIds = useRef<string[] | null>(null);
   // Loader while fetching serviceman details
   const servicemanDetailsLoader = useSectionLoader("serviceman-edit");
 
@@ -174,18 +219,30 @@ const Registration = () => {
         if (data.lname) setValue("lname", data.lname);
         if (data.service_location) setValue("address", data.service_location);
         if (data.bank_details) setValue("bank", data.bank_details);
+        // Store service_ids in ref — will be restored after the services list loads
         if (Array.isArray(data.services)) {
-          const service_ids = data.services.map((service: any) => service._id || service.service_id || service);
-          setValue("service_ids", service_ids);
+          pendingServiceIds.current = data.services.map((service: any) => service._id || service.service_id || service);
+        }
+        // Pre-select categories from API response
+        if (Array.isArray(data.categories) && data.categories.length > 0) {
+          const category_ids = data.categories.map((c: any) => c._id || c.category_id || c);
+          setValue("category_ids", category_ids);
+          // setting category_ids triggers the services useEffect which will restore service_ids
+        } else if (pendingServiceIds.current?.length) {
+          // No categories in response — set service_ids directly
+          setValue("service_ids", pendingServiceIds.current);
+          pendingServiceIds.current = null;
         }
         if (data.documents && data.documents.length > 0) {
-          const latestDoc = [...data.documents].sort(
-            (a: any, b: any) =>
-              new Date(b.updated_on).getTime() - new Date(a.updated_on).getTime()
-          )[0];
-          if (latestDoc?.file_url) {
-            setValue("serviceman_document", latestDoc.file_url);
-          }
+          const docs = data.documents;
+          // Track all existing document _ids (handles both `_id` and `id` field names)
+          setDocumentIds(
+            docs.map((d: any) => d._id || d.id || "").filter(Boolean)
+          );
+          // Load each doc into its field by index
+          if (docs[0]?.file_url) setValue("serviceman_document", docs[0].file_url);
+          if (docs[1]?.file_url) setValue("serviceman_document_2", docs[1].file_url);
+          if (docs[2]?.file_url) setValue("serviceman_document_3", docs[2].file_url);
         }
         if (data.profile_image) {
           setValue("profile_image", data.profile_image);
@@ -210,17 +267,56 @@ const Registration = () => {
       });
   };
 
+  // Fetch all categories on mount
   useEffect(() => {
     ApiService.post(
-      `/servicemen/listServicesForServiceman`,
-      {},
+      `/user/getAllCategoryList`,
+      {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        filters: { search: "" },
+        pagination: { page: 1, pageSize: 50 },
+      },
       {
         headers: { Authorization: `Bearer ${token || authToken}` },
       }
-    ).then((res: any) => {
-      setServiceList(res.data.list);
-    });
-  }, [token, authToken]);
+    )
+      .then((res: any) => {
+        setCategoryList(res.data?.list || []);
+      })
+      .catch(() => {});
+  }, [token, authToken, latitude, longitude]);
+
+  // Fetch services filtered by selected categories
+  useEffect(() => {
+    if (!selectedCategoryIds.length) {
+      setServiceList([]);
+      return;
+    }
+    ApiService.post(
+      `/servicemen/listServicesForServiceman`,
+      { filters: { category_id: selectedCategoryIds } },
+      {
+        headers: { Authorization: `Bearer ${token || authToken}` },
+      }
+    )
+      .then((res: any) => {
+        const list = res.data?.list || [];
+        setServiceList(list);
+        if (pendingServiceIds.current !== null) {
+          // Restore pre-existing selections on initial load
+          setValue("service_ids", pendingServiceIds.current);
+          pendingServiceIds.current = null;
+        } else {
+          // User changed categories — keep selections still valid in the new list
+          const newIds = new Set(list.map((s: any) => s.service_id));
+          const current = getValues("service_ids") || [];
+          setValue("service_ids", current.filter((id: string) => newIds.has(id)));
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategoriesKey, token, authToken]);
 
   useEffect(() => {
     getServicemenDetails();
@@ -229,6 +325,11 @@ const Registration = () => {
   const serviceListOptions = serviceList.map((service: any) => ({
     label: service.service_name,
     value: service.service_id,
+  }));
+
+  const categoryListOptions = categoryList.map((cat: any) => ({
+    label: cat.category_name,
+    value: cat.category_id || cat._id,
   }));
 
   const { isLoaded } = useLoadScript({
@@ -263,6 +364,7 @@ const Registration = () => {
     setLoadingGeneral(true);
     ApiService.post("/servicemen/editServicemen", formData, {
       headers: { Authorization: `Bearer ${token || authToken}` },
+      timeout: 120000, // 2 minutes — needed for profile image upload on mobile
     })
       .then(() => {
         setLoadingGeneral(false);
@@ -285,12 +387,34 @@ const Registration = () => {
     const data = getValues();
     const formData = new FormData();
     if (data.address) formData.append("address", JSON.stringify(data.address));
-    if (data.serviceman_document instanceof FileList && data.serviceman_document?.[0]) {
-      formData.append("serviceman_document", data.serviceman_document[0]);
+    // Read document slots directly from form store to bypass any Yup mixed() cast
+    // that could silently drop FileList values for notRequired() fields.
+    const rawDocs = getValues(["serviceman_document", "serviceman_document_2", "serviceman_document_3"]);
+    const docSlots: { field: FileList | string | undefined; idIndex: number }[] = [
+      { field: rawDocs[0] as FileList | string | undefined, idIndex: 0 },
+      { field: rawDocs[1] as FileList | string | undefined, idIndex: 1 },
+      { field: rawDocs[2] as FileList | string | undefined, idIndex: 2 },
+    ];
+    console.log("📄 Doc slots at submit:", docSlots.map(s => ({
+      idIndex: s.idIndex,
+      isFileList: s.field instanceof FileList,
+      fileCount: s.field instanceof FileList ? s.field.length : "n/a",
+      isString: typeof s.field === "string",
+    })));
+    const uploadedIds: string[] = [];
+    docSlots.forEach(({ field, idIndex }) => {
+      if (field instanceof FileList && field[0]) {
+        formData.append("serviceman_document", field[0]);
+        if (documentIds[idIndex]) uploadedIds.push(documentIds[idIndex]);
+      }
+    });
+    if (uploadedIds.length > 0) {
+      formData.append("document_ids", JSON.stringify(uploadedIds));
     }
     setLoadingDocs(true);
     ApiService.post("/servicemen/editServicemen", formData, {
       headers: { Authorization: `Bearer ${token || authToken}` },
+      timeout: 120000, // 2 minutes — needed for file uploads on mobile
     })
       .then(() => {
         setLoadingDocs(false);
@@ -378,13 +502,37 @@ const Registration = () => {
                 </div>
                 <div className="col-12 pt-3">
                   <MultiSelect
-                    label={<><span>Service Type</span></>}
+                    label={<><span>Select Category</span></>}
                     control={control}
-                    name="service_ids"
-                    options={serviceListOptions}
-                    error={errors.service_ids?.message as string}
+                    name="category_ids"
+                    options={categoryListOptions}
                     required
                   />
+                </div>
+                <div className="col-12 pt-3">
+                  {/* Intercept clicks when no category is selected */}
+                  <div
+                    onClick={() => {
+                      if (!selectedCategoryIds.length) {
+                        toast.info("Please select a category first");
+                      }
+                    }}
+                  >
+                    <MultiSelect
+                      label={<><span>Service Type</span></>}
+                      control={control}
+                      name="service_ids"
+                      options={serviceListOptions}
+                      error={errors.service_ids?.message as string}
+                      disabled={!selectedCategoryIds.length}
+                      required
+                    />
+                    {!selectedCategoryIds.length && (
+                      <p className="text-muted font-12 mt-1">
+                        ⚠️ Select a category above to load available services.
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="col-12 pt-1">
                   <FileInput
@@ -657,10 +805,26 @@ const Registration = () => {
                 </div>
                 <div className="col-12">
                   <FileInput
-                    label="Upload Aadhar / PAN Card"
+                    label="Upload Aadhar Card (Front)"
                     name="serviceman_document"
                     control={control}
                     error={errors.serviceman_document?.message as string}
+                  />
+                </div>
+                <div className="col-12 pt-3">
+                  <FileInput
+                    label="Upload Aadhar Card (Back)"
+                    name="serviceman_document_2"
+                    control={control}
+                    error={(errors as any).serviceman_document_2?.message as string}
+                  />
+                </div>
+                <div className="col-12 pt-3">
+                  <FileInput
+                    label="Upload Driving License"
+                    name="serviceman_document_3"
+                    control={control}
+                    error={(errors as any).serviceman_document_3?.message as string}
                   />
                 </div>
                 <div className="col-12 pt-3">
