@@ -104,7 +104,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                       alignItems: "center",
                       padding: "6px 8px",
                       cursor: "pointer",
-                      fontSize: "10px",
+                      fontSize: "14px",
                       // fontWeight: "bold",
                       borderBottom: "1px solid #eee",
                     }}
@@ -126,7 +126,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                         alignItems: "center",
                         padding: "6px 8px",
                         cursor: "pointer",
-                        fontSize: "10px",
+                        fontSize: "14px",
                       }}
                     >
                       <input
