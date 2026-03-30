@@ -145,31 +145,40 @@ const ServiceByCat = () => {
           {!catServiceLoader.loading &&
             services?.length > 0 &&
             services.map((item: any) => (
-              <div className="col-6 pt-3" key={item?.service_id}>
-                <div className="serv_cards">
+              <div
+                className="col-6 pt-3"
+                key={item?.service_id}
+                style={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  position: 'relative',
+                }}
+              >
+                <div className="serv_cards" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <img
                     src={item.service_image}
                     className="w-100"
-                    style={{ height: "140px" }}
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
+                    style={{ height: "140px", objectFit: "cover", flexShrink: 0 }}
+                    onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
                   />
 
                   <h3
                     className="s_h"
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
+                    onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      minHeight: '2.4em',
+                    }}
                   >
                     {item?.service_name}
                   </h3>
 
                   <p
                     className="s_r"
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
+                    onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
                   >
                     ⭐ {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
                   </p>
@@ -184,16 +193,20 @@ const ServiceByCat = () => {
                   ></p> */}
                   <p
                     className="s_p"
-                    onClick={() =>
-                      navigate(`/servicedeatils/${item?.service_id}`)
-                    }
+                    onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                    style={{ marginTop: 'auto' }}
                   >
                     ₹{item?.price}
                     <br />
                     Duration : {item?.duration}
                   </p>
 
-                  <button onClick={() => handleBookNow(item)} className="a_cart">
+                  <button
+                    onClick={() => handleBookNow(item)}
+                    className="a_cart"
+                    disabled={!item?.is_available}
+                    style={{ pointerEvents: item?.is_available ? 'auto' : 'none' }}
+                  >
                     Book Now
                   </button>
                 </div>

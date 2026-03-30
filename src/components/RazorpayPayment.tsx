@@ -52,7 +52,7 @@ export const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
     hasOpened.current = true;
 
     const options = {
-      key: "rzp_test_RQSSkW8Jr7P8pL", // Replace with your Razorpay Key ID
+      key: "rzp_live_SNrA3Xq0geujDs", // Replace with your Razorpay Key ID
       amount,
       currency,
       name,

@@ -361,7 +361,15 @@ const Home = () => {
                 <div className="col-12"><p className="font-14 weight-bold">No Services</p></div>
               )}
               {!servicesLoader.loading && services?.length > 0 && services.map((item: any) => (
-                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                <div
+                  className="col-6 px-2 pb-3"
+                  key={item?.service_id}
+                  onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                  }}
+                >
                   <div className="s_cards">
                     <img src={item?.service_image} className="w-100 rounded-full" />
                     <div className="px-2 pb-2">
@@ -383,7 +391,15 @@ const Home = () => {
                 <div className="col-12"><p className="font-14 weight-bold">No Popular Services</p></div>
               )}
               {!popularServicesLoader.loading && popularServices?.length > 0 && popularServices.map((item: any) => (
-                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                <div
+                  className="col-6 px-2 pb-3"
+                  key={item?.service_id}
+                  onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                  }}
+                >
                   <div className="s_cards">
                     <img src={item?.service_image} className="w-100 rounded-full" />
                     <div className="px-2 pb-2">
@@ -405,7 +421,15 @@ const Home = () => {
                 <div className="col-12"><p className="font-14 weight-bold">No Best Services</p></div>
               )}
               {!bestServicesLoader.loading && bestServices?.length > 0 && bestServices.map((item: any) => (
-                <div className="col-6 px-2 pb-3" key={item?.service_id} onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}>
+                <div
+                  className="col-6 px-2 pb-3"
+                  key={item?.service_id}
+                  onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                  style={{
+                    cursor: 'pointer',
+                    position: 'relative',
+                  }}
+                >
                   <div className="s_cards">
                     <img src={item?.service_image} className="w-100 rounded-full" />
                     <div className="px-2 pb-2">

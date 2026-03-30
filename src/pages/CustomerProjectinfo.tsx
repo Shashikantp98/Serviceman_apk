@@ -32,6 +32,29 @@ const CustomerProjectinfo = () => {
     }
   };
 
+  const handleShare = async () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const appLink = isIOS
+      ? "https://apps.apple.com/in/app/instasevak/id6754757689"
+      : "https://play.google.com/store/apps/details?id=com.instasevak.sevak";
+    const message = `🎉 I just got my ${bookingDetails?.service_name} service done through InstaSevak! Book trusted home services easily.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "InstaSevak - Home Services App",
+          text: message,
+          url: appLink,
+        });
+      } catch (err) {
+        // User cancelled or error — do nothing
+      }
+    } else {
+      // Fallback: open WhatsApp web
+      window.open(`https://wa.me/?text=${encodeURIComponent(message + " " + appLink)}`, "_blank");
+    }
+  };
+
   const getRequestDetails = () => {
     bookingDetailsLoader.setLoading(true);
     ApiService.post("/user/userBookingDetails", { booking_id: id })
@@ -217,7 +240,6 @@ const CustomerProjectinfo = () => {
             {/* Review Section - Show only when booking status is completed */}
             {bookingDetails?.booking_status === "completed" && (
               <div className="col-12 pt-2">
-
                 <Review
                   booking_id={bookingDetails?.booking_id}
                   service_id={bookingDetails?.service_id}
@@ -226,6 +248,34 @@ const CustomerProjectinfo = () => {
                     getRequestDetails();
                   }}
                 />
+                <button
+                  onClick={handleShare}
+                  style={{
+                    width: "100%",
+                    backgroundColor: "#283891",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "12px 16px",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    marginTop: "16px",
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                  </svg>
+                  Share App
+                </button>
               </div>
             )}
           </div>
