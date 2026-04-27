@@ -209,15 +209,28 @@ const Servicedetail = () => {
                   className="mb-2 pt-2"
                   dangerouslySetInnerHTML={{ __html: serviceDetails?.description }}
                 ></p>
-                <p>
-                  <b>
-                    ₹
-                    {serviceDetails?.offer_price
-                      ? serviceDetails?.offer_price
-                      : serviceDetails?.price}{" "}
-                    - Duration : {serviceDetails?.duration}
-                  </b>
-                </p>
+                <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
+                  {(serviceDetails?.offer_price || serviceDetails?.final_price) ? (
+                    <>
+                      <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '15px' }}>
+                        ₹{serviceDetails?.price}
+                      </span>
+                      <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>
+                        ₹{serviceDetails?.offer_price || serviceDetails?.final_price}
+                      </span>
+                      {serviceDetails?.discount_percent && (
+                        <span style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '12px', fontWeight: 600, borderRadius: '4px', padding: '2px 7px' }}>
+                          {serviceDetails?.discount_percent}% off
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>
+                      ₹{serviceDetails?.price}
+                    </span>
+                  )}
+                  <span style={{ color: '#555', fontSize: '14px' }}>- Duration : {serviceDetails?.duration}</span>
+                </div>
 
                 {/* <h5>What is covered</h5>
             <ul>

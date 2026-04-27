@@ -67,6 +67,36 @@ export const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
         name,
         email,
         contact,
+        method: "upi",
+      },
+      method: {
+        upi: true,
+        card: true,
+        netbanking: true,
+        wallet: true,
+        emi: false,
+      },
+      config: {
+        display: {
+          blocks: {
+            upi: {
+              name: "Pay via UPI",
+              instruments: [
+                { method: "upi" },
+              ],
+            },
+            other: {
+              name: "Other Payment Methods",
+              instruments: [
+                { method: "card" },
+                { method: "netbanking" },
+                { method: "wallet" },
+              ],
+            },
+          },
+          sequence: ["block.upi", "block.other"],
+          preferences: { show_default_blocks: false },
+        },
       },
       notes: {
         address: "Razorpay Corporate Office",

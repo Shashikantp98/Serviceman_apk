@@ -104,7 +104,7 @@ const ServiceByCat = () => {
                       className="small_cat_img"
                       src={cat?.category_image}
                       style={{
-                        border: isActive ? "2px solid var(--primary-color, #283891)" : "2px solid transparent",
+                        border: isActive ? "2px solid var(--primary-color, #040407)" : "2px solid transparent",
                         borderRadius: "50%",
                       }}
                     />
@@ -112,7 +112,7 @@ const ServiceByCat = () => {
                       className="font-14 mb-0 pt-1"
                       style={{
                         fontWeight: isActive ? 700 : 400,
-                        color: isActive ? "var(--primary-color, #283891)" : undefined,
+                        color: isActive ? "var(--primary-color, #040407)" : undefined,
                       }}
                     >
                       {cat?.category_name?.length > 8
@@ -191,15 +191,32 @@ const ServiceByCat = () => {
                       __html: item?.description?.slice(0, 120),
                     }}
                   ></p> */}
-                  <p
+                  <div
                     className="s_p"
                     onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
                     style={{ marginTop: 'auto' }}
                   >
-                    ₹{item?.price}
-                    <br />
-                    Duration : {item?.duration}
-                  </p>
+                    <div className="d-flex align-items-center gap-1 flex-wrap">
+                      {(item?.offer_price || item?.final_price) ? (
+                        <>
+                          <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>
+                            ₹{item?.price}
+                          </span>
+                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700 }}>
+                            ₹{item?.offer_price || item?.final_price}
+                          </span>
+                          {item?.discount_percent && (
+                            <span style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px', fontWeight: 600, borderRadius: '4px', padding: '1px 5px' }}>
+                              {item?.discount_percent}% off
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700 }}>₹{item?.price}</span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#555' }}>Duration : {item?.duration}</span>
+                  </div>
 
                   <button
                     onClick={() => handleBookNow(item)}
