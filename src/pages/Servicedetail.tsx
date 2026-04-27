@@ -212,17 +212,17 @@ const Servicedetail = () => {
                 <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                   {(serviceDetails?.offer_price || serviceDetails?.final_price) ? (
                     <>
-                      <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '15px' }}>
+                      {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '15px' }}>
                         ₹{serviceDetails?.price}
-                      </span>
+                      </span> */}
                       <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>
                         ₹{serviceDetails?.offer_price || serviceDetails?.final_price}
                       </span>
-                      {serviceDetails?.discount_percent && (
+                      {/* {serviceDetails?.discount_percent && (
                         <span style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '12px', fontWeight: 600, borderRadius: '4px', padding: '2px 7px' }}>
                           {serviceDetails?.discount_percent}% off
                         </span>
-                      )}
+                      )} */}
                     </>
                   ) : (
                     <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>

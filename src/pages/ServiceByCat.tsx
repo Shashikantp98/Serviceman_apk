@@ -199,17 +199,17 @@ const ServiceByCat = () => {
                     <div className="d-flex align-items-center gap-1 flex-wrap">
                       {(item?.offer_price || item?.final_price) ? (
                         <>
-                          <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>
+                          {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>
                             ₹{item?.price}
-                          </span>
+                          </span> */}
                           <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700 }}>
                             ₹{item?.offer_price || item?.final_price}
                           </span>
-                          {item?.discount_percent && (
+                          {/* {item?.discount_percent && (
                             <span style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '10px', fontWeight: 600, borderRadius: '4px', padding: '1px 5px' }}>
                               {item?.discount_percent}% off
                             </span>
-                          )}
+                          )} */}
                         </>
                       ) : (
                         <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700 }}>₹{item?.price}</span>
