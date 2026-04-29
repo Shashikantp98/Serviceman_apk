@@ -49,7 +49,7 @@ const CategoriesList = () => {
       <div className="container pb-10 main-content-service">
         <div className="row pt-3">
           <div className="col-12">
-            <p className="font-14 weight-bold">Browse all categories</p>
+            <p className="font-18 weight-bold">Browse all categories</p>
           </div>
         </div>
         <div className="row">
@@ -77,16 +77,19 @@ const CategoriesList = () => {
                   })
                 }
               >
+                <div className="cat_det_card_box">
                 <img
                   style={{ height: "120px" }}
                   src={item?.category_image}
-                  className="w-100 rounded-full"
+                  className="w-100 rounded-full object-cover"
                 />
                 <p className="font-14 pt-1">
                   {item?.category_name && item?.category_name.length > 15
                     ? item?.category_name.slice(0, 15) + "..."
                     : item?.category_name}
                 </p>
+                </div>
+
               </div>
             ))
           ) : null}

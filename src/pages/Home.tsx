@@ -370,18 +370,24 @@ const Home = () => {
                     position: 'relative',
                   }}
                 >
-                  <div className="s_cards">
+                  <div className="s_cards new_s_cardss">
+
+                    <div>
                     <img src={item?.service_image} className="w-100 rounded-full" />
-                    <div className="px-2 pb-2">
-                      <p className="ser_names">{item?.service_name}</p>
-                      <p className="ser_rts my-0 d-flex align-items-center gap-1">
+                    <p className="ser_names">{item?.service_name}</p>
+                     <p className="ser_rts my-0 d-flex align-items-center gap-1">
                         <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
                       </p>
-                      <div className="d-flex align-items-center gap-1 flex-wrap mt-1">
+                    </div>
+
+                    
+                     
+                     
+                      <div className="">
                         {(item?.offer_price || item?.final_price) ? (
                           <>
                             {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>₹{item?.price}</span> */}
-                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>
+                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>
                               ₹{item?.offer_price || item?.final_price}
                             </span>
                             {/* {item?.discount_percent && (
@@ -391,10 +397,12 @@ const Home = () => {
                             )} */}
                           </>
                         ) : (
-                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>₹{item?.price}</span>
+                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>₹{item?.price}</span>
                         )}
                       </div>
-                    </div>
+                   
+
+
                   </div>
                 </div>
               ))}
@@ -417,18 +425,20 @@ const Home = () => {
                     position: 'relative',
                   }}
                 >
-                  <div className="s_cards">
-                    <img src={item?.service_image} className="w-100 rounded-full" />
-                    <div className="px-2 pb-2">
+                  <div className="s_cards new_s_cardss">
+
+                  <div>
+                     <img src={item?.service_image} className="w-100 rounded-full" />
                       <p className="ser_names">{item?.service_name}</p>
                       <p className="ser_rts my-0 d-flex align-items-center gap-1">
                         <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
                       </p>
-                      <div className="d-flex align-items-center gap-1 flex-wrap mt-1">
+                  </div>
+                  <div className="d-flex align-items-center gap-1 flex-wrap mt-1">
                         {(item?.offer_price || item?.final_price) ? (
                           <>
                             {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>₹{item?.price}</span> */}
-                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>
+                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>
                               ₹{item?.offer_price || item?.final_price}
                             </span>
                             {/* {item?.discount_percent && (
@@ -438,10 +448,17 @@ const Home = () => {
                             )} */}
                           </>
                         ) : (
-                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>₹{item?.price}</span>
+                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>₹{item?.price}</span>
                         )}
                       </div>
-                    </div>
+
+
+                   
+                   
+                     
+                      
+                      
+               
                   </div>
                 </div>
               ))}
@@ -464,18 +481,24 @@ const Home = () => {
                     position: 'relative',
                   }}
                 >
-                  <div className="s_cards">
-                    <img src={item?.service_image} className="w-100 rounded-full" />
-                    <div className="px-2 pb-2">
+                  <div className="s_cards new_s_cardss">
+
+                    <div>
+                      <img src={item?.service_image} className="w-100 rounded-full" />
                       <p className="ser_names">{item?.service_name}</p>
                       <p className="ser_rts my-0 d-flex align-items-center gap-1">
                         <span>★</span> {item?.avg_rating || '0'} ({item?.total_reviews || '0'})
                       </p>
-                      <div className="d-flex align-items-center gap-1 flex-wrap mt-1">
+                    </div>
+
+                   
+                    
+                      
+                      <div className="">
                         {(item?.offer_price || item?.final_price) ? (
                           <>
                             {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>₹{item?.price}</span> */}
-                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>
+                            <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>
                               ₹{item?.offer_price || item?.final_price}
                             </span>
                             {/* {item?.discount_percent && (
@@ -485,10 +508,12 @@ const Home = () => {
                             )} */}
                           </>
                         ) : (
-                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '13px' }}>₹{item?.price}</span>
+                          <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '16px' }}>₹{item?.price}</span>
                         )}
                       </div>
-                    </div>
+                 
+
+
                   </div>
                 </div>
               ))}
