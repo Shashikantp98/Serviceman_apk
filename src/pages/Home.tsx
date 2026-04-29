@@ -233,9 +233,9 @@ const Home = () => {
                   >
                     <img
                       onClick={() =>
-                        navigate(`/servicedeatils/${item?.service_id}`)
+                        item?.service_id && navigate(`/servicedeatils/${item?.service_id}`)
                       }
-                      style={{ height: "240px" }}
+                      style={{ height: "240px", cursor: item?.service_id ? 'pointer' : 'default' }}
                       src={item?.banner_image_url}
                       className="d-block w-100"
                       alt="..."
