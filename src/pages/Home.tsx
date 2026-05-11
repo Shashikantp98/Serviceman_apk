@@ -191,6 +191,23 @@ const Home = () => {
   //     }
   //   }
   // };
+  const handleBannerClick = (item: any) => {
+    const type = item?.banner_type;
+    if (type === 'all_services_offer') {
+      setActiveTab('popular');
+      setTimeout(() => {
+        document.querySelector('.servicies_tab_butons')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else if (type === 'explore_services') {
+      navigate('/categories-list');
+    } else if (type === 'category_offer') {
+      navigate('/service-by-cat', { state: { category: item?.link_id } });
+    } else if (type === 'service_offer') {
+      navigate(`/servicedeatils/${item?.link_id}`);
+    }
+    // advertisement — do nothing
+  };
+
   const isHeaderMinimized = useHeaderMinimize();
   return (
     <>
@@ -232,10 +249,8 @@ const Home = () => {
                     key={index}
                   >
                     <img
-                      onClick={() =>
-                        item?.service_id && navigate(`/servicedeatils/${item?.service_id}`)
-                      }
-                      style={{ height: "240px", cursor: item?.service_id ? 'pointer' : 'default' }}
+                      onClick={() => handleBannerClick(item)}
+                      style={{ height: "240px", cursor: item?.banner_type !== 'advertisement' ? 'pointer' : 'default' }}
                       src={item?.banner_image_url}
                       className="d-block w-100"
                       alt="..."
