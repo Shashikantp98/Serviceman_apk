@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, useEffect } from "react";
 import "./App.css";
+import { loadSavedLanguage } from "./utils/languageStorage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import Supportlist from "./pages/Supportlist";
@@ -10,6 +11,7 @@ import { App as CapApp } from "@capacitor/app";
 import { setNavigator } from "./components/PushNavigate";
 import { useNavigate } from "react-router-dom";
 import ApiService from "./services/api";
+import Referaalcode from "./pages/Referralcode";
 
 // const Splash = lazy(() => import("./pages/Splash"));
 const Select = lazy(() => import("./pages/Select"));
@@ -64,7 +66,10 @@ const Addressdetails = lazy(() => import("./pages/Addressdetails"));
 const AuthAddress = lazy(() => import("./pages/AuthAddress"));
 const CustomerProjectinfo = lazy(() => import("./pages/CustomerProjectinfo"));
 const PrivacyCenter = lazy(() => import("./pages/PrivacyCenter"));
-const AllReviews = lazy(() => import("./pages/Reviews"))
+const AllReviews = lazy(() => import("./pages/Reviews"));
+const ReferralPage = lazy(() => import("./pages/Referral"));
+const InvoiceList = lazy(() => import("./pages/InvoiceList"));
+const InvoiceDetail = lazy(() => import("./pages/InvoiceDetail"));
 
 function AppContent() {
   const navigate = useNavigate();
@@ -72,6 +77,20 @@ function AppContent() {
   useEffect(() => {
     setNavigator(navigate); // Enable push navigation
   }, [navigate]);
+
+  useEffect(() => {
+    loadSavedLanguage();
+  }, []);
+
+  // Ensure the app opens the Select page on initial load in web dev
+  useEffect(() => {
+    const path = window.location.pathname || "/";
+    if (path === "/" || path === "" || path === "/servicemenregister") {
+      navigate("/select", { state: { allowWhenAuth: true } });
+    }
+    // run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (Capacitor.getPlatform() !== "web") {
@@ -132,6 +151,11 @@ function AppContent() {
               {/* Servicemen routes end unauth */}
 
               <Route path="mobile" element={<Mobile />} />
+              <Route path="referaal" element={<Referaalcode />} />
+
+              
+
+
               <Route path="otp" element={<Otp />} />
               <Route path="setpin" element={<Setpin />} />
               <Route path="location" element={<Location />} />
@@ -152,6 +176,7 @@ function AppContent() {
               }
             >
               <Route path="home" element={<Home />} />
+              <Route path="referral" element={<ReferralPage />} />
               <Route path="summery/:id" element={<Summery />} />
               <Route path="service-list" element={<ServiceList />} />
               <Route path="categories-list" element={<CategoriesList />} />
@@ -192,6 +217,8 @@ function AppContent() {
               <Route path="authaddress" element={<AuthAddress />} />
               <Route path="privacycenter" element={<PrivacyCenter />} />
               <Route path="reviews/:service_id" element={<AllReviews />} />
+              <Route path="invoices/:booking_id" element={<InvoiceList />} />
+              <Route path="invoice/:invoice_id" element={<InvoiceDetail />} />
 
 
 
