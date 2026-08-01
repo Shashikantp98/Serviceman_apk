@@ -1,27 +1,19 @@
 import { ChevronLeft, Mail, MapPin, Phone } from "react-feather";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ApiService from "../services/api";
-import { useEffect } from "react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-
-// import CommonHeader from "../components/CommonHeader";
-// import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 
 const MyCustomerProfile = () => {
   const navigate = useNavigate();
   const [profileDetails, setProfileDetails] = useState<any>({});
-
-  // Loader for profile details
   const profileLoader = useSectionLoader("profile-details");
 
   const getProfileDetails = () => {
     profileLoader.setLoading(true);
     ApiService.post("/user/getCustomerDetails")
       .then((res: any) => {
-        console.log(res);
         setProfileDetails(res.data);
       })
       .catch((err) => {
@@ -29,14 +21,31 @@ const MyCustomerProfile = () => {
       })
       .finally(() => {
         profileLoader.setLoading(false);
-      })
+      });
   };
+
   useEffect(() => {
     getProfileDetails();
   }, []);
+
+  const customer = profileDetails?.customer;
+  const address = profileDetails?.address;
+
+  const formatAddress = () => {
+    if (!address) return 'N/A';
+    const parts = [
+      address.street_1,
+      address.street_2,
+      address.city,
+      address.state,
+      address.zip,      // API returns `zip` not `zip_code`
+      address.country,
+    ].filter(Boolean);
+    return parts.join(', ') || 'N/A';
+  };
+
   return (
     <>
-      {/* <CommonHeader /> */}
       {profileLoader.loading && (
         <div className="full-page-loader">
           <div className="loader-spinner"></div>
@@ -56,91 +65,93 @@ const MyCustomerProfile = () => {
         </div>
       </div>
 
-
-
       <div className="container mb-5 pb-5 main-content-service">
         <div className="row px-3">
-          <div className="col-12 p text-center pt-4">
+
+          {/* Title */}
+          <div className="col-12 text-center pt-4">
             <h1 className="head4">My Profile</h1>
           </div>
+
+          {/* Profile Image & Name */}
           <div className="col-12 pt-3">
             <img
-              src={profileDetails?.customer?.profile_image}
+              src={customer?.profile_image}
               className="prof_img"
-            ></img>
-
+              alt="Profile"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80';
+              }}
+            />
             <h3 className="font-18 pt-3 text-center mb-1">
-              {profileDetails?.customer?.fname}{" "}
-              {profileDetails?.customer?.lname}
+              {customer?.fname} {customer?.lname}
             </h3>
-            <p className="text-center text-center font-12 mb-2">
+            <p className="text-center font-12 mb-2">
               Created on{" "}
-              {profileDetails?.customer?.created_on
-                ? dayjs(profileDetails?.customer?.created_on).format(
-                  "DD MMM YYYY"
-                )
+              {customer?.created_on
+                ? dayjs(customer.created_on).format("DD MMM YYYY")
                 : ""}
             </p>
           </div>
+
+          {/* Phone */}
           <div className="col-12 pt-4">
             <div className="d-flex align-items-center gap-10">
-              <Phone size={20}></Phone>
+              <Phone size={20} />
               <div className="px-2">
                 <h6 className="font-12 mb-1">Phone Number</h6>
                 <p className="font-14 mb-0">
-                  {profileDetails?.customer?.country_code}
-                  {profileDetails?.customer?.phone_number}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10">
-              <Mail size={20}></Mail>
-              <div className="px-2">
-                <h6 className="font-12 mb-1">Email Address</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.customer?.email
-                    ? profileDetails?.customer?.email
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10">
-              <Lock size={20}></Lock>
-              <div className="px-2">
-                <h6 className="font-12 mb-1">Referral code</h6>
-                <p className="font-14 mb-0">ID-011221</p>
-              </div>
-            </div>
-          </div> */}
-          <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10">
-              <MapPin size={20}></MapPin>
-              <div className="px-2">
-                <h6 className="font-12 mb-1">Home</h6>
-                <p className="font-14 mb-0">
-                  {profileDetails?.address
-                    ? profileDetails?.address?.street_1 +
-                    ", " +
-                    profileDetails?.address?.city +
-                    ", " +
-                    profileDetails?.address?.state +
-                    ", " +
-                    profileDetails?.address?.zip_code
-                    : "N/A"}
+                  {customer?.country_code} {customer?.phone_number}
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Email */}
+          <div className="col-12 pt-4">
+            <div className="d-flex align-items-center gap-10">
+              <Mail size={20} />
+              <div className="px-2">
+                <h6 className="font-12 mb-1">Email Address</h6>
+                <p className="font-14 mb-0">
+                  {customer?.email || 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Address */}
+          <div className="col-12 pt-4">
+            <div className="d-flex align-items-center gap-10">
+              <MapPin size={20} />
+              <div className="px-2">
+                <h6 className="font-12 mb-1">Home</h6>
+                <p className="font-14 mb-0">{formatAddress()}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Edit Profile */}
           <div className="col-12 mt-4">
             <button onClick={() => navigate("/editCustomer")} className="fill">
               Edit Profile
             </button>
           </div>
+
+          {/* Logout */}
+          <div className="col-12 mt-3">
+            <button
+              className="fill"
+              style={{ background: "#e74c3c", borderColor: "#e74c3c" }}
+              onClick={() => {
+                localStorage.clear();
+                navigate("/");
+              }}
+            >
+              Logout
+            </button>
+          </div>
+
         </div>
       </div>
     </>

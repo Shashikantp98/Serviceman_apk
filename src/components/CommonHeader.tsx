@@ -18,7 +18,7 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({ customBack }) => {
 
   return (
     <div className="new_header fixed_header">
-      <div className="row">
+      <div className="row pt-4">
         <div className="col-12">
           <button className="backs_butn" onClick={handleBack}>
             <ChevronLeft />

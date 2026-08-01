@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
 import { useEffect, useState, useRef } from "react";
-import Header from "../components/Header";
-import CommonHeader from "../components/CommonHeader";
+// import Header from "../components/Header";
+// import CommonHeader from "../components/CommonHeader";
 import { useAuth } from "../contexts/AuthContext";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
@@ -161,13 +161,13 @@ const NotificationsList = () => {
 
   return (
     <>
-      <div className="customer_header_none"></div>
-      {role === "customer" ? <Header /> : <CommonHeader />}
+      {/* <div className="customer_header_none"></div>
+      {role === "customer" ? <Header /> : <CommonHeader />} */}
 
       <div className={role === "customer" ? "container main-content pt-2" : "container main-content-service"}>
 
         <div className='fixed_header text-center'>
-          <h1 className="head4">Notifications</h1>
+          <h1 className="head4 pt-4">Notifications</h1>
         </div>
 
         <div className="row px-2 mb-5 pb-5 fixed_header_padding">

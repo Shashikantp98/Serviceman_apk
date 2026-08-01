@@ -13,9 +13,7 @@ import { GOOGLE_API_KEY } from "../config";
 import { useLoadScript } from "@react-google-maps/api";
 
 import CommonHeader from "../components/CommonHeader";
-// import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
-
 
 // ✅ Define TypeScript interface
 interface Address {
@@ -30,8 +28,6 @@ interface FormValues {
   fname: string;
   lname: string;
   email: string;
-  //   country_code: string;
-  //   phone_number: string;
   address: Address;
   file: FileList;
 }
@@ -48,11 +44,6 @@ const validationSchema = Yup.object().shape({
       "Invalid email",
       (value) => !value || Yup.string().email().isValidSync(value)
     ),
-  // country_code: Yup.string().required("Country code is required"),
-  // phone_number: Yup.string()
-  //   .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
-  //   .required("Phone number is required"),
-
   address: Yup.object().shape({
     street_1: Yup.string().required("Street is required"),
     city: Yup.string().required("City is required"),
@@ -60,9 +51,8 @@ const validationSchema = Yup.object().shape({
     country: Yup.string().required("Country is required"),
     zip: Yup.string().required("Zip code is required"),
   }),
-
   file: Yup.mixed<FileList>().test("fileType", "Invalid file type", (value) => {
-    if (!value || value.length === 0) return true; // ✅ optional
+    if (!value || value.length === 0) return true;
     const file = value[0];
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
     return allowedTypes.includes(file.type);
@@ -79,26 +69,26 @@ const EditCustomer = () => {
     profileDetailsLoader.setLoading(true);
     ApiService.post("/user/getCustomerDetails")
       .then((res: any) => {
-        console.log(res);
+        console.log("✅ Profile Details Response:", res);
         setValue("fname", res.data.customer.fname);
         setValue("lname", res.data.customer.lname);
         setValue("email", res.data.customer.email);
-
         setValue("address", res.data.address);
       })
       .catch((err) => {
-        console.log(err);
+        console.error("❌ Error fetching profile:", err);
       })
       .finally(() => {
         profileDetailsLoader.setLoading(false);
-      })
+      });
   };
+
   useEffect(() => {
     getProfileDetails();
   }, []);
+
   const [loading, setLoading] = useState(false);
   const {
-    // register,
     handleSubmit,
     control,
     setValue,
@@ -125,45 +115,66 @@ const EditCustomer = () => {
       setPreview(null);
     }
   }, [watchedFile]);
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
+    console.log("✅✅✅ onSubmit WAS CALLED! ✅✅✅");
+    console.log("📦 Data received:", data);
+
     const formData = new FormData();
 
     Object.entries(data).forEach(([key, value]) => {
       if (key === "file") {
-        formData.append(key, (value as FileList)[0]);
+        if (value && value[0]) {
+          formData.append(key, value[0]);
+          console.log("✅ File appended:", value[0].name);
+        }
       } else if (typeof value === "object") {
         formData.append(key, JSON.stringify(value));
+        console.log(`✅ ${key} appended as JSON:`, value);
       } else {
         formData.append(key, String(value));
+        console.log(`✅ ${key} appended:`, value);
       }
     });
 
-    console.log("✅ Final FormData (to send via API):", data);
+    console.log("📋 Final FormData entries:", Array.from(formData.entries()));
     setLoading(true);
+
     ApiService.post("/user/updateCustomerDetails", formData)
       .then((res: any) => {
-        console.log(res);
+        console.log("✅✅✅ API SUCCESS ✅✅✅", res);
         setLoading(false);
-        toast.success(res.message);
+        toast.success(res.message || "Profile updated successfully");
         navigate(-1);
       })
       .catch((err: any) => {
-        console.log(err);
-        toast.error(err.response.data.message);
+        console.error("❌❌❌ API ERROR ❌❌❌", err);
+        console.error("Error response:", err.response);
+        console.error("Error message:", err.response?.data?.message);
+        toast.error(err.response?.data?.message || "Failed to update profile");
         setLoading(false);
       });
+  };
+
+  // Handle validation errors
+  const handleValidationErrors = (errors: any) => {
+    console.error("❌❌❌ VALIDATION FAILED ❌❌❌");
+    console.error("Validation errors:", errors);
+    
+    // Show first error as toast
+    const firstErrorField = Object.keys(errors)[0];
+    const firstErrorMessage = errors[firstErrorField]?.message || "Validation failed";
+    toast.error(firstErrorMessage as string);
   };
 
   const handleAddressSelect = (address: any) => {
     console.log("Selected Address:", address);
 
-    // Set main address field
     setValue("address.street_1", address.fullAddress, {
       shouldValidate: true,
       shouldDirty: true,
     });
 
-    // Set individual fields
     if (address.city) {
       setValue("address.city", address.city, {
         shouldValidate: true,
@@ -194,7 +205,9 @@ const EditCustomer = () => {
     googleMapsApiKey: GOOGLE_API_KEY,
     libraries: ["places"],
   });
+
   if (!isLoaded) return <p>Loading...</p>;
+
   return (
     <>
       <CommonHeader />
@@ -288,7 +301,7 @@ const EditCustomer = () => {
         <div className="row px-3 pt-3">
           <div className="col-12">
             <button
-              onClick={handleSubmit(onSubmit)}
+              onClick={handleSubmit(onSubmit, handleValidationErrors)}
               disabled={loading}
               className="fill"
             >

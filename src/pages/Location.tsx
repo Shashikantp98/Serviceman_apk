@@ -1,4 +1,5 @@
-import { ChevronLeft, MapPin, Radio } from "react-feather";
+// import { ChevronLeft, Map, MapPin, Radio, Smartphone } from "react-feather";
+import { Map } from "react-feather";
 // import notification from "../assets/location.png";
 import { useState, useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
@@ -16,6 +17,7 @@ import { useLoadScript } from "@react-google-maps/api";
 import GooglePlacesAutocomplete from "../components/GooglePlacesAutocomplete";
 import * as yup from "yup";
 import { useAuth } from "./../contexts/AuthContext";
+
 const Location = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -317,6 +319,21 @@ const Location = () => {
   } = useForm<any>({
     resolver: yupResolver(storeSchema as any),
   });
+
+  const syncFormAddress = (nextAddress: {
+    street_1: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  }) => {
+    setValue("street_1", nextAddress.street_1, { shouldDirty: true });
+    setValue("city", nextAddress.city, { shouldDirty: true });
+    setValue("state", nextAddress.state, { shouldDirty: true });
+    setValue("zip", nextAddress.zip, { shouldDirty: true });
+    setValue("country", nextAddress.country, { shouldDirty: true });
+  };
+
   const onSubmit = (data: any) => {
     setLoading(true);
     if (user_type === "customer") {
@@ -411,6 +428,14 @@ const Location = () => {
   const handleAddressSelect = (address: any) => {
     console.log("Selected Address:", address);
 
+    setAddress({
+      street_1: address.fullAddress || "",
+      city: address.city || "",
+      state: address.state || "",
+      zip: address.postalCode || "",
+      country: address.country || "",
+    });
+
     // Set main address field
     setValue("street_1", address.fullAddress, {
       shouldValidate: true,
@@ -447,152 +472,158 @@ const Location = () => {
     googleMapsApiKey: GOOGLE_API_KEY,
     libraries: ["places"],
   });
-  if (!isLoaded) return <p>Loading...</p>;
+
+  useEffect(() => {
+    if (address.street_1 || address.city || address.state || address.zip || address.country) {
+      syncFormAddress(address);
+    }
+  }, [address]);
+
+  if (!isLoaded) return <Loader show text="Loading maps..." />;
 
   return (
     <>
       <Loader show={locationLoading} text="Getting your location..." />
-      <div style={{ position: "absolute" }}>
-        <button
-          className="back-btn mb-3 mt-3 px-3 py-3"
-          style={{ color: "#000" }}
-          onClick={() => {
-            navigate(-1);
-          }}
-        >
-          <ChevronLeft /> Back
-        </button>
+
+      <div className="loction_wrap location-screen">
+        <div className="location-shell">
+          <div className="location-header">
+            {showMap && (
+              <button className="gobackbtn" onClick={handleSetManually}>
+                Go Back
+              </button>
+            )}
+          </div>
+
+          <div className="location-intro">
+            <Map size={40} className="mb-2 color-green" />
+            <h6 className="onboard_head pb-0 mb-2">Set Location</h6>
+            <p className="font-14 mb-0">
+              Please fill your location to find the best servicemen around you.
+            </p>
+          </div>
+
+          <div className="location-content location_npt">
+            {!showMap ? (
+              <div className="location-manual-form">
+                <div className="location-field">
+                  <GooglePlacesAutocomplete
+                    control={control}
+                    name="street_1"
+                    onSelect={handleAddressSelect}
+                    label=""
+                    error={errors.street_1?.message?.toString()}
+                  />
+                </div>
+                <div className="location-field">
+                  <Input
+                    control={control}
+                    name="city"
+                    label=""
+                    type="text"
+                    placeholder="Enter city"
+                    inputMode="text"
+                    error={errors.city?.message?.toString()}
+                    disabled={loading}
+                  />
+                </div>
+                <div className="location-field">
+                  <Input
+                    control={control}
+                    name="state"
+                    label=""
+                    type="text"
+                    placeholder="Enter state"
+                    inputMode="text"
+                    error={errors.state?.message?.toString()}
+                    disabled={loading}
+                  />
+                </div>
+                <div className="location-field">
+                  <Input
+                    control={control}
+                    name="country"
+                    label=""
+                    type="text"
+                    placeholder="Enter country"
+                    inputMode="text"
+                    error={errors.country?.message?.toString()}
+                    disabled={loading}
+                  />
+                </div>
+                <div className="location-field">
+                  <Input
+                    control={control}
+                    name="zip"
+                    label=""
+                    type="text"
+                    placeholder="Enter zip"
+                    inputMode="numeric"
+                    error={errors.zip?.message?.toString()}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="location-picker-view">
+                <div className="location-map-card">
+                  <GoogleMapComponent
+                    location={location}
+                    setLocation={setLocation}
+                    setAddress={setAddress}
+                    mapHeight="clamp(300px, calc(100vh - 330px), 500px)"
+                  />
+                </div>
+                <div className="location-address-preview">
+                  <p className="mb-1 font-14"><b>Selected Address</b></p>
+                  <p className="mb-0 font-13 text-muted">
+                    {[address.street_1, address.city, address.state, address.zip, address.country]
+                      .filter(Boolean)
+                      .join(", ") || "Fetching address details..."}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="location-actions">
+            {!showMap ? (
+              <div className="location-manual-actions">
+                <button
+                  className="outline"
+                  onClick={handleAllowGoogleMaps}
+                  disabled={locationLoading}
+                >
+                  Use Current Location
+                </button>
+                <button
+                  className="fill"
+                  onClick={handleSubmit(onSubmit)}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save Address"}
+                </button>
+              </div>
+            ) : (
+              <div className="location-map-actions">
+                <button
+                  onClick={submitLocation}
+                  className="fill"
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Submit"}
+                </button>
+                <button
+                  className="outline"
+                  onClick={handleSetManually}
+                >
+                  Set Manually
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="px-5 pt-5 pb-3 ">
-        <div className="pin mt-5">
-          <MapPin size={18}></MapPin>
-        </div>
-        <h3 className="head2 pt-2 font_14s">What’s your location?</h3>
-        <p className="text-center color-grey font-12">
-          Find an artist or studio near your location
-        </p>
-      </div>
-
-      {!showMap ? (
-        <div className="container" >
-          <div className="px-4">
-            <button
-              className="outline d-flex align-items-center"
-              onClick={handleAllowGoogleMaps}
-            >
-              <Radio></Radio>&nbsp; Use Current Location
-            </button>
-          </div>
-          <div className="px-4">
-            <p className="font-12 mb-0 mt-3">Set manually</p>
-          </div>
-          <div className="row px-4">
-            <div className="col-12 pt-3">
-              <GooglePlacesAutocomplete
-                control={control}
-                name="street_1"
-                onSelect={handleAddressSelect}
-                label=""
-                error={errors.street_1?.message?.toString()}
-              />
-            </div>
-            <div className="col-6 pt-3">
-              <Input
-                control={control}
-                name="city"
-                label=""
-                type="text"
-                placeholder="Enter city"
-                inputMode="text"
-                error={errors.city?.message?.toString()}
-                disabled={loading}
-              />
-            </div>
-            <div className="col-6 pt-3">
-              <Input
-                control={control}
-                name="state"
-                label=""
-                type="text"
-                placeholder="Enter state"
-                inputMode="text"
-                error={errors.state?.message?.toString()}
-                disabled={loading}
-              />
-            </div>
-            <div className="col-6 pt-3">
-              <Input
-                control={control}
-                name="country"
-                label=""
-                type="text"
-                placeholder="Enter country"
-                inputMode="text"
-                error={errors.country?.message?.toString()}
-                disabled={loading}
-              />
-            </div>
-            <div className="col-6 pt-3">
-              <Input
-                control={control}
-                name="zip"
-                label=""
-                type="text"
-                placeholder="Enter zip"
-                inputMode="numeric"
-                error={errors.zip?.message?.toString()}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <div className="px-4 mt-5">
-            <button
-              className="fill"
-              onClick={handleSubmit(onSubmit)}
-              disabled={loading}
-            >
-              {" "}
-              {loading ? "Saving..." : "Save Address"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="">
-          <div className="px-3 pb-3 ">
-            <GoogleMapComponent
-              location={location}
-              setLocation={setLocation}
-              setAddress={setAddress}
-            />
-          </div>
-
-          <button
-            onClick={submitLocation}
-            style={{
-              position: "fixed",
-              bottom: "85px",
-              width: "90%",
-              left: "5%",
-            }}
-            className="fill"
-          >
-            {loading ? "Submitting..." : "Submit"}
-          </button>
-          <button
-            style={{
-              position: "fixed",
-              bottom: "25px",
-              width: "90%",
-              left: "5%",
-            }}
-            className="outline"
-            onClick={handleSetManually}
-          >
-            Set Manually
-          </button>
-        </div>
-      )}
     </>
   );
 };

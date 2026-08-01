@@ -17,6 +17,7 @@ const Header = ({ isMinimized = false }) => {
   } = useAuth();
 
   const [unseenCount, setUnseenCount] = useState(0);
+  const [userName, setUserName] = useState("");
 
   // 📌 Fetch unseen notifications count
   const getUnseenNotificationCount = () => {
@@ -37,17 +38,25 @@ const Header = ({ isMinimized = false }) => {
       },
     })
       .then((res: any) => {
-        setCurrentLocationFn(
-          res.data.address?.street_1 +
-            ", " +
-            res.data.address?.city +
-            ", " +
-            res.data.address?.state +
-            ", " +
-            res.data.address?.country
+        const customer = res.data?.customer;
+        const address = res.data?.address;
+
+        setUserName(
+          customer?.fname
         );
 
-        setLatLong(res.data.address?.latitude, res.data.address?.longitude);
+        setCurrentLocationFn(
+          [
+            address?.street_1,
+            address?.city,
+            address?.state,
+            address?.country,
+          ]
+            .filter(Boolean)
+            .join(", ")
+        );
+
+        setLatLong(address?.latitude, address?.longitude);
       })
       .catch((err) => {
         console.log(err);
@@ -59,10 +68,10 @@ const Header = ({ isMinimized = false }) => {
     if (token !== "guest") {
       // Fetch count immediately when not on notifications page
       getUnseenNotificationCount();
-      
+
       // Don't poll if user is on the notifications page
       const isOnNotificationsPage = location.pathname === "/notifications";
-      
+
       if (!isOnNotificationsPage) {
         const interval = setInterval(() => {
           getUnseenNotificationCount();
@@ -75,7 +84,12 @@ const Header = ({ isMinimized = false }) => {
 
   useEffect(() => {
     if (token == "guest") {
-      if (!latitude || !longitude) {
+      if (
+        latitude === undefined ||
+        latitude === null ||
+        longitude === undefined ||
+        longitude === null
+      ) {
         navigate("/authlocation");
       }
     } else {
@@ -83,87 +97,112 @@ const Header = ({ isMinimized = false }) => {
     }
   }, [token, latitude, longitude]);
 
-  // 🎯 Just navigate — DO NOT reset count, DO NOT call markNotificationsAsSeen
+
   const handleNotificationClick = () => {
     navigate("/notifications");
   };
-
   return (
     <>
-      <div className={`fixed_header${isMinimized ? ' minimized-header' : ' p-3'}`}> 
-        {isMinimized ? (
-          // Only show search bar when minimized, flush to top
-          <div className="position-relative sear" onClick={() => navigate("/search")}
-            style={{ maxWidth: 400, margin: "0 auto" }}>
-            <Search />
-            <input
-              type="text"
-              className="searchs"
-              placeholder="Search for your services"
-            />
-          </div>
-        ) : (
-          <>
-            <div className="d-flex justify-content-between align-items-center">
-              {/* 📍 LOCATION */}
-              <div
-                className="d-flex gap-10 text-white align-items-center"
-                onClick={() => navigate("/authlocation")}
-              >
-                <span className="locpin">
-                  <MapPin size={22} />
-                </span>
-                <div>
-                  <p className="adrsh">Location</p>
-                  <p className="mb-0 adsr">
-                    {currentLocation && currentLocation?.length > 35
-                      ? currentLocation?.slice(0, 35) + "..."
-                      : currentLocation}
-                  </p>
-                </div>
-              </div>
-
-              {/* 🔔 NOTIFICATION BELL */}
-              <div
-                style={{ position: "relative", cursor: "pointer" }}
-                onClick={handleNotificationClick}
-              >
-                <Bell color="#292929ff" size={22} />
-
-                {/* 🔴 Badge */}
-                {unseenCount > 0 && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: -5,
-                      right: -5,
-                      background: "red",
-                      color: "white",
-                      fontSize: "10px",
-                      padding: "2px 6px",
-                      borderRadius: "50%",
-                    }}
-                  >
-                    {unseenCount}
-                  </span>
-                )}
-              </div>
-            </div>
-            {/* SEARCH BOX */}
-            <div
-              className="position-relative sear mt-3"
-              onClick={() => navigate("/search")}
-            >
-              <Search />
+      {isMinimized ? (
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 999,
+            background: "#fff",
+            paddingTop: "10px",
+          }}
+        >
+          <div
+            className="searchwrap px-4 pb-3"
+            onClick={() => navigate("/search")}
+            style={{ cursor: "pointer" }}
+          >
+            <label className="position-relative w-100">
+              <Search className="sericons" size={21} />
               <input
                 type="text"
-                className="searchs"
+                className="searchinput"
                 placeholder="Search for your services"
+                readOnly
               />
+            </label>
+          </div>
+        </div>
+
+      ) : (
+        <>
+          <div className="headers_new px-4 pt-4 mt-5 mb-2">
+            <div
+              className="d-flex gap-10 align-items-center"
+              onClick={() => navigate("/authlocation")}
+              style={{ cursor: "pointer" }}
+            >
+              <span className="maplins">
+                <MapPin color="#fff" size={25} />
+              </span>
+
+              <span className="curlocations">
+                <h5>
+                  {currentLocation
+                    ? currentLocation.split(",")[1]?.trim() ||
+                    currentLocation.split(",")[0]?.trim()
+                    : "Location"}
+                </h5>
+
+                <p>
+                  {currentLocation && currentLocation.length > 50
+                    ? currentLocation.slice(0, 50) + "..."
+                    : currentLocation}
+                </p>
+              </span>
             </div>
-          </>
-        )}
-      </div>
+
+            <div>
+              <span
+                className="notiflins"
+                onClick={handleNotificationClick}
+                style={{ cursor: "pointer", position: "relative" }}
+              >
+                {unseenCount > 0 && (
+                  <span className="cartitemcount">
+                    {unseenCount > 99 ? "99+" : unseenCount}
+                  </span>
+                )}
+
+                <Bell color="#292929ff" size={22} />
+              </span>
+            </div>
+          </div>
+
+          <div className="px-4 mb-2">
+            <h4 className=" welcome-username">
+              Hello, {userName}
+            </h4>
+
+            {/* <h5>
+                <i>How can I help you today?</i>
+              </h5> */}
+          </div>
+
+          {/* Search Bar */}
+          <div
+            className="searchwrap px-4 pb-3"
+            onClick={() => navigate("/search")}
+            style={{ cursor: "pointer" }}
+          >
+            <label className="position-relative w-100">
+              <Search className="sericons" size={21} />
+              <input
+                type="text"
+                className="searchinput"
+                placeholder="Search for your services"
+                readOnly
+              />
+            </label>
+          </div>
+        </>
+      )}
     </>
   );
 };

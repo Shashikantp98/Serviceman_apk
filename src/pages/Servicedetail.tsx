@@ -4,12 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { LoginModal } from "../components/LoginModal";
-import { toast } from "react-toastify";
-import CommonHeader from "../components/CommonHeader";
+// import { toast } from "react-toastify";
+// import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import dayjs from "dayjs";
-// import { ArrowUpRight } from "react-feather";
+// import { Check, Home, Search, Share, Shield, Star, X } from "react-feather";
+import { Search } from "react-feather"; //Share
 
 interface ReviewData {
   _id: string;
@@ -29,22 +30,41 @@ interface ReviewData {
   };
 }
 
-
-
 const Servicedetail = () => {
   const navigate = useNavigate();
-  const { logout, token, latitude, longitude } = useAuth();
-  const [serviceDetails, setServiceDetails] = useState<any>({});
+  const { logout, latitude, longitude } = useAuth();//token
+  const [serviceDetails, setServiceDetails] = useState<any>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [averageRating, setAverageRating] = useState(0);
   const reviewsRef = useRef<HTMLDivElement>(null);
 
-  // Loader for service details
   const serviceLoader = useSectionLoader("service-details");
   const reviewsLoader = useSectionLoader("reviews");
 
   const { id } = useParams();
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const priceBreakup = serviceDetails?.price_breakup || serviceDetails?.breakup || null;
+  const hasPriceBreakup =
+    !!priceBreakup &&
+    [
+      "booking_fee",
+      "booking_fee_percent",
+      "accepting_fee_amount",
+      "accepting_fee_percent",
+      "platform_share_amount",
+      "platform_share_percent",
+      "gst_amount",
+      "gst_percent",
+      "platform_net_amount",
+      "base_price_amount",
+      "remaining_amount",
+    ].some((key) => priceBreakup?.[key] !== undefined && priceBreakup?.[key] !== null);
+
+  const formatAmount2 = (value: any) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num.toFixed(2) : "--";
+  };
 
   useEffect(() => {
     if (id) {
@@ -55,7 +75,6 @@ const Servicedetail = () => {
         longitude: Number(longitude),
       })
         .then((res: any) => {
-          console.log(res);
           setServiceDetails(res.data);
         })
         .catch((err: any) => {
@@ -67,21 +86,16 @@ const Servicedetail = () => {
     }
   }, [id]);
 
-  // Fetch reviews
   useEffect(() => {
     if (!id) return;
-
     const fetchReviews = async () => {
       reviewsLoader.setLoading(true);
       try {
         const response: any = await ApiService.post('/user/getServiceReviews', {
           service_id: id,
         });
-
         if (response?.data && Array.isArray(response.data)) {
           setReviews(response.data);
-
-          // Calculate average rating
           if (response.data.length > 0) {
             const avgRating = response.data.reduce((sum: number, review: ReviewData) => sum + review.rating, 0) / response.data.length;
             setAverageRating(Math.round(avgRating * 10) / 10);
@@ -93,237 +107,300 @@ const Servicedetail = () => {
         reviewsLoader.setLoading(false);
       }
     };
-
     fetchReviews();
   }, [id]);
 
   const handleBookNow = () => {
-    if (token == "guest") {
-      setShowLoginModal(true);
-    } else {
-      // Check customer details first
-      serviceLoader.setLoading(true);
-      ApiService.post(`/user/getCustomerDetails`, {})
-        .then((res: any) => {
-          const customerData = res.data.customer;
-
-          // Check if fname or lname is missing or empty
-          if (!customerData?.fname || !customerData?.lname ||
-            customerData.fname.trim() === '' || customerData.lname.trim() === '') {
-            toast.warning("First add your name to book the service");
-            navigate('/editCustomer');
-          } else {
-            // Proceed with booking
-            if (serviceDetails.is_available) {
-              navigate(`/summery/${serviceDetails?.service_id}`);
-            } else {
-              toast.error(serviceDetails.availability_message);
-            }
-          }
-        })
-        .catch((err: any) => {
-          console.log('Error fetching customer details:', err);
-          toast.error("Error checking customer details");
-        })
-        .finally(() => {
-          serviceLoader.setLoading(false);
-        });
-    }
+    navigate(`/summery/${serviceDetails?.service_id}`);
   };
 
-  const getRatingEmoji = (rating: number) => {
-    const emojiMap: { [key: number]: string } = {
-      1: '😡',
-      2: '😒',
-      3: '🙂',
-      4: '☺️',
-      5: '🥳',
-    };
-    return emojiMap[rating] || '😐';
-  };
+  // const getRatingEmoji = (rating: number) => {
+  //   const emojiMap: { [key: number]: string } = { 1: '😡', 2: '😒', 3: '🙂', 4: '☺️', 5: '🥳' };
+  //   return emojiMap[rating] || '😐';
+  // };
 
-  const getRatingLabel = (rating: number) => {
-    const labelMap: { [key: number]: string } = {
-      1: 'Very Bad',
-      2: 'Bad',
-      3: 'Good',
-      4: 'Very Good',
-      5: 'Excellent',
-    };
-    return labelMap[rating] || 'No Rating';
-  };
+  // const getRatingLabel = (rating: number) => {
+  //   const labelMap: { [key: number]: string } = { 1: 'Very Bad', 2: 'Bad', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
+  //   return labelMap[rating] || 'No Rating';
+  // };
 
-  const getProfileImageUrl = (imageUrl: string) => {
-    if (!imageUrl) return 'https://via.placeholder.com/40';
-    return imageUrl;
-  };
+  // const getProfileImageUrl = (imageUrl: string) => {
+  //   if (!imageUrl) return 'https://via.placeholder.com/40';
+  //   return imageUrl;
+  // };
+
+  // Show loader while fetching
+  if (serviceLoader.loading) {
+    return (
+      <div style={{ height: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <SectionLoader show={true} size="large" text="Loading service details..." />
+      </div>
+    );
+  }
+
   return (
     <>
-      <CommonHeader />
-      {/* ======= Centered Loader ======= */}
-      {serviceLoader.loading ? (
-        <div
-          style={{
-            height: "80vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <SectionLoader show={true} size="large" text="Loading service details..." />
-        </div>
-      ) : (
-        <>
+      <div>
+        <div className="container px-3 pt-4 padding_btn_main">
+          <div className="row">
 
-          <div className="container pb-5 mb-5 main-content-service">
-            <div className="row">
-              <div className="col-12 pt-3">
-                <img
-                  src={serviceDetails?.service_image_url}
-                  className="w-100 rounded-full"
-                ></img>
+            {/* Header row */}
+            <div className="col-12 d-flex pt-5 align-items-center justify-content-between">
+              <button className="back_btn_new" onClick={() => navigate(-1)}>Back</button>
+              <div className="d-flex align-items-center gap-2">
+                <button className="back_btn_new2"><Search size={16} /></button>
               </div>
-              <div className="col-12 sder_detail">
+            </div>
 
-                <div className="d-flex gap-3  justify-content-between pt-4 align-items-center">
-                  <h4 className="mb-0">{serviceDetails?.service_name}</h4>
-                  <button className=" book_servi2" onClick={handleBookNow}>
+            {/* Banner / Service Image */}
+            <div className="col-12 pt-4">
+              <img
+                src={serviceDetails?.service_image_url || ''}
+                className="w-100 rounded-full"
+                alt={serviceDetails?.service_name}
+              />
+            </div>
 
-                    Book Now
-                  </button>
+            {/* Title, Rating, Price, Book Now */}
+            <div className="col-12 pt-3 d-flex justify-content-between align-items-start">
+              <div className="mostbookedtext3">
+                <h3>{serviceDetails?.service_name}</h3>
+                <p>
+                  ✭ {averageRating > 0 ? averageRating : (serviceDetails?.avg_rating || '0')} ({serviceDetails?.total_reviews || '0'} Reviews)
+                </p>
+
+                {/* Pricing — show first pricing tier if available */}
+                {serviceDetails?.pricing?.length > 0 && (
+                  <>
+                    <p className="pt-1">
+                      <b>₹{serviceDetails.pricing[0].final_price}</b>
+                      {serviceDetails.pricing[0].price !== serviceDetails.pricing[0].final_price && (
+                        <>&nbsp;<span className="text-decoration-line-through">₹{serviceDetails.pricing[0].price}</span></>
+                      )}
+                    </p>
+                    <p className="heil_text pt-0">{serviceDetails.pricing[0].duration}</p>
+                  </>
+                )}
+
+                {/* Banner offer price (if exists) */}
+                {serviceDetails?.offer_price && (
+                  <p className="pt-1">
+                    <b>₹{serviceDetails.offer_price}</b>&nbsp;
+                    {serviceDetails.service_price && (
+                      <span className="text-decoration-line-through">₹{serviceDetails.service_price}</span>
+                    )}
+                  </p>
+                )}
+              </div>
+              <button className="fill_new3 mt-2" onClick={handleBookNow}>Book Now</button>
+            </div>
+
+            <div className="col-12">
+
+              {/* Description */}
+              {serviceDetails?.description && (
+                <div className="det_card">
+                  <h2>Description</h2>
+                  <p dangerouslySetInnerHTML={{ __html: serviceDetails.description }} />
                 </div>
+              )}
 
-
-                <h6
-                  className="pt-2"
-
-                  onClick={() => {
-                    if (serviceDetails?.total_reviews > 0 && reviewsRef.current) {
-                      reviewsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }}
-                >
-                  ★ {serviceDetails?.avg_rating || '0'} ({serviceDetails?.total_reviews || '0'} reviews)
-                </h6>
-                <p
-                  className="mb-2 pt-2"
-                  dangerouslySetInnerHTML={{ __html: serviceDetails?.description }}
-                ></p>
-                <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
-                  {(serviceDetails?.offer_price || serviceDetails?.final_price) ? (
-                    <>
-                      {/* <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '15px' }}>
-                        ₹{serviceDetails?.price}
-                      </span> */}
-                      <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>
-                        ₹{serviceDetails?.offer_price || serviceDetails?.final_price}
-                      </span>
-                      {/* {serviceDetails?.discount_percent && (
-                        <span style={{ background: '#e8f5e9', color: '#2e7d32', fontSize: '12px', fontWeight: 600, borderRadius: '4px', padding: '2px 7px' }}>
-                          {serviceDetails?.discount_percent}% off
-                        </span>
-                      )} */}
-                    </>
-                  ) : (
-                    <span style={{ color: 'var(--primary-color, #040407)', fontWeight: 700, fontSize: '17px' }}>
-                      ₹{serviceDetails?.price}
-                    </span>
-                  )}
-                  <span style={{ color: '#555', fontSize: '14px' }}>- Duration : {serviceDetails?.duration}</span>
-                </div>
-
-                {/* <h5>What is covered</h5>
-            <ul>
-              <li>Hard water stains</li>
-              <li>Toilet seat from outside and inside</li>
-              <li>Sink tiles and tanks</li>
-              <li>Mirror and Windows</li>
-              <li>Exhaust Fans</li>
-            </ul> */}
-
-                {/* Reviews Section */}
-                {reviewsLoader.loading ? (
-                  <div style={{ marginTop: '24px' }}>
-                    <SectionLoader show={true} size="medium" text="Loading reviews..." />
-                  </div>
-                ) : reviews.length > 0 ? (
-                  <div className="pt-3" ref={reviewsRef}>
-                    <div className="d-flex pb-3 align-items-center justify-content-between">
-                      <h5 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Customer Reviews</h5>
-                      <div className="d-flex align-items-center gap-1">
-                        <span className="font-12">
-                          {averageRating}
-                        </span>
-                        <div>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span
-                              key={star}
-                              style={{ fontSize: '14px', color: star <= Math.round(averageRating) ? '#ffc107' : '#ddd' }}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                        <span className="font-12 text-blue">({reviews.length} reviews )</span>
+              {/* What is Covered */}
+              {serviceDetails?.what_is_covered && (
+                <div className="det_card">
+                  <h2>What is Covered</h2>
+                  <ul className="what_coverd">
+                    {serviceDetails?.what_is_covered && (
+                      <div className="det_card">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: serviceDetails.what_is_covered,
+                          }}
+                        />
                       </div>
-                    </div>
+                    )}
+                  </ul>
+                </div>
+              )}
 
+              {/* What is Not Covered */}
+              {serviceDetails?.what_is_not_covered && (
+                <div className="det_card">
+                  <h2>What is not Covered</h2>
+                  <ul className="what_coverd">
+                    {serviceDetails.what_is_not_covered && (
+                      <div className="det_card">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: serviceDetails.what_is_not_covered,
+                          }}
+                        />
+                      </div>
+                      )}
+                  </ul>
+                </div>
+              )}
 
-
-                    {reviews.slice(0, 3).map((review) => (
-                      <div
-                        key={review._id}
-                        className="revs_carrdss mb-3"
-                      >
-                        <div className="d-flex justify-content-between">
-                          <div className="d-flex align-items-center gap-2">
-                            <img
-                              className="rev_cs_imgs"
-                              src={getProfileImageUrl(review.customer_id.profile_image)}
-                              alt={review.customer_id.fname}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/36';
-                              }}
-                            />
-                            <div>
-                              <p className="mb-0 cusnms">
-                                {review.customer_id.fname} {review.customer_id.lname}
-                              </p>
-                              <p className="mb-0 cusdatetime">
-                                {dayjs(review.created_on).format('MMM D, YYYY')}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <p style={{ margin: '0 0 4px 0', fontSize: '20px' }}>
-                              {getRatingEmoji(review.rating)}
-                            </p>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <span
-                                  key={star}
-                                  style={{
-                                    fontSize: '14px',
-                                    color: star <= review.rating ? '#ffc107' : '#ddd'
-                                  }}
-                                >
-                                  ★
-                                </span>
-                              ))}
-                            </div>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
-                              {getRatingLabel(review.rating)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <p className="cusrev mb-0 pt-2">
-                          {review.review}
-                        </p>
+              {/* Our Process */}
+              {serviceDetails?.images?.our_process?.length > 0 && (
+                <div className="det_card">
+                  <h2>Our Process</h2>
+                  <div className="newscrll">
+                    {serviceDetails.images.our_process.map((img: any) => (
+                      <div key={img.id} className="catcards fix_widcard_3 fixhei">
+                        <img src={img.image_url} alt={img.label} />
+                        <span className="mostbookedtext2">
+                          <h3>{img.label}</h3>
+                        </span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
 
+              {/* Before & After */}
+              {serviceDetails?.images?.before_after?.length > 0 && (
+                <div className="det_card">
+                  <h2>See the difference</h2>
+                  <div className="row">
+                    {serviceDetails.images.before_after.map((img: any) => (
+                      <div key={img.id} className="col-6 mt-3">
+                        <img src={img.image_url} alt={img.label} className="w-100 difimgg" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top Cleaners */}
+              {serviceDetails?.top_cleaners && (
+                <div className="det_card">
+                  <h2>Our Top Cleaners</h2>
+                  <ul className="what_coverd">
+                    {serviceDetails.top_cleaners && (
+                      <div className="det_card">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: serviceDetails.top_cleaners,
+                          }}
+                        />
+                      </div>
+                      )}
+                  </ul>
+                </div>
+              )}
+
+              {/* Our Tools / Equipment */}
+              {serviceDetails?.images?.our_tools?.length > 0 && (
+                <div className="det_card">
+                  <h2>Our cleaning equipment</h2>
+                  <div className="row">
+                    {serviceDetails.images.our_tools.map((img: any) => (
+                      <div key={img.id} className="col-4 mt-3">
+                        <img src={img.image_url} alt={img.label} className="w-100 difimgg" />
+                        <span className="mostbookedtext2">
+                          <h3>{img.label}</h3>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pricing Tiers */}
+              {serviceDetails?.pricing?.length > 1 && (
+                <div className="det_card">
+                  <h2>Pricing</h2>
+                  {serviceDetails.pricing.map((tier: any, idx: number) => (
+                    <div key={idx} className="d-flex justify-content-between align-items-center py-2 border-bottom">
+                      <span>{tier.duration}</span>
+                      <span>
+                        <b>₹{tier.final_price}</b>
+                        {tier.discount_percent > 0 && (
+                          <>
+                            &nbsp;<span className="text-decoration-line-through text-muted">₹{tier.price}</span>
+                            &nbsp;<span className="text-success" style={{ fontSize: '12px' }}>{tier.discount_percent}% off</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {hasPriceBreakup && (
+                <details className="det_card">
+                  <summary style={{ cursor: "pointer", fontWeight: 600 }}>Price breakup</summary>
+                  <div className="pt-2">
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Booking fee</span>
+                      <span>₹{formatAmount2(priceBreakup?.booking_fee)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Booking fee percent</span>
+                      <span>{formatAmount2(priceBreakup?.booking_fee_percent)}%</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Accepting fee amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.accepting_fee_amount)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Accepting fee percent</span>
+                      <span>{formatAmount2(priceBreakup?.accepting_fee_percent)}%</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Platform share amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.platform_share_amount)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Platform share percent</span>
+                      <span>{formatAmount2(priceBreakup?.platform_share_percent)}%</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>GST amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.gst_amount)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>GST percent</span>
+                      <span>{formatAmount2(priceBreakup?.gst_percent)}%</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Platform net amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.platform_net_amount)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1 border-bottom">
+                      <span>Base price amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.base_price_amount)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between py-1">
+                      <span>Remaining amount</span>
+                      <span>₹{formatAmount2(priceBreakup?.remaining_amount)}</span>
+                    </div>
+                  </div>
+                </details>
+              )}
+
+              {/* Reviews */}
+              <div className="det_card" ref={reviewsRef}>
+                <h2 className="mb-2">All Reviews</h2>
+
+                {reviewsLoader.loading ? (
+                  <SectionLoader show={true} size="medium" text="Loading reviews..." />
+                ) : reviews.length > 0 ? (
+                  <>
+                    {reviews.slice(0, 3).map((review) => (
+                      <div key={review._id} className="revs_carrdss">
+                        <div className="d-flex justify-content-between align-items-start">
+                          <h1>{review.customer_id.fname} {review.customer_id.lname}</h1>
+                          <span>✭ {review.rating}</span>
+                        </div>
+                        <p className="revttext2">
+                          {dayjs(review.created_on).format('MMM D, YYYY')}
+                          {review.booking_id?.bkng_id && ` | #${review.booking_id.bkng_id}`}
+                        </p>
+                        <p className="revttext">{review.review}</p>
+                      </div>
+                    ))}
                     {reviews.length > 3 && (
                       <button
                         className="view_all_revi"
@@ -332,26 +409,25 @@ const Servicedetail = () => {
                         View All Reviews ({reviews.length})
                       </button>
                     )}
-                  </div>
-                ) : null}
-
-                <button className="mb-5 mt-4 book_servi" onClick={handleBookNow}>
-                  {/* <ArrowUpRight></ArrowUpRight> */}
-                  Book Now
-                </button>
+                  </>
+                ) : (
+                  <p className="text-muted">No reviews yet.</p>
+                )}
               </div>
+
             </div>
-            <LoginModal
-              show={showLoginModal}
-              onCancel={() => setShowLoginModal(false)}
-              onConfirm={() => {
-                logout();
-                setShowLoginModal(false);
-              }}
-            />
           </div>
-        </>
-      )}
+        </div>
+      </div>
+
+      <LoginModal
+        show={showLoginModal}
+        onCancel={() => setShowLoginModal(false)}
+        onConfirm={() => {
+          logout();
+          setShowLoginModal(false);
+        }}
+      />
     </>
   );
 };

@@ -18,18 +18,20 @@ type Props = {
     zip: string;
     country: string;
   }) => void;
-};
-
-const containerStyle = {
-  width: "100%",
-  height: "50vh",
+  mapHeight?: string;
 };
 
 const GoogleMapComponent: React.FC<Props> = ({
   location,
   setLocation,
   setAddress,
+  mapHeight,
 }) => {
+  const containerStyle = {
+    width: "100%",
+    height: mapHeight || "50vh",
+  };
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: GOOGLE_API_KEY,
     libraries: ["places"],

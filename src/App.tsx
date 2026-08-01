@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, useEffect } from "react";
 import "./App.css";
-import { loadSavedLanguage } from "./utils/languageStorage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import Supportlist from "./pages/Supportlist";
@@ -77,10 +76,6 @@ function AppContent() {
   useEffect(() => {
     setNavigator(navigate); // Enable push navigation
   }, [navigate]);
-
-  useEffect(() => {
-    loadSavedLanguage();
-  }, []);
 
   // Ensure the app opens the Select page on initial load in web dev
   useEffect(() => {

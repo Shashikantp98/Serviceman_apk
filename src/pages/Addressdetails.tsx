@@ -1,4 +1,4 @@
-import { Edit, PlusCircle, Trash2 } from "react-feather";
+import { Edit, Edit2, PlusCircle, Trash2 } from "react-feather";
 import ApiService from "../services/api";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -86,7 +86,78 @@ const Addressdetails = () => {
 
   return (
     <>
-      <div>
+
+      <div className="container">
+        <div className="row pt-5">
+          <div className="col-12 pt-4 pb-0">
+            <h3>My Addresses</h3>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-12">
+              <div className="bookingcards">
+                  <div className='basic_details_card d-flex justify-content-between align-items-start'>
+                    <div>
+                      <span className="bkg_id">Primary</span>
+                    </div>
+                  
+                  </div>
+                  <div>
+                      <h2 className="ser_name pt-4">Dhar Road</h2>
+                      <p>315, Zainy Manzil, Noorani Nagar, Dhar Road, Indore</p>
+
+                  </div>
+                  <div className="d-flex gap-3 pt-3">
+                    <button className="paynow">Set as Primary</button>
+                    <button className="edit_req">
+                      <Edit2 size={14} /> 
+                    </button>
+                    <button className="delete_req">
+                      <Trash2 size={14} /> 
+                    </button>
+
+                  </div>
+
+                  
+
+              </div>
+                <div className="bookingcards">
+                  <div className='basic_details_card d-flex justify-content-between align-items-start'>
+                    <div>
+                      <span className="bkg_id">Secondary</span>
+                    </div>
+                  
+                  </div>
+                  <div>
+                      <h2 className="ser_name pt-4">Vijay Nagar</h2>
+                      <p>315, Zainy Manzil, Noorani Nagar, Dhar Road, Indore</p>
+
+                  </div>
+                  <div className="d-flex gap-3 pt-3">
+                    <button className="paynow">Set as Primary</button>
+                    <button className="edit_req">
+                      <Edit2 size={14} /> 
+                    </button>
+                    <button className="delete_req">
+                      <Trash2 size={14} /> 
+                    </button>
+
+                  </div>
+
+                  
+
+              </div>
+          </div>
+          <div className="col-12 mt-4">
+            <button className="paynow2">
+              <PlusCircle />
+              &nbsp; Add New Address
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="d-none">
         <CommonHeader />
         {showModal && (
           <div

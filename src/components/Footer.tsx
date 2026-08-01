@@ -45,7 +45,7 @@ const Footer = () => {
               className={isActive("/myrequest") ? "active" : ""}
             >
               <File></File>
-              Request
+              Bookings
             </li>
             <li 
               onClick={() => handleBookNow("/supportlist")}

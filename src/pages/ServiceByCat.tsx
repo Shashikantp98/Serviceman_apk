@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import { LoginModal } from "../components/LoginModal";
 import { toast } from "react-toastify";
-import CommonHeader from "../components/CommonHeader";
+// import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 
@@ -83,9 +83,119 @@ const ServiceByCat = () => {
 
   return (
     <>
-      <CommonHeader />
 
-      <div className="container pb-10 main-content-service">
+      <div className="container">
+        <div className="row pt-5">
+          <div className="col-12 pt-3">
+            <button
+              className="back_btn_new"
+              onClick={() => navigate(-1)}>
+              Back
+            </button>
+          </div>
+        </div>
+        <div className="row pt-2">
+          <div className="col-12">
+            <div className="px-0 categories_scroll pt-2">
+              <button
+                className={selectedCategoryId === "" ? "active" : ""}
+                onClick={() => setSelectedCategoryId("")}
+              >
+                All
+              </button>
+
+              {categories?.map((cat: any) => (
+                <button
+                  key={cat?.category_id}
+                  className={
+                    selectedCategoryId === cat?.category_id ? "active" : ""
+                  }
+                  onClick={() => setSelectedCategoryId(cat?.category_id)}
+                >
+                  {cat?.category_name}
+                </button>
+              ))}
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="container py-2 pb-4 mt-3 px-4 bg-lig2 padding_btn_main pb-5 mb-5">
+        <div className="row  mt-2">
+          <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
+            <p className="subcats">
+              {selectedCategoryId
+                ? categories?.find(
+                  (cat: any) =>
+                    cat?.category_id === selectedCategoryId
+                )?.category_name + " Services"
+                : "All Services"}
+            </p>            <button
+              className="view_more"
+              onClick={() => navigate("/categories-list")}
+            >
+              See All
+            </button>
+          </div>
+        </div>
+        <div className="row">
+          <SectionLoader
+            size="medium"
+            show={catServiceLoader.loading}
+            text="Loading Services..."
+            overlay={true}
+          />
+
+          {!catServiceLoader.loading &&
+            services?.map((item: any) => (
+              <div
+                className="col-6 mb-4"
+                key={item?.service_id}
+                onClick={() =>
+                  navigate(`/servicedeatils/${item?.service_id}`)
+                }
+                style={{ cursor: "pointer" }}
+              >
+                <div className="catcards">
+                  <img
+                    src={item?.service_image}
+                    alt={item?.service_name}
+                  />
+
+                  <span className="mostbookedtext2">
+                    <h3>
+                      {item?.service_name?.length > 25
+                        ? item?.service_name.slice(0, 25) + "..."
+                        : item?.service_name}
+                    </h3>
+
+                    <p className="mb-0">
+                      ✭ {item?.avg_rating || 0}
+                      {" "}
+                      ({item?.total_reviews || 0})
+                    </p>
+
+                    <p className="pt-0">
+                      ₹
+                      {item?.offer_price ||
+                        item?.final_price ||
+                        item?.price}
+                    </p>
+                  </span>
+                </div>
+              </div>
+            ))}
+
+          {!catServiceLoader.loading &&
+            services?.length === 0 && (
+              <div className="col-12">
+                <p>No Services Found</p>
+              </div>
+            )}
+        </div>
+      </div>
+
+      <div className="container pb-10 main-content-service d-none">
         {/* ===== Categories Strip ===== */}
         <div className="row pt-3">
           <SectionLoader show={categoriesLoader.loading} size="medium" text="" />

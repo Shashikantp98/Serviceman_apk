@@ -1,5 +1,4 @@
-import { Calendar, Clock } from "react-feather";
-// import Header from "../components/Header";
+import { Calendar, Clock, Trash2 } from "react-feather";
 import ApiService from "../services/api";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -21,21 +20,19 @@ const Myrequest = () => {
   const [cancelLoadingId, setCancelLoadingId] = useState("");
   const [payLoadingId, setPayLoadingId] = useState("");
 
-
   const [razorpayOrderId, setRazorpayOrderId] = useState("");
   const [isOrder, setIsOrder] = useState(false);
   const [profileDetails, setProfileDetails] = useState<any>({});
   const [orderId, setOrderId] = useState("");
   const [serviceDetails, setServiceDetails] = useState<any>({});
 
-  // Loader for booking list
   const bookingListLoader = useSectionLoader("booking-list");
 
   const getAllMyRequest = () => {
     bookingListLoader.setLoading(true);
     ApiService.post("/user/listUserBookings", {
       filters: {
-        booking_status: booking_status, //in_progress completed cancelled
+        booking_status: booking_status,
       },
       sorters: {
         created_on: -1,
@@ -44,21 +41,23 @@ const Myrequest = () => {
         page: 1,
         pageSize: 50,
       },
-    }).then((res: any) => {
-      console.log(res);
-      setbookingList(res.data.bookings);
     })
+      .then((res: any) => {
+        setbookingList(res.data.bookings);
+      })
       .catch((err: any) => {
         console.log(err);
       })
       .finally(() => {
         bookingListLoader.setLoading(false);
-      })
+      });
   };
+
   useEffect(() => {
     setbookingList([]);
     getAllMyRequest();
   }, [booking_status]);
+
   useEffect(() => {
     getProfileDetails();
   }, []);
@@ -66,26 +65,24 @@ const Myrequest = () => {
   const getProfileDetails = () => {
     ApiService.post("/user/getCustomerDetails")
       .then((res: any) => {
-        console.log(res);
         setProfileDetails(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
   const cancelRequest = () => {
     setLoading(true);
     setCancelLoadingId(booking_id);
     ApiService.post("/user/cancelBookingByCustomer", { booking_id: booking_id })
       .then((res: any) => {
-        console.log(res);
         toast.success(res.data.message);
         setLoading(false);
         setShowDeleteModal(false);
         getAllMyRequest();
       })
       .catch((err: any) => {
-        console.log(err);
         toast.error(err.response.data.message);
         setLoading(false);
         setShowDeleteModal(false);
@@ -94,15 +91,14 @@ const Myrequest = () => {
         setCancelLoadingId("");
       });
   };
-  const handleBookingSummary = (booking_id: string, payment_amount: string) => {
-    setPayLoadingId(booking_id);  // show loader only on this Pay button
 
+  const handleBookingSummary = (booking_id: string, payment_amount: string) => {
+    setPayLoadingId(booking_id);
     ApiService.post("/user/payRemainingAmount", {
       booking_id: booking_id,
       payment_amount: payment_amount,
     })
       .then((res: any) => {
-        console.log(res);
         setIsOrder(true);
         setOrderId(res.data?.booking_id);
         setRazorpayOrderId(res.data?.razorpay_order_id);
@@ -114,17 +110,15 @@ const Myrequest = () => {
         setPayLoadingId("");
       });
   };
+
   const handleSuccess = (response: any) => {
-    console.log("Payment Success:", response);
-    // e.g., verify payment on your server using response.razorpay_payment_id
     ApiService.post("/user/verifyRemainingPayment", {
       razorpay_order_id: response.razorpay_order_id,
       razorpay_payment_id: response.razorpay_payment_id,
       razorpay_signature: response.razorpay_signature,
       booking_id: orderId,
     })
-      .then((res: any) => {
-        console.log(res.data);
+      .then(() => {
         setLoading(false);
         setIsOrder(false);
         navigate("/succcess", {
@@ -154,19 +148,17 @@ const Myrequest = () => {
     setLoading(false);
     setIsOrder(false);
   };
+
   return (
     <>
-      <div className="container main-content pt-2 pb-5">
-
-
-
-
-        <div className="fixed_header text-center">
-          <h1 className="head4">My Request</h1>
+      <div className="container pb-5 mb-5">
+        <div className="row pt-4">
+          <div className="col-12 pt-5 pb-3">
+            <h3>My Bookings</h3>
+          </div>
         </div>
 
-
-        <div className="row px-2 mb-5 mb-5 fixed_header_padding">
+        <div className="row px-2 mb-5">
           <div className="col-12 pt-2">
             <ul
               className="nav nav-pills mb-3 border-bottom"
@@ -188,7 +180,6 @@ const Myrequest = () => {
                   In Progress
                 </button>
               </li>
-
               <li className="nav-item" role="presentation">
                 <button
                   className="nav-link"
@@ -207,12 +198,12 @@ const Myrequest = () => {
               <li className="nav-item" role="presentation">
                 <button
                   className="nav-link"
-                  id="pills-contact-tab"
+                  id="pills-cancel-tab"
                   data-bs-toggle="pill"
                   data-bs-target="#cancel"
                   type="button"
                   role="tab"
-                  aria-controls="pills-contact"
+                  aria-controls="cancel"
                   aria-selected="false"
                   onClick={() => setbooking_status("cancelled")}
                 >
@@ -220,13 +211,17 @@ const Myrequest = () => {
                 </button>
               </li>
             </ul>
+
             <SectionLoader
               show={bookingListLoader.loading}
               size="medium"
               text="Loading your requests..."
               overlay={true}
             />
+
             <div className="tab-content" id="pills-tabContent">
+
+              {/* ── In Progress Tab ── */}
               <div
                 className="tab-pane fade show active"
                 id="pills-home"
@@ -234,93 +229,124 @@ const Myrequest = () => {
                 aria-labelledby="pills-home-tab"
               >
                 {!bookingListLoader.loading && bookingList.length === 0 && (
-                  <div className="cards5 mb-2">
-                    <div className="d-flex align-items-center border-bottom pb-3 justify-content-between">
-                      <h2 className="mb-0 font-14">No Booking Found</h2>
-                    </div>
-                  </div>
+                  <h2 className="mb-0 font-14 mt-4">No Booking Found</h2>
                 )}
 
                 {bookingList.map((booking: any) => (
-                  <div className="cards5 mb-2" key={booking.booking_id}>
+                  <div className="bookingcards" key={booking.booking_id}>
+                    <div className="basic_details_card d-flex justify-content-between align-items-start">
+                      <div>
+                        <span className="bkg_id">
+                          Booking ID : #{booking.bkng_id}
+                        </span>
+                      </div>
+                      <div>
+                        <p
+                          className={`status_detail ${
+                            booking.booking_status === "confirmed"
+                              ? "color_success"
+                              : booking.booking_status === "cancelled"
+                              ? "color_red"
+                              : "color_org"
+                          }`}
+                        >
+                          <Clock size={14} />{" "}
+                          {booking.booking_status
+                            ?.replaceAll("_", " ")
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </p>
+                      </div>
+                    </div>
+
                     <div
                       onClick={() =>
                         navigate("/customerprojectinfo/" + booking.booking_id)
                       }
-                      className="d-flex align-items-center border-bottom pb-3 justify-content-between"
+                      style={{ cursor: "pointer" }}
                     >
-                      <h2 className="mb-0 font-14">{booking.service_name}</h2>
-                      <p
-                        className="status-pending font-12 mb-0"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {booking.booking_status}
+                      <h2 className="ser_name pt-4">{booking.service_name}</h2>
+
+                      {booking.serviceman &&
+                      booking.serviceman !== "Unassigned" ? (
+                        <p>
+                          <strong>{booking.serviceman}</strong> will be visiting
+                          your location to provide the service.
+                        </p>
+                      ) : (
+                        <p>
+                          Your booking has been confirmed. A serviceman will be
+                          assigned shortly.
+                        </p>
+                      )}
+
+                      <p className="shed_det">
+                        <Calendar size={14} />{" "}
+                        {dayjs(booking.booking_date).format("DD MMM YYYY")}
+                      </p>
+                      <p className="shed_det">
+                        <Clock size={14} /> {booking.booking_time}
+                      </p>
+                      <p className="shed_det">Amount : ₹{booking.grand_total}</p>
+                      <p className="shed_det">
+                        Payment Status :{" "}
+                        <strong>
+                          {booking.payment_status
+                            ?.replaceAll("_", " ")
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </strong>
                       </p>
                     </div>
-                    <div
-                      className="d-flex justify-content-between pt-3"
-                      onClick={() =>
-                        navigate("/customerprojectinfo/" + booking.booking_id)
-                      }
-                    >
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Calendar size={14}></Calendar>
-                        Scheduled for{" "}
-                        {dayjs(booking.booking_date).format("DD MMM")}
-                      </div>
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Clock size={14}></Clock>
-                        {booking.booking_time}
-                      </div>
-                    </div>
-                    {/* <div className="d-flex justify-content-between pt-3">
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <RotateCw size={14}></RotateCw>
-                        One-Time Cleaning Service
-                      </div>
-                    </div>
-                    <div className="d-flex justify-content-between pt-3">
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <User size={14}></User>
-                        Opakjeph Plumbing Service
-                      </div>
-                    </div> */}
-                    <div className="pt-3">
-                      <button
-                        className="canreq"
-                        disabled={cancelLoadingId === booking.booking_id}
-                        onClick={() => {
-                          setShowDeleteModal(true);
-                          setBookingId(booking.booking_id);
-                        }}
-                      >
-                        {cancelLoadingId === booking.booking_id ? "Cancelling..." : "Cancel Request"}
-                      </button>
-                      {booking.payment_status == "booking_fee_paid" && (
+
+                    <div className="d-flex gap-3 pt-3">
+                      {(booking.payment_status === "booking_fee_paid" || booking.payment_status === "pending") && (
                         <button
-                          className="canreq2"
+                          className="paynow"
                           disabled={payLoadingId === booking.booking_id}
                           onClick={() => {
                             setServiceDetails({
                               service_name: booking.service_name,
                               date: booking.booking_date,
                               time: booking.booking_time,
-                              total_amount: booking.grand_total - booking.booking_fee,
+                              total_amount:
+                                booking.grand_total - booking.booking_fee,
                             });
                             handleBookingSummary(
                               booking.booking_id,
-                              (booking.grand_total - booking.booking_fee).toString()
+                              (
+                                booking.grand_total - booking.booking_fee
+                              ).toString()
                             );
                           }}
                         >
-                          {payLoadingId === booking.booking_id ? "Processing..." : "Pay Full Amount"}
+                          {payLoadingId === booking.booking_id
+                            ? "Processing..."
+                            : "Pay Full Amount"}
                         </button>
                       )}
+
+                      {booking.booking_status !== "cancelled" &&
+                        booking.booking_status !== "completed" && (
+                          <button
+                            className="delete_req"
+                            disabled={cancelLoadingId === booking.booking_id}
+                            onClick={() => {
+                              setShowDeleteModal(true);
+                              setBookingId(booking.booking_id);
+                            }}
+                          >
+                            {cancelLoadingId === booking.booking_id ? (
+                              "Cancelling..."
+                            ) : (
+                              <Trash2 size={14} />
+                            )}
+                          </button>
+                        )}
                     </div>
                   </div>
                 ))}
               </div>
 
+              {/* ── Completed Tab ── */}
               <div
                 className="tab-pane fade"
                 id="pills-contact"
@@ -328,92 +354,113 @@ const Myrequest = () => {
                 aria-labelledby="pills-contact-tab"
               >
                 {!bookingListLoader.loading && bookingList.length === 0 && (
-                  <div className="cards5 mb-2">
-                    <div className="d-flex align-items-center border-bottom pb-3 justify-content-between">
-                      <h2 className="mb-0 font-14">No Booking Found</h2>
-                    </div>
-                  </div>
+                  <h2 className="mb-0 font-14 mt-4">No Booking Found</h2>
                 )}
+
                 {bookingList.map((booking: any) => (
                   <div
-                    className="cards5 mb-2"
+                    className="bookingcards"
                     key={booking.booking_id}
                     onClick={() =>
                       navigate("/customerprojectinfo/" + booking.booking_id)
                     }
+                    style={{ cursor: "pointer" }}
                   >
-                    <div className="d-flex align-items-center border-bottom pb-3 justify-content-between">
-                      <h2 className="mb-0 font-14">{booking.service_name}</h2>
-                      <p
-                        className="status-completed font-12 mb-0"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {booking.booking_status}
-                      </p>
-                    </div>
-                    <div className="d-flex justify-content-between pt-3">
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Calendar size={14}></Calendar>
-                        Scheduled for{" "}
-                        {dayjs(booking.booking_date).format("DD MMM")}
+                    <div className="basic_details_card d-flex justify-content-between align-items-start">
+                      <div>
+                        <span className="bkg_id">
+                          Booking ID : #{booking.bkng_id}
+                        </span>
                       </div>
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Clock size={14}></Clock>
-                        {booking.booking_time}
+                      <div>
+                        <p className="status_detail color_success">
+                          <Clock size={14} />{" "}
+                          {booking.booking_status
+                            ?.replaceAll("_", " ")
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="pt-3"></div>
+                    <h2 className="ser_name pt-4">{booking.service_name}</h2>
+                    <p className="shed_det">
+                      <Calendar size={14} />{" "}
+                      {dayjs(booking.booking_date).format("DD MMM YYYY")}
+                    </p>
+                    <p className="shed_det">
+                      <Clock size={14} /> {booking.booking_time}
+                    </p>
+                    <p className="shed_det">Amount : ₹{booking.grand_total}</p>
+                    <p className="shed_det">
+                      Payment Status :{" "}
+                      <strong>
+                        {booking.payment_status
+                          ?.replaceAll("_", " ")
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                      </strong>
+                    </p>
                   </div>
                 ))}
               </div>
+
+              {/* ── Cancelled Tab ── */}
               <div
                 className="tab-pane fade"
                 id="cancel"
                 role="tabpanel"
-                aria-labelledby="pills-contact-tab"
+                aria-labelledby="pills-cancel-tab"
               >
                 {!bookingListLoader.loading && bookingList.length === 0 && (
-                  <div className="cards5 mb-2">
-                    <div className="d-flex align-items-center border-bottom pb-3 justify-content-between">
-                      <h2 className="mb-0 font-14">No Booking Found</h2>
-                    </div>
-                  </div>
+                  <h2 className="mb-0 font-14 mt-4">No Booking Found</h2>
                 )}
+
                 {bookingList.map((booking: any) => (
                   <div
-                    className="cards5 mb-2"
+                    className="bookingcards"
                     key={booking.booking_id}
                     onClick={() =>
                       navigate("/customerprojectinfo/" + booking.booking_id)
                     }
+                    style={{ cursor: "pointer" }}
                   >
-                    <div className="d-flex align-items-center border-bottom pb-3 justify-content-between">
-                      <h2 className="mb-0 font-14">{booking.service_name}</h2>
-                      <p
-                        className="status-cancelled font-12 mb-0"
-                        style={{ textTransform: "capitalize" }}
-                      >
-                        {booking.booking_status}
-                      </p>
-                    </div>
-                    <div className="d-flex justify-content-between pt-3">
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Calendar size={14}></Calendar>
-                        Scheduled for{" "}
-                        {dayjs(booking.booking_date).format("DD MMM")}
+                    <div className="basic_details_card d-flex justify-content-between align-items-start">
+                      <div>
+                        <span className="bkg_id">
+                          Booking ID : #{booking.bkng_id}
+                        </span>
                       </div>
-                      <div className="d-flex align-items-center gap-10 font-12 color-grey">
-                        <Clock size={14}></Clock>
-                        {booking.booking_time}
+                      <div>
+                        <p className="status_detail color_red">
+                          <Clock size={14} />{" "}
+                          {booking.booking_status
+                            ?.replaceAll("_", " ")
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </p>
                       </div>
                     </div>
 
-                    <div className="pt-3"></div>
+                    <h2 className="ser_name pt-4">{booking.service_name}</h2>
+                    <p className="shed_det">
+                      <Calendar size={14} />{" "}
+                      {dayjs(booking.booking_date).format("DD MMM YYYY")}
+                    </p>
+                    <p className="shed_det">
+                      <Clock size={14} /> {booking.booking_time}
+                    </p>
+                    <p className="shed_det">Amount : ₹{booking.grand_total}</p>
+                    <p className="shed_det">
+                      Payment Status :{" "}
+                      <strong>
+                        {booking.payment_status
+                          ?.replaceAll("_", " ")
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                      </strong>
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
+
             <DeleteConfirmModal
               show={showDeleteModal}
               onCancel={() => setShowDeleteModal(false)}
@@ -427,10 +474,11 @@ const Myrequest = () => {
             />
           </div>
         </div>
+
         {isOrder && (
           <RazorpayPayment
-            orderId={razorpayOrderId} // Replace with your server-created order ID
-            amount={serviceDetails?.total_amount * 100} // ₹500.00 in paise
+            orderId={razorpayOrderId}
+            amount={serviceDetails?.total_amount * 100}
             name={
               profileDetails?.customer?.fname +
               " " +

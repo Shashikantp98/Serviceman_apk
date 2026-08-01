@@ -5,9 +5,12 @@ export default function useHeaderMinimize(threshold = 80) {
 
   useEffect(() => {
     const handleScroll = () => {
+
       setIsHeaderMinimized(window.scrollY > threshold);
     };
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, [threshold]);
 

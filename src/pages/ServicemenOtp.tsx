@@ -3,17 +3,19 @@ import OtpInput from "../components/inputs/otp-input";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ApiService from "../services/api";
-import { ChevronLeft } from "react-feather";
+import { Smartphone } from "react-feather";//ChevronLeft
 import { useAuth } from "../contexts/AuthContext";
 
 const ServicemenOtp = () => {
   const { login } = useAuth();
   const [otp, setOtp] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const location = useLocation();
   const phone_number = location.state?.phone_number;
   const country_code = location.state?.country_code;
   const user_type = location.state?.user_type;
   const is_existing = location.state?.is_existing;
+  const showReferralInput = is_existing === false || is_existing === 'false';
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -28,13 +30,19 @@ const ServicemenOtp = () => {
     setLoading(true);
 
     try {
-      const res: any = await ApiService.post("/user/verifyOtp", {
+      const payload: any = {
         phone_number,
         country_code,
         user_type,
         otp: enteredOtp,
         fcm_token: "",
-      });
+      };
+
+      if (showReferralInput && referralCode) {
+        payload.referral_code = referralCode;
+      }
+
+      const res: any = await ApiService.post("/user/verifyOtp", payload);
 
       setLoading(false);
       toast.success(res.message);
@@ -96,46 +104,59 @@ const ServicemenOtp = () => {
 
   return (
     <>
-      <div style={{ position: "absolute" }}>
-        <button
-          className="back-btn mb-3 mt-5 px-3 py-3"
-          style={{ color: "#000" }}
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft /> Back
-        </button>
-      </div>
-
-      <div className="px-5 pt-5 pb-3">
-        <h3 className="head2 pt-5">Enter verification code</h3>
-        <p className="text-center color-grey font-12">
-          We have sent you a 6 digit verification code on <b>+91 {phone_number}</b>
-        </p>
-      </div>
-
-      <div className="otp">
+     <div className="h-100vh  pt-5">
+        <div className="px-4 mt-2">
+            <button className="gobackbtn" onClick={() => navigate(-1)}>
+            Go Back
+            </button>
+        </div>
+         <div className="px-4 pt-5 mt-5">
+            <Smartphone size={40} className="mb-2 color-green " />
+            <h6 className="onboard_head pb-3">Enter verification code</h6>
+            
+            <div className="otp">
         <OtpInput
           length={6}
           onChange={handleOtpChange}
           className="otp-input-container"
           inputClassName="input"
         />
-      </div>
+            </div>
 
-      <p className="text-center color-grey font-12 pt-3">
-        Didn't receive? <b onClick={handleResendOtp}>Resend</b>
+            {showReferralInput && (
+              <div className="pt-3">
+                <label className="lbl d-block">Referral Code (optional)</label>
+                <input
+                  type="text"
+                  className="form-control mt-1 npt_cmn2"
+                  placeholder="Enter referral code"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                />
+              </div>
+            )}
+
+             <p className="text-center color-grey font-16 pt-4">
+        Didn't receive? <b className="newgr" onClick={handleResendOtp}>Resend</b>
       </p>
 
-      {/* Optional fallback button */}
-      <div className="px-4 mt-5">
-        <button
-          className="fill_half"
+             <button
+          className="fill mt-3"
           onClick={() => onSubmit(otp)}
           disabled={otp.length !== 6 || loading}
         >
           {loading ? "Verifying..." : "Verify"}
         </button>
-      </div>
+         </div>
+     </div>
+
+    
+
+      
+
+     
+
+    
     </>
   );
 };

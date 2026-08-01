@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, type Control } from "react-hook-form";
 import { ChevronDown, ChevronUp } from "react-feather";
 
@@ -27,9 +27,26 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   required,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, []);
 
   return (
-    <div style={{ marginBottom: "1rem" }}>
+    <div ref={containerRef} style={{ marginBottom: "1rem" }}>
       {label && (
         <label className="lbl">
           {label} {required && <span className="text-danger">*</span>}

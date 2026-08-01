@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ApiService from "../services/api";
 import { useEffect } from "react";
-import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
 
 import ServiceManHeader from "../components/ServiceManHeader";
@@ -36,30 +35,21 @@ const Profile = () => {
     getProfileDetails();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      const user_type = localStorage.getItem("authmobileRole") || "servicemen";
+  const handleLogout = () => {
+    setLoading(true);
 
-      const response: any = await ApiService.logout(user_type);
+    // const user_type = localStorage.getItem("authmobileRole") || "servicemen";
+    // const response: any = await ApiService.logout(user_type);
+    // if (!(response && (response.status === "success" || response.status === 200))) {
+    //   console.log("Logout failed:", response);
+    //   setLoading(false);
+    //   return;
+    // }
 
-      if (response && (response.status === "success" || response.status === 200)) {
-        // Clear all auth related data from localStorage
-        localStorage.clear();
-        // Clear auth context
-        logout();
-        // Redirect to select page
-        window.location.href = "/";
-      } else {
-        console.log("Logout failed:", response);
-        toast.error(response?.message || "Logout failed");
-        setLoading(false);
-      }
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      toast.error(error?.message || "An error occurred during logout");
-      setLoading(false);
-    }
+    // Direct logout for now (without logout API call)
+    localStorage.clear();
+    logout();
+    window.location.href = "/";
   };
 
   return (

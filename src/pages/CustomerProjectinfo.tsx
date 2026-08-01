@@ -72,6 +72,13 @@ const CustomerProjectinfo = () => {
   useEffect(() => {
     getRequestDetails();
   }, [id]);
+
+  const handleViewInvoices = () => {
+    const bookingId = bookingDetails?.booking_id || id;
+    if (!bookingId) return;
+    navigate(`/invoices/${bookingId}`, { state: { booking_id: bookingId } });
+  };
+
   return (
     <>
       <CommonHeader customBack={customBack} />
@@ -84,7 +91,7 @@ const CustomerProjectinfo = () => {
       <div className=" main-content-service2">
         <div className="pt-4 pb-0 ">
 
-          <div className="px-3">
+          <div className="px-3 mt-5">
             <div className="cards5 ">
               <p className="font-14 mb-2 ">Project Details</p>
 
@@ -234,6 +241,11 @@ const CustomerProjectinfo = () => {
                     ₹{bookingDetails?.booking_amount}
                   </p></b>
                 </div>
+              </div>
+              <div className="pt-2">
+                <button className="fill w-100" onClick={handleViewInvoices}>
+                  View Invoices
+                </button>
               </div>
             </div>
 

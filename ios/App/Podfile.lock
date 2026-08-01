@@ -6,6 +6,9 @@ PODS:
   - CapacitorCamera (7.0.4):
     - Capacitor
   - CapacitorCordova (7.4.3)
+  - CapacitorFilesystem (7.1.8):
+    - Capacitor
+    - IONFilesystemLib (~> 1.1.1)
   - CapacitorGeolocation (7.1.5):
     - Capacitor
     - IONGeolocationLib (= 1.0.1)
@@ -13,9 +16,11 @@ PODS:
     - Capacitor
     - Google-Maps-iOS-Utils (~> 5.0)
     - GoogleMaps (~> 8.4)
-  - CapacitorLocalNotifications (7.0.0):
+  - CapacitorLocalNotifications (7.0.7):
     - Capacitor
   - CapacitorPushNotifications (7.0.4):
+    - Capacitor
+  - CapacitorShare (7.0.4):
     - Capacitor
   - CapacitorStatusBar (7.0.5):
     - Capacitor
@@ -73,6 +78,7 @@ PODS:
   - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
+  - IONFilesystemLib (1.1.2)
   - IONGeolocationLib (1.0.1)
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
@@ -86,10 +92,12 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
   - "CapacitorGoogleMaps (from `../../node_modules/@capacitor/google-maps`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - FirebaseCore
   - FirebaseMessaging
@@ -104,6 +112,7 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleMaps
     - GoogleUtilities
+    - IONFilesystemLib
     - IONGeolocationLib
     - nanopb
     - PromisesObjC
@@ -117,6 +126,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/camera"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
   CapacitorGeolocation:
     :path: "../../node_modules/@capacitor/geolocation"
   CapacitorGoogleMaps:
@@ -125,6 +136,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/local-notifications"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
 
@@ -133,10 +146,12 @@ SPEC CHECKSUMS:
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorCamera: 3158866d7ab503bb04e190e679d28c55def20088
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorFilesystem: c63fc54df41e5a6761785a7f3c49dc696c22e296
   CapacitorGeolocation: 84f868bea4c2499aebc3bb3a88fd0a508f87ab87
   CapacitorGoogleMaps: f899816fb5838e875445ec79094c08fadd20f0c0
-  CapacitorLocalNotifications: c9577978cd598af5e2b5615548b8222b3b10d7e2
+  CapacitorLocalNotifications: 71124afe526ac00585314bff34651bd023f86e37
   CapacitorPushNotifications: 7604512af53bbfdf1dd8fb2256b9ef1e8a69cdc2
+  CapacitorShare: 25f7fc5dd0e4edbde5d6801c6de5d14a8b450a41
   CapacitorStatusBar: 6de542f202c0dd3f9d0a73b240d4c9d3dddc49b4
   FirebaseCore: efb3893e5b94f32b86e331e3bd6dadf18b66568e
   FirebaseCoreInternal: 9afa45b1159304c963da48addb78275ef701c6b4
@@ -146,10 +161,11 @@ SPEC CHECKSUMS:
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
+  IONFilesystemLib: 21a63377696b2d8fab5632ecfb7d2ac67bddb68a
   IONGeolocationLib: 20f9d0248a0b5264511fb57a37e25dd2badf797a
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: 8daf90bf8acfd969f982dfbc58ba6ed3fc941a01
+PODFILE CHECKSUM: d0b60c16ca98f7f6d5ed73a2a84de9a907a0b690
 
 COCOAPODS: 1.16.2

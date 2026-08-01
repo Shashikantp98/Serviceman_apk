@@ -17,6 +17,7 @@ const Select = ({
   error,
   options,
   required,
+  className,
   ...rest
 }: SelectProps) => {
   return (
@@ -31,8 +32,7 @@ const Select = ({
           <select
             {...field}
             {...rest}
-            className="npt"
-            style={{ height: "40px" }}
+            className={`npt select-field ${className || ""}`.trim()}
           >
             <option value="">Select {label}</option>
             {options.map((option, index) => (

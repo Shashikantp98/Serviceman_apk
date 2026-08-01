@@ -7,8 +7,8 @@ import ApiService from "../services/api";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import FileInput from "../components/inputs/FileInput";
-import Header from "../components/Header";
-import CommonHeader from "../components/CommonHeader";
+// import Header from "../components/Header";
+// import CommonHeader from "../components/CommonHeader";
 import { useAuth } from "../contexts/AuthContext";
 
 const Support = () => {
@@ -52,16 +52,16 @@ const Support = () => {
   };
   return (
     <>
-      {role === "customer" ? <Header /> : <CommonHeader />}
+     
       <div
         className={
           role === "customer"
-            ? "container main-content"
-            : "container main-content-service"
+            ? "container "
+            : "container "
         }
       >
         <div className="row px-2 pt-3">
-          <div className="col-12 pt-2">
+          <div className="col-12 pt-5">
             <h1 className="head4">Support</h1>
           </div>
         </div>

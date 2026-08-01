@@ -1,53 +1,48 @@
-import logo from "../assets/logo.png";
+// import logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 const Select = () => {
   const navigate = useNavigate();
   const { setIsGuestFn } = useAuth();
-  const { isGuest } = useAuth();
-  useEffect(() => {
-    navigate(!isGuest ? "/select" : "/servicemenregister", {
-      state: { role: "customer" },
-    });
-  }, []);
+  // const { isGuest } = useAuth();
+  // Intentionally not auto-redirecting here — user should see the Select UI.
   return (
     <>
-      <div className="spalsh">
-        <img src={logo}></img>
+      
+      <div className="spl_wrap">
+        <div className="laygred" ></div>
       </div>
+
+
       <div className="pop">
-        <h1 className="wlctext">👋 Hello! Welcome</h1>
-        <h4 className="head">What type of account  you like to create?</h4>
-        {/* <button
-          className="fill brds100"
-          onClick={() => {
-            setIsGuestFn(false);
-            navigate("/servicemenlogin", { state: { role: "servicemen" } });
-          }}
-        >
-          Servicemen
-        </button> */}
+        <h1 className="wlctext">Clean Home Happy You Always </h1>
+        <h4 className="supporttext">We Provide all types of cleaning and repair services to our customers</h4>
         <button
           className="fill brds100"
           onClick={() => {
             setIsGuestFn(true);
-            navigate("/servicemenlogin", { state: { role: "customer" } });
+            navigate("/servicemenregister", { state: { role: "customer" } });
           }}
         >
-          Customer
+          Get Started
         </button>
+
+       
         <button
-          className="outline brds100 mt-3 d-block"
+          className="iamser"
           onClick={() => {
             setIsGuestFn(false);
-            navigate("/servicemenlogin", { state: { role: "servicemen" } });
+            navigate("/servicemenregister", { state: { role: "servicemen" } });
           }}
         >
-          Serviceman
+           Are you Servicemen? <b>Click</b>
         </button>
       </div>
+
+
+
     </>
   );
 };

@@ -143,9 +143,20 @@ const Dashboard = () => {
         toast.success(res.message);
 
         if (action === "accept") {
-          setIsOrder(true);
-          setOrderId(res.data?.booking_id);
-          setRazorpayOrderId(res.data?.razorpay_order_id);
+          const nextBookingId = res.data?.booking_id;
+          const nextRazorpayOrderId = res.data?.razorpay_order_id;
+
+          if (nextRazorpayOrderId) {
+            // Existing flow: collect payment, then refresh in handleSuccess()
+            setIsOrder(true);
+            setOrderId(nextBookingId);
+            setRazorpayOrderId(nextRazorpayOrderId);
+          } else {
+            // No online payment required for this acceptance — refresh immediately
+            setTimeout(() => {
+              window.location.reload();
+            }, 400);
+          }
         } else {
           setbookingList([]);
           getAllMyRequest();

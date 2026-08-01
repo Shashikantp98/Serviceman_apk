@@ -96,6 +96,40 @@ class ApiService {
     );
     return response.data;
   }
+
+  // Customer invoice requests
+  static async getInvoice<T>(
+    data: { invoice_id: string },
+    config?: AxiosRequestConfig
+  ): ApiResponse<T> {
+    const response = await api.post<T>('/user/getInvoice', data, config);
+    return response.data;
+  }
+
+  static async listInvoices<T>(
+    data?: { booking_id?: string },
+    config?: AxiosRequestConfig
+  ): ApiResponse<T> {
+    const response = await api.post<T>('/user/listInvoices', data, config);
+    return response.data;
+  }
+
+  // Serviceman invoice requests
+  static async getServicemanInvoice<T>(
+    data: { booking_id: string },
+    config?: AxiosRequestConfig
+  ): ApiResponse<T> {
+    const response = await api.post<T>('/servicemen/getServicemanInvoice', data, config);
+    return response.data;
+  }
+
+  static async listServicemanInvoices<T>(
+    data?: { booking_id?: string },
+    config?: AxiosRequestConfig
+  ): ApiResponse<T> {
+    const response = await api.post<T>('/servicemen/listServicemanInvoices', data, config);
+    return response.data;
+  }
 }
 
 export default ApiService;

@@ -1,4 +1,4 @@
-import logo from "../assets/dlogo.png";
+// import logo from "../assets/dlogo.png";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Input from "../components/inputs/input";
 import ApiService from "../services/api";
 import { useState } from "react";
-import { ChevronLeft } from "react-feather";
+import { Smartphone } from "react-feather";
 
 const ServicemenRegister = () => {
   const navigate = useNavigate();
@@ -75,27 +75,30 @@ const ServicemenRegister = () => {
       });
   };
 
+  const handleGoBack = () => {
+    console.log("Go Back clicked -> navigating to /select");
+    navigate("/select", { state: { allowWhenAuth: true } });
+  };
+
   return (
     <>
-      <div style={{ position: "absolute" }}>
-        <button
-          className="back-btn mb-3 mt-5 px-3 py-3"
-          style={{ color: "#000" }}
-          onClick={() => navigate("/servicemenlogin", { state: { role } })}
-        >
-          <ChevronLeft /> Back
-        </button>
+     
+
+      <div className="h-100vh  pt-5">
+       
+      <div className="px-4 mt-2">
+        <button type="button" className="gobackbtn" onClick={handleGoBack}>
+        Go Back
+       </button>
       </div>
 
-      <div className="h-100vh gred2 pt-5">
-        <div className="cir">
-          <img src={logo} />
-        </div>
+        <div className="px-4 pt-5 mt-5">
 
-        <div className="px-4 pt-5">
-          <h6>Enter Mobile Number</h6>
+          <Smartphone size={40} className="mb-2 color-green " />
+          <h6 className="onboard_head">Enter Mobile Number</h6>
 
           <Input
+         
             control={control}
             name="phone_number"
             label=""
@@ -113,12 +116,12 @@ const ServicemenRegister = () => {
 
           {/* ✅ Show error below input */}
           {errors.phone_number && (
-            <p className="text-danger font-12 mt-1">
+            <p className="text-danger font-12 mt-2">
               {errors.phone_number.message?.toString()}
             </p>
           )}
 
-          <p className="color-grey font-12 mt-2">
+          <p className="color-grey font-12 mt-3">
             An OTP will be sent on given phone number for verification. Standard
             message and data rates apply.
           </p>

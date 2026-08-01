@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import ApiService from "../services/api";
 
+
+import cat1 from '../assets/cat1.png';
+import cat2 from '../assets/cat2.png';
+import cat3 from '../assets/cat3.png';
+
+
 import { useNavigate } from "react-router-dom";
-import CommonHeader from "../components/CommonHeader";
+// import CommonHeader from "../components/CommonHeader";
 import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 
@@ -45,14 +51,34 @@ const CategoriesList = () => {
   }, []);
   return (
     <div>
-      <CommonHeader />
-      <div className="container pb-10 main-content-service">
-        <div className="row pt-3">
-          <div className="col-12">
-            <p className="font-18 weight-bold">Browse all categories</p>
+     
+      <div className="container padding_btn_main">
+
+          <div className="row pt-5">
+            <div className="col-12 pt-3 d-flex align-items-center justify-content-between">
+              <button className="back_btn_new">Back</button>
+            </div>
+          </div>
+
+          <div className="row">
+              <div className="col-12 pt-4 pb-0">
+              <h3>All Categories</h3>
+              </div>
+          </div>
+
+        <div className="row pb-5 mb-5">
+          <div className="col-12 mt-3">
+            <img src={cat1} className="w-100 " />
+          </div>
+          <div className="col-12 mt-3">
+            <img src={cat2} className="w-100 " />
+          </div>
+          <div className="col-12 mt-3">
+            <img src={cat3} className="w-100 " />
           </div>
         </div>
-        <div className="row">
+
+        <div className="row d-none">
           <SectionLoader
             show={categoryLoader.loading}
             size="medium"

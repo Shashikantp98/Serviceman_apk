@@ -9,8 +9,7 @@ import FileInput from "../components/inputs/FileInput";
 import { useLocation, useNavigate } from "react-router-dom";
 import ApiService from "../services/api";
 import { toast } from "react-toastify";
-import { SuccessConfirmModal } from "../components/SuccessConfirmModal";
-import { ChevronLeft, ChevronDown, ChevronUp } from "react-feather";
+import { ChevronLeft } from "react-feather";
 import { useAuth } from "../contexts/AuthContext";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import GooglePlacesAutocomplete from "../components/GooglePlacesAutocomplete";
@@ -152,18 +151,12 @@ const Registration = () => {
   const navigate = useNavigate();
   const locationData = useLocation();
   const { login, token: authToken, latitude, longitude } = useAuth();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const token = locationData.state?.token;
-  const phone_number = locationData.state?.phone_number;
-  const country_code = locationData.state?.country_code;
   const user_type = locationData.state?.user_type;
   const [loadingGeneral, setLoadingGeneral] = useState(false);
   const [loadingDocs, setLoadingDocs] = useState(false);
-  const [generalInfoDone, setGeneralInfoDone] = useState(false);
-  const [openSection, setOpenSection] = useState<
-    "general" | "bank" | "docs" | "none"
-  >("general");
-  const [paymentType, setPaymentType] = useState<"upi" | "bank">("bank");
+  const [currentStep, setCurrentStep] = useState(1);
+  const [referralCode, setReferralCode] = useState("");
   const {
     control,
     trigger,
@@ -255,8 +248,7 @@ const Registration = () => {
           data.profile_image
         );
         if (hasGeneralInfo) {
-          setGeneralInfoDone(true);
-          setOpenSection("docs");
+          setCurrentStep(3);
         }
       })
       .catch(() => {
@@ -345,37 +337,95 @@ const Registration = () => {
     if (addressData.country) setValue("address.country" as any, addressData.country, { shouldValidate: true, shouldDirty: true });
   };
 
-  const submitGeneralInfo = async () => {
-    const valid = await trigger(["fname", "lname", "service_ids", "profile_image"]);
-    if (!valid) {
-      const { fname, lname, service_ids, profile_image } = errors;
-      const firstErr = (fname || lname || (service_ids as any) || profile_image) as any;
-      toast.error(firstErr?.message || "Please fix the errors in General Info");
+  const stepTitles = [
+    "Basic Info",
+    "Service Details",
+    "Service Location",
+    "Documents",
+  ];
+
+  const goToNextStep = async () => {
+    if (currentStep === 1) {
+      const valid = await trigger(["fname", "lname", "profile_image"]);
+      if (!valid) {
+        const { fname, lname, profile_image } = errors;
+        const firstErr = (fname || lname || profile_image) as any;
+        toast.error(firstErr?.message || "Please fix the errors before continuing");
+        return;
+      }
+      setCurrentStep(2);
       return;
+    }
+
+    if (currentStep === 2) {
+      const valid = await trigger(["category_ids", "service_ids"]);
+      if (!valid) {
+        const { category_ids, service_ids } = errors;
+        const firstErr = (category_ids || (service_ids as any)) as any;
+        toast.error(firstErr?.message || "Please select category and service");
+        return;
+      }
+      await submitGeneralInfo();
+      return;
+    }
+
+    if (currentStep === 3) {
+      const valid = await trigger(["address.street_1", "address.city", "address.state", "address.country", "address.zip"] as any);
+      if (!valid) {
+        const addressErrors = (errors as any).address;
+        const firstErr =
+          addressErrors?.street_1 ||
+          addressErrors?.city ||
+          addressErrors?.state ||
+          addressErrors?.country ||
+          addressErrors?.zip;
+        toast.error(firstErr?.message || "Please fix the service location details");
+        return;
+      }
+      setCurrentStep(4);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+  };
+
+  const submitGeneralInfo = async () => {
+    const valid = await trigger(["fname", "lname", "category_ids", "service_ids", "profile_image"]);
+    if (!valid) {
+      const { fname, lname, category_ids, service_ids, profile_image } = errors;
+      const firstErr = (fname || lname || category_ids || (service_ids as any) || profile_image) as any;
+      toast.error(firstErr?.message || "Please fix the errors in General Info");
+      return false;
     }
     const data = getValues();
     const formData = new FormData();
     formData.append("fname", data.fname);
     if (data.lname) formData.append("lname", data.lname);
+    if (data.category_ids?.length) formData.append("category_ids", JSON.stringify(data.category_ids));
     if (data.service_ids?.length) formData.append("service_ids", JSON.stringify(data.service_ids));
     if (data.profile_image instanceof FileList && data.profile_image?.[0]) {
       formData.append("profile_image", data.profile_image[0]);
     }
+    if (referralCode.trim()) {
+      // TODO: confirm field name with backend for serviceman-registration referral code
+      // formData.append("<backend_referral_field>", referralCode.trim());
+    }
     setLoadingGeneral(true);
-    ApiService.post("/servicemen/editServicemen", formData, {
-      headers: { Authorization: `Bearer ${token || authToken}` },
-      timeout: 120000, // 2 minutes — needed for profile image upload on mobile
-    })
-      .then(() => {
-        setLoadingGeneral(false);
-        setGeneralInfoDone(true);
-        setOpenSection("docs");
-        toast.success("General info saved!");
-      })
-      .catch((err: any) => {
-        toast.error(err.response?.data?.message || "Error updating general info");
-        setLoadingGeneral(false);
+    try {
+      await ApiService.post("/servicemen/editServicemen", formData, {
+        headers: { Authorization: `Bearer ${token || authToken}` },
+        timeout: 120000,
       });
+      setLoadingGeneral(false);
+      setCurrentStep(3);
+      toast.success("General info saved!");
+      return true;
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Error updating general info");
+      setLoadingGeneral(false);
+      return false;
+    }
   };
 
   const submitVerificationInfo = async () => {
@@ -430,10 +480,6 @@ const Registration = () => {
       });
   };
 
-  const handleClose = () => {
-    setShowSuccessModal(false);
-    navigate("/dashboard");
-  };
   const handleSkip = () => {
     if (token) login(token, user_type);
     navigate("/dashboard");
@@ -443,391 +489,275 @@ const Registration = () => {
     <div className="container py-4 ">
       <div className="row">
         <div className="col-12">
+          <Loader show={!isLoaded} text="Loading maps..." />
+          {servicemanDetailsLoader.loading && (
+            <div className="full-page-loader">
+              <div className="loader-spinner"></div>
+              <p>Loading profile details...</p>
+            </div>
+          )}
 
-        
-      <Loader show={!isLoaded} text="Loading maps..." />
-      {servicemanDetailsLoader.loading && (
-        <div className="full-page-loader">
-          <div className="loader-spinner"></div>
-          <p>Loading profile details...</p>
-        </div>
-      )}
-      <button
-        className="back-btn mb-3 px-3 py-3"
-        style={{ color: "#000" }}
-        onClick={() => navigate(-1)}
-      >
-        <ChevronLeft /> Back
-      </button>
-
-      <h6 className="text-center mb-4">Servicemen Registration</h6>
-
-      {/* Accordion Sections */}
-      <div className="accordion">
-        {/* General Info */}
-        <div className="accordion-item mb-3 border rounded p-3">
-          <div
-            className="d-flex justify-content-between align-items-center"
-            onClick={() =>
-              setOpenSection(openSection === "general" ? "none" : "general")
-            }
-            style={{ cursor: "pointer" }}
+          <button
+            className="back-btn mb-3 px-3 py-3"
+            style={{ color: "#000" }}
+            onClick={() => (currentStep > 1 ? goToPreviousStep() : navigate(-1))}
           >
-            <h6 className="m-0">General Info</h6>
-            {openSection === "general" ? <ChevronUp /> : <ChevronDown />}
+            <ChevronLeft /> {currentStep > 1 ? "Previous" : "Back"}
+          </button>
+
+          <h6 className="text-center mb-4">Servicemen Registration</h6>
+
+          <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const isActive = stepNumber === currentStep;
+                const isCompleted = stepNumber < currentStep;
+
+                return (
+                  <div
+                    key={title}
+                    className="flex-fill text-center"
+                    style={{ minWidth: 0 }}
+                  >
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        margin: "0 auto 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: isActive || isCompleted ? "#007bff" : "#dee2e6",
+                        color: "#fff",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {stepNumber}
+                    </div>
+                    <p
+                      className="mb-0 font-12"
+                      style={{
+                        color: isActive ? "#007bff" : "#6c757d",
+                        fontWeight: isActive ? 600 : 400,
+                      }}
+                    >
+                      {title}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {openSection === "general" && (
-            <div className="mt-3">
-              <div className="row">
-                <div className="col-12 pt-3">
-                  <Input
-                    label={<><span>First Name</span><span style={{ color: "red" }}> *</span></>}
-                    control={control}
-                    name="fname"
-                    type="text"
-                    placeholder="Enter First Name"
-                    error={errors.fname?.message as string}
-                  />
-                </div>
-                <div className="col-12 pt-3">
-                  <Input
-                    label={<><span>Last Name</span><span style={{ color: "red" }}> *</span></>}
-                    control={control}
-                    name="lname"
-                    type="text"
-                    placeholder="Enter Last Name"
-                    error={errors.lname?.message as string}
-                  />
-                </div>
-                <div className="col-12 pt-3">
-                  <MultiSelect
-                    label={<><span>Select Category</span></>}
-                    control={control}
-                    name="category_ids"
-                    options={categoryListOptions}
-                    required
-                  />
-                </div>
-                <div className="col-12 pt-3">
-                  {/* Intercept clicks when no category is selected */}
-                  <div
-                    onClick={() => {
-                      if (!selectedCategoryIds.length) {
-                        toast.info("Please select a category first");
-                      }
-                    }}
-                  >
-                    <MultiSelect
-                      label={<><span>Service Type</span></>}
+          <div className="border rounded p-3">
+            <div className="mb-3">
+              <h6 className="mb-1">Step {currentStep} of 4</h6>
+              <p className="text-muted mb-0">{stepTitles[currentStep - 1]}</p>
+            </div>
+
+            <div className="row">
+              {currentStep === 1 && (
+                <>
+                  <div className="col-12 pt-3">
+                    <Input
+                      label={<><span>First Name</span><span style={{ color: "red" }}> *</span></>}
                       control={control}
-                      name="service_ids"
-                      options={serviceListOptions}
-                      error={errors.service_ids?.message as string}
-                      disabled={!selectedCategoryIds.length}
+                      name="fname"
+                      type="text"
+                      placeholder="Enter First Name"
+                      error={errors.fname?.message as string}
+                    />
+                  </div>
+                  <div className="col-12 pt-3">
+                    <Input
+                      label={<><span>Last Name</span><span style={{ color: "red" }}> *</span></>}
+                      control={control}
+                      name="lname"
+                      type="text"
+                      placeholder="Enter Last Name"
+                      error={errors.lname?.message as string}
+                    />
+                  </div>
+                  <div className="col-12 pt-3">
+                    <label className="lbl">Referral Code (optional)</label>
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Enter Referral Code"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-12 pt-1">
+                    <FileInput
+                      label={<><span>Upload Profile Image</span><span style={{ color: "red" }}> *</span></>}
+                      name="profile_image"
+                      control={control}
+                      error={errors.profile_image?.message as string}
+                      openCamera
+                      captureMode="user"
+                      accept="image/*"
+                    />
+                  </div>
+                </>
+              )}
+
+              {currentStep === 2 && (
+                <>
+                  <div className="col-12 pt-3">
+                    <MultiSelect
+                      label={<><span>Select Category</span><span style={{ color: "red" }}></span></>}
+                      control={control}
+                      name="category_ids"
+                      options={categoryListOptions}
+                      error={errors.category_ids?.message as string}
                       required
                     />
-                    {!selectedCategoryIds.length && (
-                      <p className="text-muted font-12 mt-1">
-                        ⚠️ Select a category above to load available services.
-                      </p>
+                  </div>
+                  <div className="col-12 pt-3">
+                    <div
+                      onClick={() => {
+                        if (!selectedCategoryIds.length) {
+                          toast.info("Please select a category first");
+                        }
+                      }}
+                    >
+                      <MultiSelect
+                        label={<><span>Service Type</span><span style={{ color: "red" }}></span></>}
+                        control={control}
+                        name="service_ids"
+                        options={serviceListOptions}
+                        error={errors.service_ids?.message as string}
+                        disabled={!selectedCategoryIds.length}
+                        required
+                      />
+                      {!selectedCategoryIds.length && (
+                        <p className="text-muted font-12 mt-1">
+                          ⚠️ Select a category above to load available services.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentStep === 3 && (
+                <>
+                  <div className="col-12 pt-2">
+                    <p className="font-14 weight-bold mb-1">Service Location</p>
+                  </div>
+                  <div className="col-12 pt-2">
+                    {isLoaded ? (
+                      <GooglePlacesAutocomplete
+                        control={control}
+                        name="address.street_1"
+                        onSelect={handleAddressSelect}
+                        label="Street Address"
+                        error={(errors as any).address?.street_1?.message}
+                      />
+                    ) : (
+                      <Input
+                        label="Street Address"
+                        control={control}
+                        name="address.street_1"
+                        type="text"
+                        placeholder="Enter street address"
+                        error={(errors as any).address?.street_1?.message}
+                      />
                     )}
                   </div>
-                </div>
-                <div className="col-12 pt-1">
-                  <FileInput
-                    label={<><span>Upload Profile Image</span><span style={{ color: "red" }}> *</span></>}
-                    name="profile_image"
-                    control={control}
-                    error={errors.profile_image?.message as string}
-                    openCamera
-                    captureMode="user"
-                    accept="image/*"
-                  />
-                </div>
-                <div className="col-12 pt-3">
+                  <div className="col-6 pt-3">
+                    <Input
+                      label="City"
+                      control={control}
+                      name="address.city"
+                      type="text"
+                      placeholder="Enter city"
+                      error={(errors as any).address?.city?.message}
+                    />
+                  </div>
+                  <div className="col-6 pt-3">
+                    <Input
+                      label="State"
+                      control={control}
+                      name="address.state"
+                      type="text"
+                      placeholder="Enter state"
+                      error={(errors as any).address?.state?.message}
+                    />
+                  </div>
+                  <div className="col-6 pt-3">
+                    <Input
+                      label="Country"
+                      control={control}
+                      name="address.country"
+                      type="text"
+                      placeholder="Enter country"
+                      error={(errors as any).address?.country?.message}
+                    />
+                  </div>
+                  <div className="col-6 pt-3">
+                    <Input
+                      label="Zip Code"
+                      control={control}
+                      name="address.zip"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Enter zip"
+                      error={(errors as any).address?.zip?.message}
+                    />
+                  </div>
+                </>
+              )}
+
+              {currentStep === 4 && (
+                <>
+                  <div className="col-12 pt-3">
+                    <p className="font-14 weight-bold mb-1">Documents</p>
+                  </div>
+                  <div className="col-12">
+                    <FileInput
+                      label="Upload Aadhar Card (Front)"
+                      name="serviceman_document"
+                      control={control}
+                      error={errors.serviceman_document?.message as string}
+                    />
+                  </div>
+                  <div className="col-12 pt-3">
+                    <FileInput
+                      label="Upload Aadhar Card (Back)"
+                      name="serviceman_document_2"
+                      control={control}
+                      error={(errors as any).serviceman_document_2?.message as string}
+                    />
+                  </div>
+                  <div className="col-12 pt-3">
+                    <FileInput
+                      label="Upload Driving License"
+                      name="serviceman_document_3"
+                      control={control}
+                      error={(errors as any).serviceman_document_3?.message as string}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="col-12 pt-4">
+                {currentStep < 4 ? (
                   <button
                     className="fill w-100"
-                    onClick={submitGeneralInfo}
+                    onClick={goToNextStep}
                     disabled={loadingGeneral}
                   >
-                    {loadingGeneral ? "Saving..." : "Update General Info"}
+                    {currentStep === 2
+                      ? loadingGeneral
+                        ? "Saving..."
+                        : "Save and Continue"
+                      : "Continue"}
                   </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        {/* <div className="col-12 pt-3">  
-          {" "}
-          {errors.bank?.message && (
-            <p className="alert alert-danger">{errors.bank?.message}</p>
-          )}{" "}
-        </div> */}
-
-        {/* Banner shown after General Info is saved */}
-        {generalInfoDone && (
-          <div
-            className="alert alert-success d-flex align-items-center gap-2 mb-3"
-            role="alert"
-          >
-            <span>✅</span>
-            <span>General info saved! Now fill the verification details below.</span>
-          </div>
-        )}
-
-        {/* Banking Info */}
-        {false && (<div className="accordion-item mb-3 border rounded p-3">
-          <div
-            className="d-flex justify-content-between align-items-center"
-            onClick={() =>
-              setOpenSection(openSection === "bank" ? "none" : "bank")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            <h6 className="m-0">Banking Info</h6>
-            {openSection === "bank" ? <ChevronUp /> : <ChevronDown />}
-          </div>
-
-          {openSection === "bank" && (
-            <div className="mt-3">
-              <div className="row">
-                {/* --- Select Payment Type --- */}
-                <div className="col-12 pt-3">
-                  <label className="lbl2 d-block mb-2">
-                    Select Payment Method
-                  </label>
-                  <div className="d-flex gap-4">
-                    <div className="form-check">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        id="upiOption"
-                        name="payment_type"
-                        checked={paymentType === "upi"}
-                        onChange={() => {
-                          setPaymentType("upi");
-                          setValue("bank.account_name", "");
-                          setValue("bank.bank_name", "");
-                          setValue("bank.account_number", "");
-                          setValue("bank.ifsc_code", "");
-                        }}
-                      />
-                      <label
-                        htmlFor="upiOption"
-                        className="form-check-label font-14"
-                      >
-                        UPI ID
-                      </label>
-                    </div>
-
-                    <div className="form-check">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        id="bankOption"
-                        name="payment_type"
-                        checked={paymentType === "bank"}
-                        onChange={() => {
-                          setPaymentType("bank");
-                          setValue("bank.upi_id", "");
-                        }}
-                      />
-                      <label
-                        htmlFor="bankOption"
-                        className="form-check-label font-14"
-                      >
-                        Bank Account
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ✅ Show form-level bank error here */}
-                {errors.bank?.message && (
-                  <div className="col-12 pt-3">
-                    <div className="alert alert-danger py-2">
-                      {errors.bank?.message}
-                    </div>
-                  </div>
-                )}
-
-                {/* --- UPI Section --- */}
-                {paymentType === "upi" && (
-                  <div className="col-12 pt-3">
-                    <div className="">
-                      <Input
-                        label="UPI ID"
-                        control={control}
-                        name="bank.upi_id"
-                        type="text"
-                        placeholder="example@bank"
-                        error={errors.bank?.upi_id?.message as string}
-                      />
-                      <p className="text-muted font-12 mt-2">
-                        Enter your valid UPI handle (e.g. name@bank)
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* --- Bank Details Section --- */}
-                {paymentType === "bank" && (
-                  <div className="col-12 pt-3">
-                    <div className="bnkboxf">
-                      <Input
-                        label="Account Name"
-                        control={control}
-                        name="bank.account_name"
-                        type="text"
-                        placeholder="Enter Account Name"
-                        error={errors.bank?.account_name?.message as string}
-                      />
-                      <Input
-                        label="Bank Name"
-                        control={control}
-                        name="bank.bank_name"
-                        type="text"
-                        placeholder="Enter Bank Name"
-                        error={errors.bank?.bank_name?.message as string}
-                      />
-                      <Input
-                        label="Account Number"
-                        control={control}
-                        name="bank.account_number"
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="Enter Account Number"
-                        error={errors.bank?.account_number?.message as string}
-                      />
-                      <Input
-                        label="IFSC Code"
-                        control={control}
-                        name="bank.ifsc_code"
-                        type="text"
-                        placeholder="Enter IFSC Code"
-                        error={errors.bank?.ifsc_code?.message as string}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-        )}
-
-        {/* Docs Upload */}
-        <div className="accordion-item mb-3 border rounded p-3">
-          <div
-            className="d-flex justify-content-between align-items-center"
-            onClick={() =>
-              setOpenSection(openSection === "docs" ? "none" : "docs")
-            }
-            style={{ cursor: "pointer" }}
-          >
-            <h6 className="m-0"> Verification Info</h6>
-            {openSection === "docs" ? <ChevronUp /> : <ChevronDown />}
-          </div>
-
-          {openSection === "docs" && (
-            <div className="mt-3">
-              <div className="row">
-                {/* Service Location Address */}
-                <div className="col-12 pt-2">
-                  <p className="font-14 weight-bold mb-1">Service Location</p>
-                </div>
-                <div className="col-12 pt-2">
-                  {isLoaded ? (
-                    <GooglePlacesAutocomplete
-                      control={control}
-                      name="address.street_1"
-                      onSelect={handleAddressSelect}
-                      label="Street Address"
-                      error={(errors as any).address?.street_1?.message}
-                    />
-                  ) : (
-                    <Input
-                      label="Street Address"
-                      control={control}
-                      name="address.street_1"
-                      type="text"
-                      placeholder="Enter street address"
-                      error={(errors as any).address?.street_1?.message}
-                    />
-                  )}
-                </div>
-                <div className="col-6 pt-3">
-                  <Input
-                    label="City"
-                    control={control}
-                    name="address.city"
-                    type="text"
-                    placeholder="Enter city"
-                    error={(errors as any).address?.city?.message}
-                  />
-                </div>
-                <div className="col-6 pt-3">
-                  <Input
-                    label="State"
-                    control={control}
-                    name="address.state"
-                    type="text"
-                    placeholder="Enter state"
-                    error={(errors as any).address?.state?.message}
-                  />
-                </div>
-                <div className="col-6 pt-3">
-                  <Input
-                    label="Country"
-                    control={control}
-                    name="address.country"
-                    type="text"
-                    placeholder="Enter country"
-                    error={(errors as any).address?.country?.message}
-                  />
-                </div>
-                <div className="col-6 pt-3">
-                  <Input
-                    label="Zip Code"
-                    control={control}
-                    name="address.zip"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="Enter zip"
-                    error={(errors as any).address?.zip?.message}
-                  />
-                </div>
-
-                {/* Document Upload */}
-                <div className="col-12 pt-3">
-                  <p className="font-14 weight-bold mb-1">Documents</p>
-                </div>
-                <div className="col-12">
-                  <FileInput
-                    label="Upload Aadhar Card (Front)"
-                    name="serviceman_document"
-                    control={control}
-                    error={errors.serviceman_document?.message as string}
-                  />
-                </div>
-                <div className="col-12 pt-3">
-                  <FileInput
-                    label="Upload Aadhar Card (Back)"
-                    name="serviceman_document_2"
-                    control={control}
-                    error={(errors as any).serviceman_document_2?.message as string}
-                  />
-                </div>
-                <div className="col-12 pt-3">
-                  <FileInput
-                    label="Upload Driving License"
-                    name="serviceman_document_3"
-                    control={control}
-                    error={(errors as any).serviceman_document_3?.message as string}
-                  />
-                </div>
-                <div className="col-12 pt-3">
+                ) : (
                   <button
                     className="fill w-100"
                     onClick={submitVerificationInfo}
@@ -835,33 +765,21 @@ const Registration = () => {
                   >
                     {loadingDocs ? "Saving..." : "Update Verification Info"}
                   </button>
-                </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
 
-        <div className="text-center mt-4">
-          <button
-            className="fill w-100"
-            onClick={handleSkip}>
-            Go to Dashboard
-          </button>
-        </div>
+            <div className="text-center mt-4">
+              <button
+                className="fill w-100"
+                onClick={handleSkip}
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
       </div>
       </div>
-      </div>
-
-      <SuccessConfirmModal
-        show={showSuccessModal}
-        onCancel={() => setShowSuccessModal(false)}
-        onConfirm={handleClose}
-        loading={loadingGeneral}
-        itemName={country_code + phone_number}
-        title=" 🥳 Thanks for joining Instasevak"
-        description="Your account has been registered successfully."
-        confirmLabel="Close"
-      />
     </div>
   );
 };
