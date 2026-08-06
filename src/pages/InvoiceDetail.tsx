@@ -11,7 +11,7 @@ import "./InvoiceDetail.css";
 
 const amount2 = (value: any) => Number(value || 0).toFixed(2);
 
-const formatCustomerAddress = (address: any) => {
+const formatAddress = (address: any) => {
     if (!address) return "-";
     return [
         address?.street_1,
@@ -151,7 +151,7 @@ const InvoiceDetail = () => {
                                             <div className="invoice-field">
                                                 <div className="invoice-field-label">Delivery Address</div>
                                                 <div className="invoice-field-value">
-                                                    {formatCustomerAddress(invoice?.customer_address)}
+                                                    {formatAddress(invoice?.customer_address)}
                                                 </div>
                                             </div>
                                             <div className="invoice-field">
@@ -171,26 +171,29 @@ const InvoiceDetail = () => {
                                         <div className="invoice-grid-col">
                                             <div className="invoice-provider-label">DELIVERY SERVICE PROVIDER</div>
                                             <div className="invoice-field">
-                                                <div className="invoice-field-label">Business GSTIN</div>
-                                                <div className="invoice-field-value">{invoice?.serviceman?.gstin || "-"}</div>
-                                            </div>
-                                            <div className="invoice-field">
                                                 <div className="invoice-field-label">Business Name</div>
                                                 <div className="invoice-field-value">{invoice?.serviceman?.name || "-"}</div>
                                             </div>
                                             <div className="invoice-field">
                                                 <div className="invoice-field-label">Address</div>
-                                                <div className="invoice-field-value">{invoice?.serviceman?.address || "-"}</div>
+                                                <div className="invoice-field-value">
+                                                    {formatAddress(invoice?.serviceman_address)}
+                                                </div>
                                             </div>
                                             <div className="invoice-field">
                                                 <div className="invoice-field-label">State Name & Code</div>
                                                 <div className="invoice-field-value">
-                                                    {invoice?.serviceman?.state_name
-                                                        ? `${invoice?.serviceman?.state_name}${invoice?.serviceman?.state_code
-                                                            ? ` (${invoice?.serviceman?.state_code})`
+                                                    {invoice?.serviceman_address?.state
+                                                        ? `${invoice?.serviceman_address?.state}${invoice?.serviceman_address?.zip
+                                                            ? ` (${invoice?.serviceman_address?.zip})`
                                                             : ""
                                                         }`
-                                                        : "-"}
+                                                        : invoice?.serviceman?.state_name
+                                                            ? `${invoice?.serviceman?.state_name}${invoice?.serviceman?.state_code
+                                                                ? ` (${invoice?.serviceman?.state_code})`
+                                                                : ""
+                                                            }`
+                                                            : "-"}
                                                 </div>
                                             </div>
                                         </div>
@@ -202,7 +205,7 @@ const InvoiceDetail = () => {
                                             <span>Taxable Value</span>
                                         </div>
 
-                                        {/* <div className="invoice-item-row">
+                                        <div className="invoice-item-row">
                                             <div>
                                                 <div className="invoice-item-name">
                                                     {invoice?.booking?.job_description ||
@@ -212,33 +215,26 @@ const InvoiceDetail = () => {
                                             <div className="invoice-item-taxable">
                                                 ₹{amount2(invoice?.bill_details?.base_price_amount)}
                                             </div>
-                                        </div> */}
+                                        </div>
 
                                         <div className="invoice-line-row">
-                                            <span>Item total</span>
-                                            <span>
-                                            ₹{amount2(invoice?.bill_details?.customer_total_amount)}
-                                               
-                                            </span>
+                                            <span>Discount</span>
+                                            <span>₹0.00</span>
                                         </div>
-                                        {/* <div className="invoice-line-row">
-                                            <span>Base discount</span>
-                                            <span>₹{amount2(invoice?.bill_details?.base_discount_amount)}</span>
-                                        </div> */}
                                         <div className="invoice-line-row">
-                                            <span>Coupon discount</span>
-                                            <span>₹{amount2(invoice?.bill_details?.coupon_discount_amount)}</span>
+                                            <span>Platform Share Amount</span>
+                                            <span>₹{amount2(invoice?.bill_details?.platform_net_amount)}</span>
                                         </div>
-                                        {/* <div className="invoice-line-row">
-                                            <span>Tax and fee</span>
+                                        <div className="invoice-line-row">
+                                            <span>GST @{amount2(invoice?.bill_details?.gst_percent)}%</span>
                                             <span>₹{amount2(invoice?.bill_details?.gst_amount)}</span>
-                                        </div> */}
+                                        </div>
 
                                         <div className="invoice-total-row">
-                                            <span>Final Amount</span>
+                                            <span>TOTAL AMOUNT</span>
                                             <span>
                                                 ₹{amount2(
-                                                    invoice?.invoice_amount
+                                                    invoice?.bill_details?.customer_total_amount || invoice?.invoice_amount
                                                 )}
                                             </span>
                                         </div>

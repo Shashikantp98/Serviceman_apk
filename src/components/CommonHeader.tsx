@@ -1,4 +1,4 @@
-import { ChevronLeft } from "react-feather";
+// import { ChevronLeft } from "react-feather";
 import { useNavigate } from "react-router-dom";
 
 interface CommonHeaderProps {
@@ -20,8 +20,8 @@ const CommonHeader: React.FC<CommonHeaderProps> = ({ customBack }) => {
     <div className="new_header fixed_header">
       <div className="row pt-4">
         <div className="col-12">
-          <button className="backs_butn" onClick={handleBack}>
-            <ChevronLeft />
+          <button className="back_btn_new" onClick={handleBack}>
+            Back
             
           </button>
         </div>

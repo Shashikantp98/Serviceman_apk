@@ -145,7 +145,7 @@ const Servicedetail = () => {
           <div className="row">
 
             {/* Header row */}
-            <div className="col-12 d-flex pt-5 align-items-center justify-content-between">
+            <div className="col-12 d-flex pt-4 align-items-center justify-content-between">
               <button className="back_btn_new" onClick={() => navigate(-1)}>Back</button>
               <div className="d-flex align-items-center gap-2">
                 <button className="back_btn_new2"><Search size={16} /></button>

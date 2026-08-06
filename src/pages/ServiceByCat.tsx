@@ -86,7 +86,7 @@ const ServiceByCat = () => {
 
       <div className="container">
         <div className="row pt-5">
-          <div className="col-12 pt-3">
+          <div className="col-12 pt-2">
             <button
               className="back_btn_new"
               onClick={() => navigate(-1)}>
@@ -95,7 +95,7 @@ const ServiceByCat = () => {
           </div>
         </div>
         <div className="row pt-2">
-          <div className="col-12">
+          <div className="col-12 pt-3">
             <div className="px-0 categories_scroll pt-2">
               <button
                 className={selectedCategoryId === "" ? "active" : ""}
@@ -120,9 +120,9 @@ const ServiceByCat = () => {
           </div>
         </div>
       </div>
-      <div className="container py-2 pb-4 mt-3 px-4 bg-lig2 padding_btn_main pb-5 mb-5">
-        <div className="row  mt-2">
-          <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
+      <div className="container py-2 pb-4 mt-4 px-4 bg-lig2 padding_btn_main pb-5 mb-5">
+        <div className="row  mt-4">
+          <div className="col-12 pb-4 d-flex align-items-center justify-content-between">
             <p className="subcats">
               {selectedCategoryId
                 ? categories?.find(

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Gift, ArrowLeft } from "react-feather";// Users, TrendingUp, Award,
+// import { useNavigate } from "react-router-dom";
+// import { Gift, ArrowLeft } from "react-feather";// Users, TrendingUp, Award,
 import ReferralShare from "../components/ReferralShare";
 import ApiService from "../services/api";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ interface ReferralStats {
 }
 
 const ReferralPage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const userType = localStorage.getItem("authmobileRole") || "customer";
@@ -54,25 +54,34 @@ const ReferralPage: React.FC = () => {
   return (
     <div className="referral-page">
       {/* Header */}
-      <div className="header-section bg-primary text-white p-3">
-        <div className="d-flex align-items-center mb-3">
-          <button
+
+      
+
+
+
+
+      <div className="header-section bg-dark-head text-white p-4 pt-4">
+        <div className="d-flex align-items-start mb-2 ">
+          {/* <button
             className="btn btn-link text-white p-0 me-3"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={24} />
-          </button>
-          <h5 className="mb-0 fw-bold">
-            <Gift size={20} className="me-2" />
+          </button> */}
+          <h5 className="mb-0 font-18 pt-2 ">
+           
             Referral Program
+            <span className="support-texts">
+              Refer Friends & Earn Rewards
+            </span>
           </h5>
         </div>
-        <p className="mb-0 font-14 opacity-75">
-          Invite friends and earn rewards together!
-        </p>
+        
       </div>
 
-      <div className="container-fluid p-3">
+      
+
+      <div className="container-fluid p-4">
         {/* Loading State */}
         {loading && !stats && (
           <div className="text-center py-5">
@@ -158,12 +167,12 @@ const ReferralPage: React.FC = () => {
         </div>
 
         {/* How It Works */}
-        <div className="card border-0 shadow-sm mb-4">
+        <div className="card border-0  mb-4">
           <div className="card-body p-3">
             <h6 className="card-title fw-bold mb-3">How It Works</h6>
             <div className="steps">
               <div className="d-flex align-items-start mb-3">
-                <div className="badge bg-primary rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="badge bg-dark-head rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   1
                 </div>
                 <div>
@@ -174,7 +183,7 @@ const ReferralPage: React.FC = () => {
                 </div>
               </div>
               <div className="d-flex align-items-start mb-3">
-                <div className="badge bg-primary rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="badge bg-dark-head rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   2
                 </div>
                 <div>
@@ -185,7 +194,7 @@ const ReferralPage: React.FC = () => {
                 </div>
               </div>
               <div className="d-flex align-items-start">
-                <div className="badge bg-primary rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div className="badge bg-dark-head rounded-circle me-3" style={{ width: "30px", height: "30px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   3
                 </div>
                 <div>

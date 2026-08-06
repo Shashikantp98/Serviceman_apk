@@ -9,15 +9,12 @@ import CommonHeader from "../components/CommonHeader";
 import Loader from "../components/Loader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 
-
 const toNumber = (value: any) => Number(value) || 0;
-
 
 const Summery = () => {
   const { latitude, longitude } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-
 
   const [serviceDetails, setServiceDetails] = useState<any>({});
   const [selectedPricing, setSelectedPricing] = useState<any>(null);
@@ -26,13 +23,12 @@ const Summery = () => {
     itemTotal: 0,
     baseDiscount: 0,
     couponDiscount: 0,
-    gst_amount: 0,
+    taxAmount: 0,
     totalAmount: 0,
     bookingFeeAmount: 0,
     remainingAmount: 0,
     customerTotalAmount: 0,
   });
-
 
   const [coupons, setCoupons] = useState<any[]>([]);
   const [steps, setSteps] = useState(1);
@@ -48,50 +44,40 @@ const Summery = () => {
   const [booking_time, setBookingTime] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
-
   const pageLoader = useSectionLoader("summery-page");
-
 
   const buildBaseSummary = (pricing: any, service: any) => {
     const basePrice = toNumber(pricing?.price || service?.price);
     const finalPrice = toNumber(
       pricing?.final_price || pricing?.price || service?.final_price || service?.price
     );
-    const gst_amount = service?.gst_amount ? toNumber(service.gst_amount) : 0;
-    const gst_percent = service?.gst_percent ? toNumber(service.gst_percent) : 0;
+    const taxAmount = toNumber(pricing?.tax_amount ?? service?.tax_amount);
     const baseDiscount = basePrice > finalPrice ? basePrice - finalPrice : 0;
-
 
     return {
       price: basePrice,
       itemTotal: finalPrice,
       baseDiscount,
       couponDiscount: 0,
-      gst_amount,
-      gst_percent,
-      totalAmount: finalPrice + gst_amount,
+      taxAmount,
+      totalAmount: finalPrice + taxAmount,
     };
   };
 
-
-  const recalcTotal = (itemTotal: number, couponDiscount: number, gst_amount: number) => {
-    return Math.max(itemTotal - couponDiscount + gst_amount, 0);
+  const recalcTotal = (itemTotal: number, couponDiscount: number, taxAmount: number) => {
+    return Math.max(itemTotal - couponDiscount + taxAmount, 0);
   };
-
 
   const handlePricingSelect = (pricing: any) => {
     setSelectedPricing(pricing);
     setCouponCode("");
 
-
     const summary = buildBaseSummary(pricing, serviceDetails);
-
 
     setPaymentSummery((prev: any) => ({
       ...prev,
       ...summary,
     }));
-
 
     setCoupons((prev) =>
       prev.map((c) => ({
@@ -101,15 +87,12 @@ const Summery = () => {
     );
   };
 
-
   useEffect(() => {
     if (!id) return;
-
 
     pageLoader.setLoading(true);
     getCoupons();
     getProfileDetails();
-
 
     ApiService.post(`/user/serviceDetails`, {
       service_id: id,
@@ -120,13 +103,10 @@ const Summery = () => {
         const service = res.data?.data || res.data || {};
         setServiceDetails(service);
 
-
         const defaultPricing = service?.pricing?.[0] || service;
         setSelectedPricing(defaultPricing);
 
-
         const summary = buildBaseSummary(defaultPricing, service);
-
 
         setPaymentSummery((prev: any) => ({
           ...prev,
@@ -141,7 +121,6 @@ const Summery = () => {
       });
   }, [id]);
 
-
   const getProfileDetails = () => {
     ApiService.post("/user/getCustomerDetails")
       .then((res: any) => {
@@ -151,7 +130,6 @@ const Summery = () => {
         console.log(err);
       });
   };
-
 
   const getCoupons = () => {
     ApiService.post("/user/listCouponsForUser", {})
@@ -167,16 +145,14 @@ const Summery = () => {
       });
   };
 
-
   const applyCoupon = (coupon: any, index: number) => {
     const serviceCharge = toNumber(paymentSummery?.itemTotal);
-    const gst_amount = toNumber(paymentSummery?.gst_amount);
-
+    const taxAmount = toNumber(paymentSummery?.taxAmount);
 
     ApiService.post("/user/userApplyCouponForBooking", {
       coupon_code: coupon.coupon_code,
       service_charge: serviceCharge,
-      tax_and_other_charges: gst_amount,
+      tax_and_other_charges: taxAmount,
     })
       .then((res: any) => {
         const bill = res.data?.bill_details || {};
@@ -185,18 +161,15 @@ const Summery = () => {
         const tax = toNumber(bill.tax_and_other_charges);
         const total = toNumber(bill.grand_total) || recalcTotal(subtotal, couponDiscount, tax);
 
-
         setPaymentSummery((prev: any) => ({
           ...prev,
           itemTotal: subtotal,
           couponDiscount: couponDiscount,
-          gst_amount: tax,
+          taxAmount: tax,
           totalAmount: total,
         }));
 
-
         setCouponCode(coupon.coupon_code);
-
 
         setCoupons((prev: any[]) =>
           prev.map((c, i) => ({
@@ -211,19 +184,8 @@ const Summery = () => {
       });
   };
 
-
   const removeCoupon = () => {
-    const summary = buildBaseSummary(selectedPricing, serviceDetails);
-
-
-    setPaymentSummery((prev: any) => ({
-      ...prev,
-      ...summary,
-    }));
-
-
     setCouponCode("");
-
 
     setCoupons((prev: any[]) =>
       prev.map((c) => ({
@@ -231,17 +193,22 @@ const Summery = () => {
         isCouponApplied: false,
       }))
     );
-  };
 
+    const pricingForSummary = selectedPricing || (serviceDetails?.pricing || [])[0] || serviceDetails;
+    const summary = buildBaseSummary(pricingForSummary, serviceDetails);
+
+    setPaymentSummery((prev: any) => ({
+      ...prev,
+      ...summary,
+    }));
+  };
 
   const handleDateTimeSelect = (date: string, time: string, note: string) => {
     setLoading(true);
     setBookingDate(date);
     setBookingTime(time);
 
-
     const isCOD = payment_type === "cash_on_delivery";
-
 
     ApiService.post("/user/userCreateBooking", {
       address_id: address,
@@ -251,7 +218,7 @@ const Summery = () => {
       job_description: note,
       booking_fee: serviceDetails?.booking_fee,
       service_charge: paymentSummery?.itemTotal,
-      tax_and_other_charges: paymentSummery?.gst_amount,
+      tax_and_other_charges: paymentSummery?.taxAmount,
       payment_method: isCOD ? "cod" : "online",
       payment_type: payment_type,
       coupon_code: couponCode,
@@ -259,14 +226,12 @@ const Summery = () => {
       .then((res: any) => {
         setLoading(false);
 
-
         setPaymentSummery((prev: any) => ({
           ...prev,
           bookingFeeAmount: toNumber(res.data?.booking_fee_amount),
           remainingAmount: toNumber(res.data?.remaining_amount),
           customerTotalAmount: toNumber(res.data?.customer_total_amount),
         }));
-
 
         if (isCOD) {
           navigate("/succcess", {
@@ -292,10 +257,8 @@ const Summery = () => {
       });
   };
 
-
   const handleSuccess = (response: any) => {
     setIsVerifying(true);
-
 
     ApiService.post("/user/verifyBookingPayment", {
       razorpay_order_id: response.razorpay_order_id,
@@ -306,7 +269,6 @@ const Summery = () => {
       .then(() => {
         setIsOrder(false);
         setRazorpayOrderId("");
-
 
         setTimeout(() => {
           setIsVerifying(false);
@@ -335,7 +297,6 @@ const Summery = () => {
       });
   };
 
-
   const handleFailure = (response: any) => {
     console.log("Payment Cancelled or Failed:", response);
     alert("Payment Failed");
@@ -343,12 +304,10 @@ const Summery = () => {
     setIsOrder(false);
   };
 
-
   const handleAddressSelect = (address: string) => {
     setAddress(address);
     setSteps(3);
   };
-
 
   const handleExit = () => {
     setIsOrder(false);
@@ -356,12 +315,10 @@ const Summery = () => {
     setSteps(1);
   };
 
-
   return (
     <>
       <Loader show={isVerifying} text="Please wait..." />
       <CommonHeader />
-
 
       {pageLoader.loading && (
         <div className="full-page-loader">
@@ -370,12 +327,10 @@ const Summery = () => {
         </div>
       )}
 
-
       <div className="container mb-5 pb-5 main-content-service">
         <div className="row">
           <div className="col-12">
             <h6 className="pt-4 pb-2">Selected Service</h6>
-
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <img
@@ -396,7 +351,6 @@ const Summery = () => {
                     __html: serviceDetails?.description,
                   }}
                 ></p>
-
 
                 <div className="mt-3">
                   <h6>Select Duration</h6>
@@ -442,14 +396,12 @@ const Summery = () => {
                   )}
                 </div>
 
-
                 <p className="font-12 color-grey">
                   ₹{serviceDetails?.booking_fee} will be charged for generate request.
                 </p>
               </div>
             </div>
           </div>
-
 
           <div className="col-12 mt-3">
             {!serviceDetails?.offer_price && (
@@ -490,26 +442,22 @@ const Summery = () => {
               </div>
             )}
 
-
             <div className="cou_cards mt-3">
               <h6 className="head_cp mb-0 font-14">Payments summary</h6>
-
 
               <div className="d-flex align-items-center justify-content-between">
                 <p className="font-12 my-2">Item total</p>
                 <p className="font-12 my-2 color-grey text-right">
-                  ₹{paymentSummery?.itemTotal}
+                  ₹{paymentSummery?.price}
                 </p>
               </div>
 
-
-              {/* <div className="d-flex align-items-center justify-content-between">
+              <div className="d-flex align-items-center justify-content-between">
                 <p className="font-12 my-2">Base discount</p>
                 <p className="font-12 my-2 color-grey text-right">
                   ₹{paymentSummery?.baseDiscount}
                 </p>
-              </div> */}
-
+              </div>
 
               <div className="d-flex align-items-center justify-content-between">
                 <p className="font-12 my-2">Coupon discount</p>
@@ -518,14 +466,12 @@ const Summery = () => {
                 </p>
               </div>
 
-
               <div className="d-flex align-items-center justify-content-between">
-                <p className="font-12 my-2">Tax and fee ({paymentSummery?.gst_percent}%)</p>
+                <p className="font-12 my-2">Tax and fee</p>
                 <p className="font-12 my-2 color-grey text-right">
-                  ₹{paymentSummery?.gst_amount}
+                  ₹{paymentSummery?.taxAmount}
                 </p>
               </div>
-
 
               <div className="d-flex align-items-center justify-content-between">
                 <p className="font-14 my-2">Amount to pay</p>
@@ -537,7 +483,6 @@ const Summery = () => {
           </div>
         </div>
 
-
         <div className="row pt-3">
           <div className="col-12">
             <button
@@ -546,13 +491,6 @@ const Summery = () => {
                 setpayment_type("booking_fee");
                 setSteps(2);
               }}
-              disabled={!!couponCode}
-              title={couponCode ? "Coupon applied — full payment required" : undefined}
-              style={
-                couponCode
-                  ? { opacity: 0.5, cursor: "not-allowed", pointerEvents: "none" }
-                  : undefined
-              }
             >
               {loading
                 ? "Loading..."
@@ -572,12 +510,10 @@ const Summery = () => {
           </div>
         </div>
 
-
         {steps === 2 && (
           <Address onSelect={handleAddressSelect} service_id={id} onExit={handleExit} />
         )}
         {steps === 3 && <Date onSelect={handleDateTimeSelect} onExit={handleExit} />}
-
 
         {isOrder && razorpayOrderId && (
           <RazorpayPayment
@@ -598,6 +534,5 @@ const Summery = () => {
     </>
   );
 };
-
 
 export default Summery;

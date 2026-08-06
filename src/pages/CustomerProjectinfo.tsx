@@ -89,7 +89,7 @@ const CustomerProjectinfo = () => {
         </div>
       )}
       <div className=" main-content-service2">
-        <div className="pt-4 pb-0 ">
+        <div className="pt-0 pb-0 ">
 
           <div className="px-3 mt-5">
             <div className="cards5 ">

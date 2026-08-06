@@ -1,4 +1,4 @@
-import { ChevronLeft, Mail, MapPin, Phone } from "react-feather";
+import { Mail, MapPin, Phone } from "react-feather";
 import { useState, useEffect } from "react";
 import ApiService from "../services/api";
 import dayjs from "dayjs";
@@ -57,8 +57,8 @@ const MyCustomerProfile = () => {
         <div className="container">
           <div className="row">
             <div className="col-12 back_btn_pro">
-              <button className="backs_butn" onClick={() => navigate(-1)}>
-                <ChevronLeft />
+              <button className="back_btn_new" onClick={() => navigate(-1)}>
+               Back
               </button>
             </div>
           </div>
@@ -97,9 +97,9 @@ const MyCustomerProfile = () => {
           {/* Phone */}
           <div className="col-12 pt-4">
             <div className="d-flex align-items-center gap-10">
-              <Phone size={20} />
+              <Phone size={20} className="minwid-20"/>
               <div className="px-2">
-                <h6 className="font-12 mb-1">Phone Number</h6>
+                <h6 className="font-14 bold mb-1">Phone Number</h6>
                 <p className="font-14 mb-0">
                   {customer?.country_code} {customer?.phone_number}
                 </p>
@@ -110,9 +110,9 @@ const MyCustomerProfile = () => {
           {/* Email */}
           <div className="col-12 pt-4">
             <div className="d-flex align-items-center gap-10">
-              <Mail size={20} />
+              <Mail size={20} className="minwid-20" />
               <div className="px-2">
-                <h6 className="font-12 mb-1">Email Address</h6>
+                <h6 className="font-14 bold mb-1">Email Address</h6>
                 <p className="font-14 mb-0">
                   {customer?.email || 'N/A'}
                 </p>
@@ -122,10 +122,10 @@ const MyCustomerProfile = () => {
 
           {/* Address */}
           <div className="col-12 pt-4">
-            <div className="d-flex align-items-center gap-10">
-              <MapPin size={20} />
+            <div className="d-flex  gap-10">
+              <MapPin size={20} className="minwid-20 mt-2" />
               <div className="px-2">
-                <h6 className="font-12 mb-1">Home</h6>
+                <h6 className="font-14 bold mb-1">Home Address</h6>
                 <p className="font-14 mb-0">{formatAddress()}</p>
               </div>
             </div>
@@ -139,18 +139,7 @@ const MyCustomerProfile = () => {
           </div>
 
           {/* Logout */}
-          <div className="col-12 mt-3">
-            <button
-              className="fill"
-              style={{ background: "#e74c3c", borderColor: "#e74c3c" }}
-              onClick={() => {
-                localStorage.clear();
-                navigate("/");
-              }}
-            >
-              Logout
-            </button>
-          </div>
+          
 
         </div>
       </div>

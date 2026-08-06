@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Share2, Copy, Check } from "react-feather";
+import { Share2, Copy, Check, MessageCircle } from "react-feather";
 import { toast } from "react-toastify";
 import ApiService from "../services/api";
 import { generateReferralLink } from "../utils/referralUtils";
@@ -132,53 +132,66 @@ const ReferralShare: React.FC<ReferralShareProps> = ({
 
   return (
     <div className={`referral-share-container ${className}`}>
-      <div className="card border-0 shadow-sm">
-        <div className="card-body p-3">
-          <h6 className="card-title mb-3 fw-bold">
-            <Share2 size={18} className="me-2" />
-            Refer & Earn
-          </h6>
 
-          {/* Referral Code */}
-          <div className="mb-3">
-            <label className="form-label font-12 text-muted mb-1">
+
+      <div className="">
+        <div className="ref-cards">
+          <div className="bg-wallet-img">
+            <h6 className="ref-h6">
+              Refer & <br></br>Get Rewards
+            </h6>
+            <div className="mb-0 pt-3">
+            <label className="form-label font-14  mb-2">
               Your Referral Code
             </label>
-            <div className="input-group">
+            <div className="ref-copy-input">
               <input
                 type="text"
-                className="form-control"
+                className="ref-code-input"
                 value={referralData.referral_code}
                 readOnly
               />
               <button
-                className="btn btn-outline-secondary"
+                className="copy-btn-red"
                 onClick={() => copyToClipboard(referralData.referral_code, "code")}
               >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? <Check size={20} /> : <Copy size={20}  />}
+                
               </button>
             </div>
           </div>
-
-          {/* Share Buttons */}
-          <div className="d-grid gap-2">
+            
+          </div>
+        </div>
+        <div className="share-ref-btn">
             <button
-              className="btn btn-primary btn-sm d-flex align-items-center justify-content-center"
+              className=""
               onClick={shareViaGenericShare}
             >
-              <Share2 size={18} className="me-2" />
-              Share Referral Code
+             <Share2 size={18} className="" />
+              Share Code
             </button>
+            <button
+                  className="wa"
+                  onClick={shareOnWhatsApp}
+                >
+                  <MessageCircle size={18} className="" />
+                  WhatsApp
+            </button>
+        </div>
+      </div>
+
+        {/* <div className="card border-0 shadow-sm">
+        <div className="card-body p-3">
+          
+
+          
+          <div className="">
+            
 
             <div className="row g-2">
               <div className="col-12">
-                <button
-                  className="btn btn-success btn-sm w-100"
-                  onClick={shareOnWhatsApp}
-                >
-                  <Share2 size={16} className="me-1" />
-                  WhatsApp
-                </button>
+                
               </div>
               </div>
             </div>
@@ -189,7 +202,7 @@ const ReferralShare: React.FC<ReferralShareProps> = ({
               Share your referral code and earn rewards when friends sign up!
             </small>
           </div>
-        </div>
+        </div> */}
       </div>
   );
 };
