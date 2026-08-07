@@ -169,7 +169,7 @@ const ReferralShare: React.FC<ReferralShareProps> = ({
               onClick={shareViaGenericShare}
             >
              <Share2 size={18} className="" />
-              Share Code
+              Share
             </button>
             <button
                   className="wa"

@@ -1,4 +1,4 @@
-import { ChevronLeft } from "react-feather";
+
 import { useNavigate } from "react-router-dom";
 import { DeleteConfirmModal } from "../components/DeleteConfirmModal";
 
@@ -36,8 +36,8 @@ const PrivacyCenter = () => {
       <div className="fixed_header">
         <div className="row">
           <div className="col-12 px-3 back_btn_pro  ">
-            <button className="backs_butn" onClick={() => navigate(-1)}>
-              <ChevronLeft />
+            <button className="back_btn_new" onClick={() => navigate(-1)}>
+              Back
             </button>
           </div>
         </div>

@@ -87,7 +87,7 @@ const Addressdetails = () => {
   return (
     <>
 
-      <div className="container">
+      <div className="container mbt-200px">
         <div className="row pt-5">
           <div className="col-12 pt-4 pb-0">
             <h3>My Addresses</h3>

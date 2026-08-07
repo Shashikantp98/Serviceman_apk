@@ -328,7 +328,7 @@ const Summery = () => {
       )}
 
       <div className="container mb-5 pb-5 main-content-service">
-        <div className="row">
+        <div className="row px-2">
           <div className="col-12">
             <h6 className="pt-4 pb-2">Selected Service</h6>
 

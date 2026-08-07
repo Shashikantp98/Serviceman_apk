@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ApiService from "../services/api";
 import dayjs from "dayjs";
-import CommonHeader from "../components/CommonHeader";
+// import CommonHeader from "../components/CommonHeader";
 import { useSectionLoader } from "../utils/useSectionLoader";
 import Review from "./Review";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -81,14 +81,17 @@ const CustomerProjectinfo = () => {
 
   return (
     <>
-      <CommonHeader customBack={customBack} />
+      {/* <CommonHeader customBack={customBack} /> */}
+      <div className="px-3 pt-5 mt-4">
+        <button className="back_btn_new" onClick={customBack}>Back</button>
+      </div>
       {bookingDetailsLoader.loading && (
         <div className="full-page-loader">
           <div className="loader-spinner"></div>
           <p>Loading request details...</p>
         </div>
       )}
-      <div className=" main-content-service2">
+      <div className=" ">
         <div className="pt-0 pb-0 ">
 
           <div className="px-3 mt-5">

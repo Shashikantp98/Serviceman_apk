@@ -5,7 +5,7 @@ import { GOOGLE_API_KEY } from "../config";
 import { toast } from "react-toastify";
 import ApiService from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
-import { ChevronLeft } from "react-feather";
+
 // import { ChevronLeft } from "react-feather";
 const AuthLocation = () => {
   const navigate = useNavigate();
@@ -141,15 +141,15 @@ const AuthLocation = () => {
   };
   return (
     <>
-      <div>
+      <div className="">
         <div className="fixed_header">
           <button
-            className="back-btn mb-2"
+            className="back_btn_new mb-2"
             onClick={() => {
               window.history.back();
             }}
           >
-            <ChevronLeft />
+            
             Back
           </button>
         </div>

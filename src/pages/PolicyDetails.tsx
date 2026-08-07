@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ApiService from "../services/api";
-import { ChevronLeft } from "react-feather";
+
 import { useNavigate } from "react-router-dom";
 // import SectionLoader from "../components/SectionLoader";
 import { useSectionLoader } from "../utils/useSectionLoader";
@@ -40,8 +40,8 @@ const PolicyDetails = () => {
         )}
         <div className="row">
           <div className="col-12 px-3 back_btn_pro">
-            <button className="backs_butn" onClick={() => navigate(-1)}>
-              <ChevronLeft />
+            <button className="back_btn_new" onClick={() => navigate(-1)}>
+            Back
             </button>
           </div>
         </div>

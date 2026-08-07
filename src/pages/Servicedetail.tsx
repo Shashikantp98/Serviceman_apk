@@ -142,7 +142,7 @@ const Servicedetail = () => {
     <>
       <div>
         <div className="container px-3 pt-4 padding_btn_main">
-          <div className="row">
+          <div className="row pt-3">
 
             {/* Header row */}
             <div className="col-12 d-flex pt-4 align-items-center justify-content-between">

@@ -40,11 +40,13 @@ const InvoiceList = () => {
 
   return (
     <>
+    <div className="pt-3">
       <CommonHeader />
+      </div>
       <div className="container main-content-service">
-        <div className="row px-2 pt-4">
+        <div className="row px-2 pt-2">
           <div className="col-12">
-            <h3 className="mb-1 pt-5">Invoices</h3>
+            <h3 className="mb-1 pt-1">Invoices</h3>
             <p className="font-12 color-grey mb-0">
               Booking: {effectiveBookingId || "N/A"}
             </p>

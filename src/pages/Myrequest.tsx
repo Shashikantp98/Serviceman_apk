@@ -153,7 +153,7 @@ const Myrequest = () => {
     <>
       <div className="container pb-5 mb-5">
         <div className="row pt-4">
-          <div className="col-12 pt-4 pb-3">
+          <div className="col-12 pt-4 mt-3 pb-3">
             <h3>My Bookings</h3>
           </div>
         </div>

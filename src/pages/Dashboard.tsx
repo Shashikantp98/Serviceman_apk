@@ -223,7 +223,7 @@ const Dashboard = () => {
                 ? serviceMenDetails?.fname
                 : serviceMenDetails?.phone_number}
             </h1>
-            <p className="">Welcome to instasevak</p>
+            <p className="mb-0">Welcome to instasevak</p>
           </div>
         </div>
 

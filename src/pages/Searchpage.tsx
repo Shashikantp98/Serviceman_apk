@@ -1,4 +1,4 @@
-import { ChevronLeft, Clock, Search } from "react-feather";
+import {  Clock, Search } from "react-feather";
 import ApiService from "../services/api";
 import { useEffect, useState } from "react";
 import { debounce } from "lodash";
@@ -78,9 +78,8 @@ const Searchpage = () => {
     <>
       <div>
         <div className="fixed_header">
-          <button className="backs_butn" onClick={() => navigate(-1)}>
-            <ChevronLeft></ChevronLeft>
-
+          <button className="back_btn_new" onClick={() => navigate(-1)}>
+            Back
           </button>
           <div className="container">
             <div className="row pt-3">

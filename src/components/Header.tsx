@@ -110,7 +110,7 @@ const Header = ({ isMinimized = false }) => {
             top: 0,
             zIndex: 999,
             background: "#fff",
-            paddingTop: "10px",
+            paddingTop: "60px",
           }}
         >
           <div
@@ -132,7 +132,7 @@ const Header = ({ isMinimized = false }) => {
 
       ) : (
         <>
-          <div className="headers_new px-4 pt-4 mt-4 mb-2">
+          <div className="headers_new px-4 pt-4 mar-top-35px mb-2">
             <div
               className="d-flex gap-10 align-items-center"
               onClick={() => navigate("/authlocation")}

@@ -927,7 +927,7 @@ background-color: #fafbff !important;
   padding-right: max(15px, env(safe-area-inset-right));
 
   /* Minimum top padding for dynamic island on iPhone 16 */
-  padding-top: max(env(safe-area-inset-top, 15px), 50px) !important;
+  padding-top: max(env(safe-area-inset-top, 15px), 60px) !important;
 
 }
 
@@ -3003,4 +3003,10 @@ top: 5px;
   background-position:  right;
 padding: 20px;
   background-repeat: no-repeat;
+}
+.mar-top-35px{
+  margin-top: 40px;
+}
+.mbt-200px{
+  margin-bottom: 150px;
 }

@@ -52,7 +52,7 @@ const ReferralPage: React.FC = () => {
   };
 
   return (
-    <div className="referral-page">
+    <div className="referral-page mbt-200px">
       {/* Header */}
 
       
@@ -60,7 +60,7 @@ const ReferralPage: React.FC = () => {
 
 
 
-      <div className="header-section bg-dark-head text-white p-4 pt-4">
+      <div className="header-section bg-dark-head text-white p-4 pt-5">
         <div className="d-flex align-items-start mb-2 ">
           {/* <button
             className="btn btn-link text-white p-0 me-3"
@@ -68,7 +68,7 @@ const ReferralPage: React.FC = () => {
           >
             <ArrowLeft size={24} />
           </button> */}
-          <h5 className="mb-0 font-18 pt-2 ">
+          <h5 className="mb-0 font-18 pt-4 ">
            
             Referral Program
             <span className="support-texts">
