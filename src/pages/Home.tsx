@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "../components/Header";
-import useHeaderMinimize from "../utils/useHeaderMinimize";
+
 import { useEffect, useState } from "react";
 import ApiService from "../services/api";
 import { LoginModal } from "../components/LoginModal";
@@ -170,10 +170,9 @@ const Home = () => {
     return <>₹{item?.final_price || item?.price}</>;
   };
 
-  const isHeaderMinimized = useHeaderMinimize();
   return (
     <>
-      <Header isMinimized={isHeaderMinimized} />
+      <Header />
 
       {/* Category pills — unchanged */}
       <div className="px-4 categories_scroll pt-2">

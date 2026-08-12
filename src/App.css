@@ -2443,6 +2443,19 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100
   justify-content: space-between;
 }
 
+/* Top section (location + greeting) — normal flow, scrolls with page */
+.header_top_section {
+  background: #fff;
+}
+
+/* Search bar wrapper — sticks to the top once location/greeting scrolls away */
+.header_sticky_search {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #fff;
+}
+
 .cartitemcount{
   display: flex;
   align-items: center;

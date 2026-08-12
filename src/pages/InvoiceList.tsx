@@ -40,9 +40,7 @@ const InvoiceList = () => {
 
   return (
     <>
-    <div className="pt-3">
       <CommonHeader />
-      </div>
       <div className="container main-content-service">
         <div className="row px-2 pt-2">
           <div className="col-12">

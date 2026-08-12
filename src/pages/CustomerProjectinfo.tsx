@@ -82,7 +82,7 @@ const CustomerProjectinfo = () => {
   return (
     <>
       {/* <CommonHeader customBack={customBack} /> */}
-      <div className="px-3 pt-5 mt-4">
+      <div className="px-3 pt-3">
         <button className="back_btn_new" onClick={customBack}>Back</button>
       </div>
       {bookingDetailsLoader.loading && (
@@ -94,7 +94,7 @@ const CustomerProjectinfo = () => {
       <div className=" ">
         <div className="pt-0 pb-0 ">
 
-          <div className="px-3 mt-5">
+          <div className="px-3 mt-2">
             <div className="cards5 ">
               <p className="font-14 mb-2 ">Project Details</p>
 

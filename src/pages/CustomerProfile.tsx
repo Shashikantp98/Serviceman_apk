@@ -55,7 +55,7 @@ const CustomerProfile = () => {
       <div className="container main-content pt-2 px-4 pt-4 padding_btn_main">
 
         {/* Profile Card */}
-        <div className="row bgprofcard mt-5">
+        <div className="row bgprofcard">
           <div className="col-12">
             <div className="d-flex gap-10 align-items-center justify-content-between">
               <span className="badgecomp">

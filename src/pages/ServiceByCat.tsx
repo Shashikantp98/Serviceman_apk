@@ -85,8 +85,8 @@ const ServiceByCat = () => {
     <>
 
       <div className="container">
-        <div className="row pt-5">
-          <div className="col-12 pt-2">
+        <div className="row pt-2">
+          <div className="col-12">
             <button
               className="back_btn_new"
               onClick={() => navigate(-1)}>

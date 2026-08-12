@@ -4,7 +4,7 @@ import ApiService from "../services/api";
 import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
-const Header = ({ isMinimized = false }) => {
+const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -103,106 +103,73 @@ const Header = ({ isMinimized = false }) => {
   };
   return (
     <>
-      {isMinimized ? (
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 999,
-            background: "#fff",
-            paddingTop: "60px",
-          }}
-        >
+      {/* Location + greeting — scrolls away naturally with the page */}
+      <div className="header_top_section px-4 pt-3">
+        <div className="headers_new mb-2">
           <div
-            className="searchwrap px-4 pb-3"
-            onClick={() => navigate("/search")}
+            className="d-flex gap-10 align-items-center"
+            onClick={() => navigate("/authlocation")}
             style={{ cursor: "pointer" }}
           >
-            <label className="position-relative w-100">
-              <Search className="sericons" size={21} />
-              <input
-                type="text"
-                className="searchinput"
-                placeholder="Search for your services"
-                readOnly
-              />
-            </label>
+            <span className="maplins">
+              <MapPin color="#fff" size={25} />
+            </span>
+
+            <span className="curlocations">
+              <h5>
+                {currentLocation
+                  ? currentLocation.split(",")[1]?.trim() ||
+                  currentLocation.split(",")[0]?.trim()
+                  : "Location"}
+              </h5>
+
+              <p>
+                {currentLocation && currentLocation.length > 50
+                  ? currentLocation.slice(0, 50) + "..."
+                  : currentLocation}
+              </p>
+            </span>
+          </div>
+
+          <div>
+            <span
+              className="notiflins"
+              onClick={handleNotificationClick}
+              style={{ cursor: "pointer", position: "relative" }}
+            >
+              {unseenCount > 0 && (
+                <span className="cartitemcount">
+                  {unseenCount > 99 ? "99+" : unseenCount}
+                </span>
+              )}
+              <Bell color="#292929ff" size={22} />
+            </span>
           </div>
         </div>
 
-      ) : (
-        <>
-          <div className="headers_new px-4 pt-4 mar-top-35px mb-2">
-            <div
-              className="d-flex gap-10 align-items-center"
-              onClick={() => navigate("/authlocation")}
-              style={{ cursor: "pointer" }}
-            >
-              <span className="maplins">
-                <MapPin color="#fff" size={25} />
-              </span>
+        <div className="mb-2">
+          <h4 className="welcome-username">Hello, {userName}</h4>
+        </div>
+      </div>
 
-              <span className="curlocations">
-                <h5>
-                  {currentLocation
-                    ? currentLocation.split(",")[1]?.trim() ||
-                    currentLocation.split(",")[0]?.trim()
-                    : "Location"}
-                </h5>
-
-                <p>
-                  {currentLocation && currentLocation.length > 50
-                    ? currentLocation.slice(0, 50) + "..."
-                    : currentLocation}
-                </p>
-              </span>
-            </div>
-
-            <div>
-              <span
-                className="notiflins"
-                onClick={handleNotificationClick}
-                style={{ cursor: "pointer", position: "relative" }}
-              >
-                {unseenCount > 0 && (
-                  <span className="cartitemcount">
-                    {unseenCount > 99 ? "99+" : unseenCount}
-                  </span>
-                )}
-
-                <Bell color="#292929ff" size={22} />
-              </span>
-            </div>
-          </div>
-
-          <div className="px-4 mb-2">
-            <h4 className=" welcome-username">
-              Hello, {userName}
-            </h4>
-
-            {/* <h5>
-                <i>How can I help you today?</i>
-              </h5> */}
-          </div>
-
-          {/* Search Bar */}
-          <div
-            className="searchwrap px-4 pb-3"
-            onClick={() => navigate("/search")}
-            style={{ cursor: "pointer" }}
-          >
-            <label className="position-relative w-100">
-              <Search className="sericons" size={21} />
-              <input
-                type="text"
-                className="searchinput"
-                placeholder="Search for your services"
-                readOnly
-              />
-            </label>
-          </div>
-        </>
-      )}
+      {/* Search bar — sticks to top once location/greeting scrolls out of view */}
+      <div className="header_sticky_search">
+        <div
+          className="searchwrap px-4 pb-3 pt-2"
+          onClick={() => navigate("/search")}
+          style={{ cursor: "pointer" }}
+        >
+          <label className="position-relative w-100">
+            <Search className="sericons" size={21} />
+            <input
+              type="text"
+              className="searchinput"
+              placeholder="Search for your services"
+              readOnly
+            />
+          </label>
+        </div>
+      </div>
     </>
   );
 };

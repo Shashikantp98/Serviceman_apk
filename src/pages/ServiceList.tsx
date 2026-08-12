@@ -69,10 +69,10 @@ const ServiceList = () => {
     <>
       {/* <Header /> */}
       <CommonHeader />
-      <div className="container pb-10 pt-5 mt-5 px-3 mb-5">
+      <div className="container main-content-service px-3 mb-5">
         <div className="row px-1">
           <div className="col-12 pb-3">
-            <p className="subcats mt-5 pt-5">
+            <p className="subcats">
               {isPopular ? "Popular" : "Best"} services
             </p>
           </div>

@@ -73,9 +73,7 @@ const InvoiceDetail = () => {
 
     return (
         <>
-        <div className="pt-3">
             <CommonHeader />
-            </div>
             <div className="container main-content-service pb-5 mb-5">
                 <div className="row px-2 pt-4 pb-4">
                     <div className="col-12">

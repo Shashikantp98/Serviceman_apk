@@ -54,8 +54,8 @@ const CategoriesList = () => {
      
       <div className="container padding_btn_main">
 
-          <div className="row pt-5">
-            <div className="col-12 pt-3 d-flex align-items-center justify-content-between">
+          <div className="row pt-2">
+            <div className="col-12 d-flex align-items-center justify-content-between">
               <button className="back_btn_new">Back</button>
             </div>
           </div>
