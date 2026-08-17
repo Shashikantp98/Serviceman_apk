@@ -130,12 +130,13 @@ const ServiceByCat = () => {
                     cat?.category_id === selectedCategoryId
                 )?.category_name + " Services"
                 : "All Services"}
-            </p>            <button
+            </p>
+            {/* <button
               className="view_more"
               onClick={() => navigate("/categories-list")}
             >
               See All
-            </button>
+            </button> */}
           </div>
         </div>
         <div className="row">
