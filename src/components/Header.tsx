@@ -1,7 +1,7 @@
 import { Bell, MapPin, Search } from "react-feather";
 import { useNavigate, useLocation } from "react-router-dom";
 import ApiService from "../services/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Header = () => {
@@ -18,6 +18,19 @@ const Header = () => {
 
   const [unseenCount, setUnseenCount] = useState(0);
   const [userName, setUserName] = useState("");
+  const stickyRef = useRef<HTMLDivElement>(null);
+
+  // Toggle .is-stuck only when the search bar is actually pinned to the top
+  useEffect(() => {
+    const el = stickyRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const stuck = el.getBoundingClientRect().top === 0;
+      el.classList.toggle("is-stuck", stuck);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // 📌 Fetch unseen notifications count
   const getUnseenNotificationCount = () => {
@@ -153,7 +166,7 @@ const Header = () => {
       </div>
 
       {/* Search bar — sticks to top once location/greeting scrolls out of view */}
-      <div className="header_sticky_search">
+      <div className="header_sticky_search" ref={stickyRef}>
         <div
           className="searchwrap px-4 pb-3 pt-2"
           onClick={() => navigate("/search")}

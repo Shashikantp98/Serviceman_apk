@@ -3,31 +3,66 @@ import { useNavigate } from "react-router-dom";
 import { DeleteConfirmModal } from "../components/DeleteConfirmModal";
 
 import { useState } from "react";
+import ApiService from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
+
+type DeleteUserResponse = {
+  status?: string | number;
+  message?: string;
+  data?: {
+    user_id?: string;
+    user_type?: string;
+  };
+};
+
 const PrivacyCenter = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const deleteAccount = () => {
-    localStorage.clear();
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
-    // setLoading(true);
-    // ApiService.post("/user/deleteUser")
-    //   .then((res: any) => {
-    //     console.log(res);
-    //     setLoading(false);
-    //     localStorage.clear();
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //       window.location.href = "/";
-    //     }, 1000);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     setLoading(false);
-    //   });
+  const { logout } = useAuth();
+
+  const deleteAccount = async () => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const userType = (localStorage.getItem("authmobileRole") || "").toLowerCase();
+      const payload = userType ? { user_type: userType } : {};
+
+      const res = await ApiService.post<DeleteUserResponse>("/user/deleteUser", payload);
+
+      if (res?.status === "success" || res?.status === 200) {
+        toast.success(res?.message || "Account deleted successfully");
+        setShowDeleteModal(false);
+        localStorage.clear();
+        logout();
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 800);
+
+        return;
+      }
+
+      toast.error(res?.message || "Failed to delete account");
+      setLoading(false);
+    } catch (error: unknown) {
+      const errorMessage =
+        (
+          error as {
+            response?: { data?: { message?: string } };
+          }
+        )?.response?.data?.message ||
+        (error instanceof Error ? error.message : "Failed to delete account");
+
+      toast.error(errorMessage);
+      setLoading(false);
+    }
   };
+
   const deleteAccountModal = () => {
     setShowDeleteModal(true);
   };
@@ -72,7 +107,7 @@ const PrivacyCenter = () => {
           </div>
           <div className="col-12" style={{ width: "90%", margin: "auto" }}>
             <button
-              disabled={false}
+              disabled={loading}
               onClick={deleteAccountModal}
               className="fill mt-3"
             >
@@ -82,9 +117,13 @@ const PrivacyCenter = () => {
         </div>
         <DeleteConfirmModal
           show={showDeleteModal}
-          onCancel={() => setShowDeleteModal(false)}
+          onCancel={() => {
+            if (!loading) {
+              setShowDeleteModal(false);
+            }
+          }}
           onConfirm={deleteAccount}
-          loading={false}
+          loading={loading}
           itemName={""}
           title="Delete Account"
           description="If you proceed, all associated data will be removed."

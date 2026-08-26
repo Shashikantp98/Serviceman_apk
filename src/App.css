@@ -2239,8 +2239,8 @@ input[type="file"]{
   background-position: center;
 }
 .laygred{
-/* background: #000000;
-background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100%); */
+background: #000000;
+background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100%);
    height: 100vh;
 }
 
@@ -2446,6 +2446,7 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100
 /* Top section (location + greeting) — normal flow, scrolls with page */
 .header_top_section {
   background: #fff;
+  padding-bottom: 12px; /* contains child margins so they can't collapse out and create a gap */
 }
 
 /* Search bar wrapper — sticks to the top once location/greeting scrolls away */
@@ -2454,6 +2455,12 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100
   top: 0;
   z-index: 999;
   background: #fff;
+  /* no shadow by default — added only when stuck (see .is-stuck below) */
+}
+
+/* Applied by scroll listener in Header.tsx once the bar is pinned to the top */
+.header_sticky_search.is-stuck {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 .cartitemcount{
@@ -2895,8 +2902,8 @@ max-width: 110px !important;
 }
 .welcome-username{
   font-size: 18px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 12px;
+  margin-bottom: 0;   /* was 20px — margin was collapsing through parent, causing the seam */
 }
 
 .minwid-20{
