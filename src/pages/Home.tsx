@@ -257,8 +257,12 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Browse Categories — unchanged */}
-        <div className="col-12 newscrll px-3">
+        {/* Browse Categories */}
+        <div className="col-12 px-3">
+
+          <div className="d-flex align-items-center justify-content-between pb-2">
+            <p className="subcats mb-0">Browse Categories</p>
+          </div>
 
           <SectionLoader
             show={categoriesLoader.loading}
@@ -271,47 +275,50 @@ const Home = () => {
           )}
 
           {!categoriesLoader.loading &&
-            categories?.map((item: any) => (
-              <div
-                key={item?.category_id}
-                className="catcards fix_widcard_3 new-ser-imgs"
-                style={{ cursor: "pointer" }}
-                onClick={() =>
-                  navigate("/service-by-cat", {
-                    state: {
-                      category: item?.category_id,
-                    },
-                  })
-                }
-              >
-                <img
-                  src={item?.category_image}
-                  alt={item?.category_name}
-                />
-
-                <span className="mostbookedtext2">
-                  <h3>
-                    {item?.category_name?.length > 12
-                      ? item.category_name.slice(0, 12) + "..."
-                      : item?.category_name}
-                  </h3>
-
-                  <p
-                    className="mb-0"
-                    style={{
-                      color: item?.is_available
-                        ? "#28a745"
-                        : "#dc3545",
-                      fontSize: "12px",
-                    }}
+            <div className="row g-3 pb-2 category-grid">
+              {categories?.map((item: any) => (
+                <div className="col-4 category-grid-item" key={item?.category_id}>
+                  <div
+                    className="catcards new-ser-imgs category-card h-100"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate("/service-by-cat", {
+                        state: {
+                          category: item?.category_id,
+                        },
+                      })
+                    }
                   >
-                    {/* {item?.is_available
-                      ? "Available"
-                      : "Unavailable"} */}
-                  </p>
-                </span>
-              </div>
-            ))}
+                    <img
+                      src={item?.category_image}
+                      alt={item?.category_name}
+                    />
+
+                    <span className="mostbookedtext2">
+                      <h3>
+                        {item?.category_name?.length > 12
+                          ? item.category_name.slice(0, 12) + "..."
+                          : item?.category_name}
+                      </h3>
+
+                      <p
+                        className="mb-0"
+                        style={{
+                          color: item?.is_available
+                            ? "#28a745"
+                            : "#dc3545",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {/* {item?.is_available
+                          ? "Available"
+                          : "Unavailable"} */}
+                      </p>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>}
         </div>
 
         {/* Most Booked Services — unchanged
@@ -347,7 +354,7 @@ const Home = () => {
         </div> */}
 
         {/* ✅ Our Popular Services — API integrated */}
-        <div className="container py-2 pb-4 mt-3 px-4 bg-lig2">
+        <div className="container py-2 pb-4 mt-3 px-4 bg-lig2 popular-section">
           <div className="row mt-2">
             <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
               <p className="subcats">Our Popular Services</p>
@@ -360,36 +367,41 @@ const Home = () => {
             </div>
           </div>
           <div className="row">
-            <div className="col-12 newscrll">
+            <div className="col-12">
               <SectionLoader show={popularServicesLoader.loading} size="medium" text="Loading..." />
               {!popularServicesLoader.loading && popularServices?.length === 0 && (
                 <p className="font-14 weight-bold">No Popular Services</p>
               )}
-              {!popularServicesLoader.loading && popularServices?.map((item: any) => (
-                <div
-                  key={item?.service_id}
-                  className="catcards fix_widcard"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
-                >
-                  <img src={item?.service_image} alt={item?.service_name} />
-                  <span className="mostbookedtext2">
-                    <h3>
-                      {item?.service_name?.length > 15
-                        ? item.service_name.slice(0, 15) + '...'
-                        : item?.service_name}
-                    </h3>
-                    <p className="mb-0">✭ {item?.avg_rating || '0'} ({item?.total_reviews || '0'})</p>
-                    <p className="pt-0">{renderPrice(item)}</p>
-                  </span>
+              {!popularServicesLoader.loading && (
+                <div className="row g-3 popular-grid">
+                  {popularServices?.map((item: any) => (
+                    <div className="col-6 popular-grid-item" key={item?.service_id}>
+                      <div
+                        className="catcards h-100 popular-card"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate(`/servicedeatils/${item?.service_id}`)}
+                      >
+                        <img src={item?.service_image} alt={item?.service_name} />
+                        <span className="mostbookedtext2">
+                          <h3>
+                            {item?.service_name?.length > 15
+                              ? item.service_name.slice(0, 15) + '...'
+                              : item?.service_name}
+                          </h3>
+                          <p className="mb-0">✭ {item?.avg_rating || '0'} ({item?.total_reviews || '0'})</p>
+                          <p className="pt-0">{renderPrice(item)}</p>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
         {/* Refer Card — unchanged */}
-        <div className="container bg-lig2 mt-3 py-3">
+        <div className="container bg-lig2 mt-3 py-3 referral-section">
           <div className="row">
             <div className="col-12">
               <div className="refercard">
@@ -404,7 +416,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ✅ Best Services — API integrated */}
+        {/* ✅ Best Services — API integrated
         <div className="container py-2 pb-4 mt-3 px-4 bg-lig2">
           <div className="row mt-2">
             <div className="col-12 pb-3 d-flex align-items-center justify-content-between">
@@ -444,7 +456,7 @@ const Home = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
 
       </div>
 

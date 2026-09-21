@@ -17,8 +17,11 @@ const ServiceByCat = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
-    locationState?.category || ""
+    String(locationState?.category ?? "")
   );
+  const selectedCategoryName = categories?.find(
+    (cat: any) => String(cat?.category_id) === String(selectedCategoryId)
+  )?.category_name;
 
   // Loader for service by category
   const catServiceLoader = useSectionLoader("catServ-loader");
@@ -108,9 +111,9 @@ const ServiceByCat = () => {
                 <button
                   key={cat?.category_id}
                   className={
-                    selectedCategoryId === cat?.category_id ? "active" : ""
+                    selectedCategoryId === String(cat?.category_id) ? "active" : ""
                   }
-                  onClick={() => setSelectedCategoryId(cat?.category_id)}
+                  onClick={() => setSelectedCategoryId(String(cat?.category_id))}
                 >
                   {cat?.category_name}
                 </button>
@@ -125,10 +128,9 @@ const ServiceByCat = () => {
           <div className="col-12 pb-4 d-flex align-items-center justify-content-between">
             <p className="subcats">
               {selectedCategoryId
-                ? categories?.find(
-                  (cat: any) =>
-                    cat?.category_id === selectedCategoryId
-                )?.category_name + " Services"
+                ? selectedCategoryName
+                  ? `${selectedCategoryName} Services`
+                  : "Services"
                 : "All Services"}
             </p>
             {/* <button
@@ -203,11 +205,11 @@ const ServiceByCat = () => {
           {!categoriesLoader.loading && categories.length > 0 && (
             <div className="col-12 d-flex gap-15 overflow-auto pb-2">
               {categories.map((cat: any) => {
-                const isActive = cat?.category_id === selectedCategoryId;
+                const isActive = String(cat?.category_id) === String(selectedCategoryId);
                 return (
                   <span
                     key={cat?.category_id}
-                    onClick={() => setSelectedCategoryId(cat?.category_id)}
+                    onClick={() => setSelectedCategoryId(String(cat?.category_id))}
                     className="d-flex direction-cloumn align-items-center"
                     style={{ cursor: "pointer", flexShrink: 0 }}
                   >
