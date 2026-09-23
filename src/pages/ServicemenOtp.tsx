@@ -104,7 +104,7 @@ const ServicemenOtp = () => {
 
   return (
     <>
-     <div className="h-100vh  pt-4 ">
+     <div className="h-100vh  pt-3">
         <div className="px-4 mt-2">
             <button className="gobackbtn" onClick={() => navigate(-1)}>
             Go Back
