@@ -66,6 +66,34 @@ const Servicedetail = () => {
     return Number.isFinite(num) ? num.toFixed(2) : "--";
   };
 
+  const toNumber = (value: any) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+
+  const primaryPricing = serviceDetails?.pricing?.[0] || null;
+  const displayFinalPrice =
+    primaryPricing?.final_price ??
+    serviceDetails?.offer_price ??
+    serviceDetails?.final_price ??
+    serviceDetails?.price ??
+    serviceDetails?.service_price;
+  const displayBasePrice =
+    primaryPricing?.price ?? serviceDetails?.service_price ?? serviceDetails?.price;
+  const displayDuration = primaryPricing?.duration ?? serviceDetails?.duration;
+  const normalizedServiceName = String(serviceDetails?.service_name || "").trim().toLowerCase();
+  const normalizedDuration = String(displayDuration || "").trim().toLowerCase();
+  const showDuration =
+    !!displayDuration &&
+    (!normalizedServiceName ||
+      (!normalizedDuration.includes(normalizedServiceName) &&
+        !normalizedServiceName.includes(normalizedDuration)));
+  const showPrice = displayFinalPrice !== undefined && displayFinalPrice !== null && displayFinalPrice !== "";
+  const showStrikePrice =
+    toNumber(displayBasePrice) !== null &&
+    toNumber(displayFinalPrice) !== null &&
+    toNumber(displayBasePrice) !== toNumber(displayFinalPrice);
+
   useEffect(() => {
     if (id) {
       serviceLoader.setLoading(true);
@@ -161,36 +189,24 @@ const Servicedetail = () => {
               />
             </div>
 
-            {/* Title, Rating, Price, Book Now */}
+            {/* Price, Title, Rating, Book Now */}
             <div className="col-12 pt-3 d-flex justify-content-between align-items-start">
               <div className="mostbookedtext3">
+                {/* Price */}
+                {showPrice && (
+                  <p className="pt-1">
+                    <b>₹{displayFinalPrice}</b>
+                    {showStrikePrice && (
+                      <>&nbsp;<span className="text-decoration-line-through">₹{displayBasePrice}</span></>
+                    )}
+                  </p>
+                )}
+                {showDuration && <p className="heil_text pt-0">{displayDuration}</p>}
+
                 <h3>{serviceDetails?.service_name}</h3>
                 <p>
                   ✭ {averageRating > 0 ? averageRating : (serviceDetails?.avg_rating || '0')} ({serviceDetails?.total_reviews || '0'} Reviews)
                 </p>
-
-                {/* Pricing — show first pricing tier if available */}
-                {serviceDetails?.pricing?.length > 0 && (
-                  <>
-                    <p className="pt-1">
-                      <b>₹{serviceDetails.pricing[0].final_price}</b>
-                      {serviceDetails.pricing[0].price !== serviceDetails.pricing[0].final_price && (
-                        <>&nbsp;<span className="text-decoration-line-through">₹{serviceDetails.pricing[0].price}</span></>
-                      )}
-                    </p>
-                    <p className="heil_text pt-0">{serviceDetails.pricing[0].duration}</p>
-                  </>
-                )}
-
-                {/* Banner offer price (if exists) */}
-                {serviceDetails?.offer_price && (
-                  <p className="pt-1">
-                    <b>₹{serviceDetails.offer_price}</b>&nbsp;
-                    {serviceDetails.service_price && (
-                      <span className="text-decoration-line-through">₹{serviceDetails.service_price}</span>
-                    )}
-                  </p>
-                )}
               </div>
               <button className="fill_new3 mt-2" onClick={handleBookNow}>Book Now</button>
             </div>
