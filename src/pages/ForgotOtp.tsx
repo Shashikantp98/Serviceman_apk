@@ -61,7 +61,7 @@ const ForgotOtp = () => {
           <ChevronLeft /> Back
         </button>
       </div>
-      <div className="px-5 pt-5 pb-3">
+      <div className="px-5 pt-3 pb-3">
         <h3 className="head2 pt-5">Enter verification code</h3>
         <p className="text-center color-grey font-12">
           We have sent you a 6 digit verification code on{" "}

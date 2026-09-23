@@ -84,7 +84,7 @@ const ServicemenRegister = () => {
     <>
      
 
-      <div className="h-100vh  pt-5">
+      <div className="h-100vh  pt-4">
        
       <div className="px-4 mt-2">
         <button type="button" className="gobackbtn" onClick={handleGoBack}>

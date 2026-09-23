@@ -3,7 +3,7 @@ import logo from "../assets/dlogo.png";
 const Mobile = () => {
   return (
     <>
-      <div className="h-100vh gred2 pt-5">
+      <div className="h-100vh gred2 pt-3">
         <div className="cir">
           <img src={logo}></img>
         </div>

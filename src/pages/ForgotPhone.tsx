@@ -60,7 +60,7 @@ const ForgotPhone = () => {
     <>
       <div style={{ position: "absolute" }}>
         <button
-          className="back-btn mb-3 mt-4 px-3 py-3"
+          className="back-btn mb-3 mt-2 px-3 py-3"
           style={{ color: "#000" }}
           onClick={() => {
             navigate(-1);
