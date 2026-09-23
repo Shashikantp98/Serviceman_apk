@@ -2447,6 +2447,10 @@ background: linear-gradient(180deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 100
 .header_top_section {
   background: #fff;
   padding-bottom: 12px; /* contains child margins so they can't collapse out and create a gap */
+  padding-top: 60px !important;
+}
+.padding_top_60{
+    padding-top: 65px !important;
 }
 
 /* Search bar wrapper — sticks to the top once location/greeting scrolls away */

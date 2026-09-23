@@ -60,8 +60,8 @@ const Support = () => {
             : "container "
         }
       >
-        <div className="row px-2 pt-3">
-          <div className="col-12 pt-5">
+        <div className="row px-2">
+          <div className="col-12 padding_top_60 ">
             <h1 className="head4">Support</h1>
           </div>
         </div>

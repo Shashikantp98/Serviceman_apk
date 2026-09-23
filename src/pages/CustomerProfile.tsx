@@ -52,7 +52,7 @@ const CustomerProfile = () => {
 
   return (
     <>
-      <div className="container main-content pt-2 px-4 pt-4 padding_btn_main">
+      <div className="container padding_top_60  px-4  padding_btn_main">
 
         {/* Profile Card */}
         <div className="row bgprofcard">

@@ -152,9 +152,9 @@ const Myrequest = () => {
   return (
     <>
       <div className="container pb-5 mb-5">
-        <div className="row pt-2">
-          <div className="col-12 pb-3">
-            <h3>My Bookings</h3>
+        <div className="row">
+          <div className="col-12 pb-3 padding_top_60">
+            <h3 className="head4">My Bookings</h3>
           </div>
         </div>
 

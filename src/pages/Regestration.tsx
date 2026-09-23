@@ -486,7 +486,7 @@ const Registration = () => {
   };
 
   return (
-    <div className="container py-4 ">
+    <div className="container padding_top_60 ">
       <div className="row">
         <div className="col-12">
           <Loader show={!isLoaded} text="Loading maps..." />
@@ -498,14 +498,14 @@ const Registration = () => {
           )}
 
           <button
-            className="back-btn mb-3 px-3 py-3"
-            style={{ color: "#000" }}
+            className="gobackbtn d-flex align-items-center gap-1 mb-3 "
+            
             onClick={() => (currentStep > 1 ? goToPreviousStep() : navigate(-1))}
           >
             <ChevronLeft /> {currentStep > 1 ? "Previous" : "Back"}
           </button>
 
-          <h6 className="text-center mb-4">Servicemen Registration</h6>
+          <h6 className="text-center mb-4 pt-3">Servicemen Registration</h6>
 
           <div className="mb-4">
             <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
@@ -529,7 +529,7 @@ const Registration = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        backgroundColor: isActive || isCompleted ? "#007bff" : "#dee2e6",
+                        backgroundColor: isActive || isCompleted ? "#001b48" : "#dee2e6",
                         color: "#fff",
                         fontWeight: 600,
                       }}
@@ -539,7 +539,7 @@ const Registration = () => {
                     <p
                       className="mb-0 font-12"
                       style={{
-                        color: isActive ? "#007bff" : "#6c757d",
+                        color: isActive ? "#001b48" : "#6c757d",
                         fontWeight: isActive ? 600 : 400,
                       }}
                     >
@@ -584,13 +584,13 @@ const Registration = () => {
                     <label className="lbl">Referral Code (optional)</label>
                     <input
                       type="text"
-                      className="input"
+                      className="npt"
                       placeholder="Enter Referral Code"
                       value={referralCode}
                       onChange={(e) => setReferralCode(e.target.value)}
                     />
                   </div>
-                  <div className="col-12 pt-1">
+                  <div className="col-12 pt-3">
                     <FileInput
                       label={<><span>Upload Profile Image</span><span style={{ color: "red" }}> *</span></>}
                       name="profile_image"
@@ -616,7 +616,7 @@ const Registration = () => {
                       required
                     />
                   </div>
-                  <div className="col-12 pt-3">
+                  <div className="col-12 pt-0">
                     <div
                       onClick={() => {
                         if (!selectedCategoryIds.length) {
@@ -744,7 +744,7 @@ const Registration = () => {
                 </>
               )}
 
-              <div className="col-12 pt-4">
+              <div className="col-12 pt-4 ">
                 {currentStep < 4 ? (
                   <button
                     className="fill w-100"
@@ -759,7 +759,7 @@ const Registration = () => {
                   </button>
                 ) : (
                   <button
-                    className="fill w-100"
+                    className="outline w-100"
                     onClick={submitVerificationInfo}
                     disabled={loadingDocs}
                   >
@@ -769,7 +769,7 @@ const Registration = () => {
               </div>
             </div>
 
-            <div className="text-center mt-4">
+            <div className="text-center mt-2 pb-4">
               <button
                 className="fill w-100"
                 onClick={handleSkip}
